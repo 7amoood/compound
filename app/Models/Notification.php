@@ -72,10 +72,10 @@ class Notification extends Model
         }
 
         $projectId = env('FIREBASE_PROJECT_ID', 'garden-city-compound');
-        $authFile  = storage_path('app/firebase-auth.json');
+        $authFile  = env('FIREBASE_CREDENTIALS', storage_path('app/firebase-auth.json'));
 
         if (! file_exists($authFile)) {
-            Log::warning('FCM v1: Missing service account file at ' . $authFile);
+            Log::warning('FCM v1: Missing service account file at ' . $authFile . '. Please ensure the file exists or set FIREBASE_CREDENTIALS in .env');
             return;
         }
 
