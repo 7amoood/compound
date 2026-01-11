@@ -120,12 +120,9 @@
         
         <!-- Logout Section -->
         <div class="px-4 mb-8">
-            <form method="POST" action="/logout">
-                <input type="hidden" name="_token" :value="csrfToken" />
-                <button type="submit" class="w-full bg-surface-light dark:bg-surface-dark rounded-xl p-3 shadow-sm text-red-500 font-medium text-[16px] active:bg-red-50 dark:active:bg-red-900/20 transition-colors">
-                    تسجيل الخروج
-                </button>
-            </form>
+            <a href="/logout" class="w-full flex items-center justify-center bg-surface-light dark:bg-surface-dark rounded-xl p-3 shadow-sm text-red-500 font-medium text-[16px] active:bg-red-50 dark:active:bg-red-900/20 transition-colors">
+                تسجيل الخروج
+            </a>
             <p class="text-center text-xs text-gray-400 mt-4">CommunityApp v1.0.0</p>
         </div>
 

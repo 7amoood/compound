@@ -116,8 +116,15 @@ Route::middleware('auth')->group(function () {
     // Settings routes
     Route::post('/settings/avatar', [SettingsController::class, 'setAvatar'])->name('settings.avatar');
 
+    Route::get('/logout', function () {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/login');
+    })->name('logout.get');
+
     Route::post('/logout', function () {
-        auth()->logout();
+        Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect('/login');
@@ -190,6 +197,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/services', [ServiceCategoryController::class, 'index']);
             Route::post('/services', [ServiceCategoryController::class, 'store']);
             Route::put('/admin/services/{category}', [ServiceCategoryController::class, 'update']);
+            Route::post('/admin/services/{category}/toggle-status', [ServiceCategoryController::class, 'toggleActive']);
             Route::delete('/admin/services/{category}', [ServiceCategoryController::class, 'destroy']);
 
             // Compounds CRUD

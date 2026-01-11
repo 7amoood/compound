@@ -10,12 +10,9 @@
                     <div class="bg-center bg-no-repeat bg-cover rounded-full size-9 border border-slate-200 dark:border-slate-700 shadow-sm" :style="`background-image: url('${user.photo || 'https://ui-avatars.com/api/?name=Admin'}');`"></div>
                     <h1 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight tracking-tight">لوحة المسؤول</h1>
                 </div>
-                <form method="POST" action="/logout" class="m-0">
-                    <input type="hidden" name="_token" :value="csrfToken" />
-                    <button type="submit" class="flex items-center justify-center size-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
-                        <span class="material-symbols-outlined">logout</span>
-                    </button>
-                </form>
+                <a href="/logout" class="flex items-center justify-center size-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
             </div>
         </header>
 
