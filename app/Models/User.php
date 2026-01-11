@@ -30,6 +30,7 @@ class User extends Authenticatable
         'rating_average',
         'rating_count',
         'total_earnings',
+        'fcm_token',
     ];
 
     /**
