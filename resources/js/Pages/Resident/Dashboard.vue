@@ -460,6 +460,11 @@ export default {
             this.activeTab = params.get('tab');
         }
         
+        // Handle direct request detail opening (e.g. from push notifications)
+        if (params.has('request_id')) {
+            this.openRequestDetails(parseInt(params.get('request_id')));
+        }
+        
         this.loadCategories();
         this.loadRequests(); // This might be double call due to watch, but safe
         this.loadUnreadCount();
@@ -687,16 +692,6 @@ export default {
                     this.unreadNotificationsCount = response.data.count;
                 }
             } catch (e) {}
-        },
-        async handleNotificationClick(notification) {
-            if (!notification.is_read) {
-                try {
-                    await axios.post(`/api/notifications/${notification.id}/read`);
-                    notification.is_read = true;
-                    this.unreadNotificationsCount--;
-                } catch (e) {}
-            }
-            this.showNotificationsModal = false;
         },
         formatDate(dateString) {
             return new Date(dateString).toLocaleDateString('ar-EG', {

@@ -21,6 +21,11 @@ const messaging = firebase.messaging();
 // 3. Handle Background Messages
 messaging.onBackgroundMessage((payload) => {
     console.log('[SW] Background message received:', payload);
+    // Note: If the payload contains a 'notification' property (as our PHP side does),
+    // the Firebase Messaging SW automatically shows a notification.
+    // Manually calling showNotification here would cause duplicates.
+
+    /*
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
@@ -29,6 +34,7 @@ messaging.onBackgroundMessage((payload) => {
         data: payload.data?.click_action || '/'
     };
     self.registration.showNotification(notificationTitle, notificationOptions);
+    */
 });
 
 // 4. PWA Caching Logic
@@ -104,7 +110,23 @@ self.addEventListener('fetch', event => {
 // 5. Handle Notification Clicks
 self.addEventListener('notificationclick', event => {
     event.notification.close();
+
+    // Get target URL from notification data (click_action)
+    const urlToOpen = event.notification.data?.click_action || event.notification.data || '/dashboard';
+
     event.waitUntil(
-        clients.openWindow(event.notification.data || '/')
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+            // 1. If a window is already open, focus it and redirect
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if ('focus' in client) {
+                    return client.focus().then(c => c.navigate(urlToOpen));
+                }
+            }
+            // 2. Otherwise open a new window
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
     );
 });

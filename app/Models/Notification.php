@@ -86,6 +86,7 @@ class Notification extends Model
             $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
             $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
 
+            Log::info("FCM v1: Sending to user {$user->id} (token: " . substr($user->fcm_token, 0, 10) . "...)");
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $accessToken,
                 'Content-Type'  => 'application/json',
@@ -99,7 +100,7 @@ class Notification extends Model
                     'data'         => [
                         'type'         => $notification->type,
                         'request_id'   => (string) ($notification->data['request_id'] ?? ''),
-                        'click_action' => '/',
+                        'click_action' => isset($notification->data['request_id']) ? "/dashboard?request_id=" . $notification->data['request_id'] : '/dashboard',
                     ],
                     'webpush'      => [
                         'notification' => [
@@ -108,7 +109,7 @@ class Notification extends Model
                             'dir'   => 'rtl',
                         ],
                         'fcm_options'  => [
-                            'link' => '/',
+                            'link' => isset($notification->data['request_id']) ? "/dashboard?request_id=" . $notification->data['request_id'] : '/dashboard',
                         ],
                     ],
                 ],
@@ -116,6 +117,8 @@ class Notification extends Model
 
             if (! $response->successful()) {
                 Log::error('FCM v1 Error: ' . $response->body());
+            } else {
+                Log::info('FCM v1: Sent successfully');
             }
         } catch (\Exception $e) {
             Log::error('FCM v1 Exception: ' . $e->getMessage());

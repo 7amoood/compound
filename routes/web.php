@@ -23,10 +23,16 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
     return redirect()->route('login');
 });
 
 Route::get('/login', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
     return Inertia::render('Auth/Login', [
         'categories' => \App\Models\ServiceCategory::active()->get(['id', 'name', 'icon']),
         'compounds'  => \App\Models\Compound::active()->get(['id', 'name']),

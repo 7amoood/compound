@@ -386,8 +386,33 @@ export default {
         this.loadUnreadCount();
         this.switchToTab(this.activeTab);
         requestNotificationPermission();
+
+        // Handle direct request focus (e.g. from push notifications)
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('request_id')) {
+            this.focusRequest(parseInt(params.get('request_id')));
+        }
     },
     methods: {
+        async focusRequest(id) {
+            // 1. Try to find in My Jobs first (active/completed)
+            if (this.myJobs.length === 0) await this.loadMyJobs();
+            const myJob = this.myJobs.find(j => j.id === id);
+            if (myJob) {
+                this.switchToTab('myjobs');
+                this.myJobsFilter = (myJob.status === 'completed') ? 'completed' : 'active';
+                return;
+            }
+
+            // 2. Try to find in Available Jobs
+            if (this.availableJobs.length === 0) await this.loadAvailableJobs();
+            const availableJob = this.availableJobs.find(j => j.id === id);
+            if (availableJob) {
+                this.switchToTab('available');
+                this.openProposalModal(availableJob);
+                return;
+            }
+        },
         switchToTab(tab) {
             this.activeTab = tab;
             localStorage.setItem('provider_current_tab', tab);
@@ -542,7 +567,7 @@ export default {
              }
              this.showNotificationsModal = false;
              if (n.data && n.data.request_id) {
-                 this.switchToTab('myjobs');
+                 this.focusRequest(n.data.request_id);
              }
         },
         async loadNotifications() {

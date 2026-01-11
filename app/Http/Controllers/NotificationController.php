@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -117,8 +118,17 @@ class NotificationController extends Controller
             'token' => 'required|string',
         ]);
 
-        $request->user()->update([
-            'fcm_token' => $request->token,
+        $token      = $request->token;
+        $activeUser = $request->user();
+
+        // 1. Remove this token from any other user (to prevent duplicates on same device/browser)
+        User::where('fcm_token', $token)
+            ->where('id', '!=', $activeUser->id)
+            ->update(['fcm_token' => null]);
+
+        // 2. Save token for current user
+        $activeUser->update([
+            'fcm_token' => $token,
         ]);
 
         return response()->json([
