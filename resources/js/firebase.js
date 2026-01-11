@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import axios from 'axios';
 
-// These should be in your .env / shareable via Inertia props
 const firebaseConfig = {
     apiKey: "AIzaSyCf6DUu21s4qhbD2fLkSypCRDkSnCbzQCo",
     authDomain: "garden-city-compound.firebaseapp.com",
@@ -16,30 +15,23 @@ const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 export async function requestNotificationPermission() {
-    if (!('serviceWorker' in navigator) || !('Notification' in window)) {
-        console.warn('Push notifications are not supported in this browser');
+    if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window)) {
+        console.warn('Notifications not supported');
         return;
     }
 
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            const swUrl = '/service-worker.js';
-            let registration = await navigator.serviceWorker.getRegistration(swUrl);
+            // Register/Ensure the service worker is active
+            const registration = await navigator.serviceWorker.register('/service-worker.js', {
+                scope: '/'
+            });
 
-            if (!registration) {
-                registration = await navigator.serviceWorker.register(swUrl);
-            }
-
-            // Wait for the service worker to be fully ready and active
+            // Wait until it's ready
             await navigator.serviceWorker.ready;
 
-            // Double check secure context (FCM Requirement)
-            if (!window.isSecureContext) {
-                console.error('FCM requires a secure context (HTTPS or localhost). Current origin: ', window.location.origin);
-                return;
-            }
-
+            // Attempt to get the token
             const token = await getToken(messaging, {
                 vapidKey: 'BC6EtV4AwjM5kQj92nuF9b31rzDE1Pj7htPT6ESqa8yGD10Uln3QHrApWppge6Uexd9UsQFCdbtXvoDBR-D4-6E',
                 serviceWorkerRegistration: registration
@@ -47,14 +39,17 @@ export async function requestNotificationPermission() {
 
             if (token) {
                 await axios.post('/api/notifications/save-token', { token });
-                console.log('FCM Token saved successfully');
+                console.log('FCM Token generated successfully');
             }
         }
     } catch (error) {
-        if (error.message && error.message.includes('push service error')) {
-            console.error('FCM Error: Browser cannot connect to Push Service. This happens if you are not using HTTPS/localhost or if Google services are blocked.');
-        } else {
-            console.error('Notification permission error:', error);
+        console.error('Detailed Notification Error:', error);
+
+        // Check for common production issues
+        if (error.code === 'messaging/permission-blocked') {
+            console.error('Please unblock notifications in your browser settings.');
+        } else if (error.message.includes('push service error')) {
+            console.error('Network/Security error: The browser cannot reach the push service. Check your internet connection or firewall.');
         }
     }
 }
