@@ -24,25 +24,19 @@ export async function requestNotificationPermission() {
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            // Wait for existing service worker or register new one
-            let registration = await navigator.serviceWorker.getRegistration('/service-worker.js');
+            const swUrl = '/service-worker.js';
+            let registration = await navigator.serviceWorker.getRegistration(swUrl);
 
             if (!registration) {
-                registration = await navigator.serviceWorker.register('/service-worker.js');
+                registration = await navigator.serviceWorker.register(swUrl);
             }
 
-            // Ensure the service worker is active before getting the token
-            if (registration.installing) {
-                await new Promise((resolve) => {
-                    registration.installing.addEventListener('statechange', (e) => {
-                        if (e.target.state === 'activated') resolve();
-                    });
-                });
-            }
+            // Wait for the service worker to be fully ready and active
+            await navigator.serviceWorker.ready;
 
-            // Double check compatibility
+            // Double check secure context (FCM Requirement)
             if (!window.isSecureContext) {
-                console.error('FCM requires a secure context (HTTPS or localhost)');
+                console.error('FCM requires a secure context (HTTPS or localhost). Current origin: ', window.location.origin);
                 return;
             }
 
@@ -53,13 +47,15 @@ export async function requestNotificationPermission() {
 
             if (token) {
                 await axios.post('/api/notifications/save-token', { token });
-                console.log('FCM Token saved');
+                console.log('FCM Token saved successfully');
             }
         }
     } catch (error) {
-        // If it's a "push service error", it often means the browser can't reach Google services 
-        // or the environment is not considered secure.
-        console.error('Notification permission error:', error);
+        if (error.message && error.message.includes('push service error')) {
+            console.error('FCM Error: Browser cannot connect to Push Service. This happens if you are not using HTTPS/localhost or if Google services are blocked.');
+        } else {
+            console.error('Notification permission error:', error);
+        }
     }
 }
 
