@@ -39,6 +39,14 @@ Route::post('/login', function (Request $request) {
         'password' => ['required'],
     ]);
 
+    $user = User::where('phone', $request->phone)->first();
+
+    if ($user && ! $user->is_active) {
+        return back()->withErrors([
+            'message' => 'حسابك لا يزال بانتظار تفعيل المشرف. يرجى الانتظار.',
+        ]);
+    }
+
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
         return redirect()->intended('/dashboard');
