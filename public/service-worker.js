@@ -32,7 +32,7 @@ messaging.onBackgroundMessage((payload) => {
 });
 
 // 4. PWA Caching Logic
-const CACHE_NAME = 'compound-v2';
+const CACHE_NAME = 'compound-v3'; // Incremented version to clear old problematic cache
 const STATIC_ASSETS = [
     '/',
     '/login',
@@ -61,19 +61,42 @@ self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
 
+    // Skip non-GET and API requests
     if (request.method !== 'GET' || url.pathname.startsWith('/api')) return;
 
+    // Strategy: Network-First for navigation (HTML pages) AND Inertia JSON requests
+    // This prevents showing a cached dashboard/data of a different user
+    const isInertia = request.headers.get('X-Inertia');
+    if (request.mode === 'navigate' || isInertia) {
+        event.respondWith(
+            fetch(request)
+                .then(response => {
+                    // We only cache successful page loads to allow offline backup
+                    if (response.ok) {
+                        const copy = response.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+                    }
+                    return response;
+                })
+                .catch(() => caches.match(request) || (request.mode === 'navigate' ? caches.match('/') : null))
+        );
+        return;
+    }
+
+    // Strategy: Cache-First for static assets (JS, CSS, Fonts, Images)
     event.respondWith(
         caches.match(request).then(cached => {
             return cached || fetch(request).then(response => {
-                if (response.ok && !url.pathname.includes('hot-update')) {
+                const isStatic = url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff2|woff|ttf)$/) ||
+                    url.host.includes('fonts.googleapis.com') ||
+                    url.host.includes('fonts.gstatic.com');
+
+                if (response.ok && isStatic && !url.pathname.includes('hot-update')) {
                     const copy = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
                 }
                 return response;
             });
-        }).catch(() => {
-            if (request.mode === 'navigate') return caches.match('/');
         })
     );
 });
