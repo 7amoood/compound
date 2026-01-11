@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Service Request Modal</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2632",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        .material-symbols-outlined.filled {
+             font-variation-settings:
+            'FILL' 1,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden">
+<!-- Screen Container -->
+<div class="relative h-screen w-full flex flex-col mx-auto max-w-md bg-white shadow-2xl overflow-hidden">
+<!-- Background Dashboard Simulation (Visual Context) -->
+<div class="absolute inset-0 z-0 flex flex-col bg-background-light dark:bg-background-dark p-6 overflow-y-auto">
+<!-- Header simulation -->
+<div class="flex justify-between items-center mb-8">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Good Morning, Alex</h1>
+<p class="text-slate-500 dark:text-slate-400">Unit 402 • Resident</p>
+</div>
+<div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden" data-alt="User profile placeholder avatar showing a generic silhouette">
+<img class="h-full w-full object-cover" data-alt="Portrait of a smiling user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPegdSwi67GF5HjgvEsaPdmPEAbh3Jwouca3a_O_c_d8THf9dOomQsLBmrn-2p_HjwKeZ6sKuqwHQGSRuVFAhLBlZGZunbBTKGyNzzTR2uPh66RVqO-W-0dbLhRioA2z8m-Oyg5en2doW6ll0hjmE7Jex5tTfeIGIgzwIGwvu5j-PONIsSGV0xJT6OBmArZL3Kps0UzhtgUrGknPXewHTVvAvi_5bYmcmJ6stiJu4pUJYRIta8WHUrIPby-m6IG2t3OEUJx-RJGg"/>
+</div>
+</div>
+<!-- Dashboard Content simulation -->
+<div class="space-y-4 opacity-50">
+<div class="h-32 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 p-4 text-white" data-alt="Colorful abstract gradient background for an announcement card">
+<div class="font-bold text-lg">Community BBQ</div>
+<div class="text-sm opacity-90">Join us this Saturday!</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="h-24 rounded-xl bg-surface-light dark:bg-surface-dark shadow-sm"></div>
+<div class="h-24 rounded-xl bg-surface-light dark:bg-surface-dark shadow-sm"></div>
+</div>
+<div class="h-64 rounded-xl bg-surface-light dark:bg-surface-dark shadow-sm"></div>
+</div>
+</div>
+<!-- Backdrop Overlay -->
+<div class="absolute inset-0 z-10 bg-[#0d141b]/60 backdrop-blur-[2px]"></div>
+<!-- Bottom Sheet Modal -->
+<div class="absolute bottom-0 left-0 right-0 z-20 flex flex-col max-h-[92vh] w-full rounded-t-3xl bg-surface-light dark:bg-surface-dark shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-out transform translate-y-0">
+<!-- Handle -->
+<div class="flex w-full items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
+<div class="h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+</div>
+<!-- Header -->
+<div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">New Service Request</h2>
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 pb-24">
+<!-- Progress Stepper -->
+<div class="w-full">
+<div class="flex items-center justify-between relative">
+<!-- Connecting Line Background -->
+<div class="absolute left-0 top-1/2 w-full h-0.5 bg-slate-200 dark:bg-slate-700 -translate-y-1/2 z-0"></div>
+<!-- Step 1: Pending (Active) -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 ring-4 ring-white dark:ring-surface-dark">
+<span class="material-symbols-outlined" style="font-size: 16px;">pending</span>
+</div>
+<span class="text-xs font-semibold text-primary absolute -bottom-6 w-20 text-center">Pending</span>
+</div>
+<!-- Step 2: Accepted -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 ring-4 ring-white dark:ring-surface-dark">
+<span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span>
+</div>
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500 absolute -bottom-6 w-20 text-center">Accepted</span>
+</div>
+<!-- Step 3: In Progress -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 ring-4 ring-white dark:ring-surface-dark">
+<span class="material-symbols-outlined" style="font-size: 16px;">engineering</span>
+</div>
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500 absolute -bottom-6 w-24 text-center">In Progress</span>
+</div>
+<!-- Step 4: Done -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 ring-4 ring-white dark:ring-surface-dark">
+<span class="material-symbols-outlined" style="font-size: 16px;">verified</span>
+</div>
+<span class="text-xs font-medium text-slate-400 dark:text-slate-500 absolute -bottom-6 w-20 text-center">Done</span>
+</div>
+</div>
+</div>
+<div class="h-4"></div> <!-- Spacer for labels -->
+<!-- Form -->
+<form class="flex flex-col gap-6">
+<!-- Service Category -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300" for="category">Service Category</label>
+<div class="relative">
+<select class="w-full appearance-none rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 pr-10 text-base font-medium text-slate-900 dark:text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" id="category">
+<option disabled="" selected="" value="">Select a service type</option>
+<option value="plumbing">Plumbing</option>
+<option value="electrical">Electrical</option>
+<option value="hvac">HVAC / AC</option>
+<option value="appliance">Appliance Repair</option>
+<option value="general">General Maintenance</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Description -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300" for="description">Details</label>
+<textarea class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 text-base font-normal text-slate-900 dark:text-white placeholder-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none transition-colors" id="description" placeholder="Please describe the issue in detail..." rows="4"></textarea>
+</div>
+<!-- Access Preference -->
+<div class="space-y-3">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Access Preference</label>
+<div class="grid grid-cols-1 gap-3">
+<!-- Option A -->
+<label class="relative flex cursor-pointer items-start rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800/30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5 dark:has-[:checked]:bg-primary/10">
+<input checked="" class="mt-1 h-4 w-4 border-slate-300 text-primary focus:ring-primary" name="access" type="radio"/>
+<div class="ml-3 flex flex-col">
+<span class="block text-sm font-semibold text-slate-900 dark:text-white">Permission to Enter</span>
+<span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Technician can enter using master key if you are not home.</span>
+</div>
+</label>
+<!-- Option B -->
+<label class="relative flex cursor-pointer items-start rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800/30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5 dark:has-[:checked]:bg-primary/10">
+<input class="mt-1 h-4 w-4 border-slate-300 text-primary focus:ring-primary" name="access" type="radio"/>
+<div class="ml-3 flex flex-col">
+<span class="block text-sm font-semibold text-slate-900 dark:text-white">Schedule Appointment</span>
+<span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">I need to be present. Contact me to schedule a time.</span>
+</div>
+</label>
+</div>
+</div>
+</form>
+</div>
+<!-- Footer / CTA -->
+<div class="absolute bottom-0 left-0 right-0 bg-surface-light dark:bg-surface-dark px-6 py-4 border-t border-slate-100 dark:border-slate-800 z-30">
+<button class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-base font-bold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all active:scale-[0.98]">
+<span>Submit Request</span>
+<span class="material-symbols-outlined" style="font-size: 20px;">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

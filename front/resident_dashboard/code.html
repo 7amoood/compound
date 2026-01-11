@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resident Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2632",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-200 antialiased pb-24">
+<!-- Top App Bar & Profile Header Combined -->
+<header class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-transparent transition-all duration-200">
+<div class="flex items-center justify-between px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-white dark:ring-slate-700 shadow-sm" data-alt="Profile picture of resident Alex" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBMec10rw27kx-Jy4V3jRqOIfzGoSTdMmqZOoOIjz2hBU0mOQ9dN38Ol9Vr0q4lI68qxJnETRgEjl3P_ixmMq-d1FEa2O7VNtxxh08xXpj2KM4jJOgfP5lBEX7EuKOVZWkgSDGXVuaXkxglF19jAayMi7RVc-Cn3ad9zxBIpdK4Ry6Wotl6nSQ_8MUa1Jm4DEQz_7D8Alt6eyFeq0TbH1eNymwdZqN76xisdup6gh5sv2kqfODY_uW1NlJU-Gb33ZTC-H4VcWtr3Q");'>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Resident</span>
+<span class="text-sm font-bold text-slate-900 dark:text-white leading-none">The Heights, Apt 4B</span>
+</div>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-white dark:bg-surface-dark text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors relative">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white dark:border-surface-dark"></span>
+</button>
+</div>
+</header>
+<main class="flex flex-col gap-6 pt-4">
+<!-- Welcome Title -->
+<div class="px-4">
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Good Morning,<br/>Alex</h1>
+</div>
+<!-- Search Bar -->
+<div class="px-4">
+<label class="flex flex-col w-full">
+<div class="relative flex w-full items-center rounded-xl bg-white dark:bg-surface-dark shadow-sm border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all overflow-hidden h-12">
+<div class="flex items-center justify-center pl-4 text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</div>
+<input class="w-full bg-transparent border-none text-base text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-0 px-3 h-full font-normal" placeholder="Search requests..." value=""/>
+</div>
+</label>
+</div>
+<!-- Quick Actions Grid -->
+<div class="px-4">
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-base font-bold text-slate-900 dark:text-white">Quick Actions</h2>
+</div>
+<div class="grid grid-cols-4 gap-3">
+<!-- Plumbing -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">water_drop</span>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Plumbing</span>
+</button>
+<!-- Cleaning -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-14 rounded-2xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/50 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">cleaning_services</span>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Cleaning</span>
+</button>
+<!-- Deliveries -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-14 rounded-2xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/50 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">local_shipping</span>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Deliveries</span>
+</button>
+<!-- Guests -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+<span class="material-symbols-outlined text-[28px]">person_add</span>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-300">Guests</span>
+</button>
+</div>
+</div>
+<!-- Primary Action Button -->
+<div class="px-4">
+<button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all duration-200">
+<span class="material-symbols-outlined">add_circle</span>
+<span>Request New Service</span>
+</button>
+</div>
+<!-- Service History Section -->
+<div class="flex flex-col gap-4">
+<!-- Header & Filters -->
+<div class="flex flex-col gap-3">
+<div class="px-4 flex items-center justify-between">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">Service History</h2>
+<a class="text-sm font-semibold text-primary hover:text-blue-500" href="#">See All</a>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 px-4 overflow-x-auto no-scrollbar pb-1">
+<button class="shrink-0 h-8 px-4 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold shadow-sm transition-colors">
+                        All
+                    </button>
+<button class="shrink-0 h-8 px-4 rounded-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        Pending
+                    </button>
+<button class="shrink-0 h-8 px-4 rounded-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        In Progress
+                    </button>
+<button class="shrink-0 h-8 px-4 rounded-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        Completed
+                    </button>
+</div>
+</div>
+<!-- List of Cards -->
+<div class="flex flex-col gap-3 px-4">
+<!-- Card 1: In Progress -->
+<div class="group flex flex-col bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-primary shrink-0">
+<span class="material-symbols-outlined">plumbing</span>
+</div>
+<div class="flex flex-col">
+<h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">Leaky Faucet</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Kitchen • Today, 10:00 AM</p>
+</div>
+</div>
+<div class="shrink-0">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                In Progress
+                            </span>
+</div>
+</div>
+</div>
+<!-- Card 2: Completed -->
+<div class="group flex flex-col bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-12 rounded-xl bg-green-50 dark:bg-green-900/20 text-emerald-600 shrink-0">
+<span class="material-symbols-outlined">inventory_2</span>
+</div>
+<div class="flex flex-col">
+<h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">Package Delivery</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Concierge • Yesterday</p>
+</div>
+</div>
+<div class="shrink-0">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                Completed
+                            </span>
+</div>
+</div>
+</div>
+<!-- Card 3: Pending -->
+<div class="group flex flex-col bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-12 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 shrink-0">
+<span class="material-symbols-outlined">lightbulb</span>
+</div>
+<div class="flex flex-col">
+<h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">Light Replacement</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Living Room • Mon, Oct 24</p>
+</div>
+</div>
+<div class="shrink-0">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
+                                Pending
+                            </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800 pb-safe z-30">
+<div class="flex items-center justify-around h-16 max-w-lg mx-auto">
+<button class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-primary">
+<span class="material-symbols-outlined fill-1">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-[10px] font-medium">Messages</span>
+</button>
+<button class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</div>
+</nav>
+<!-- Safe Area Padding for iOS PWA -->
+<style>
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .pt-safe-top {
+            padding-top: env(safe-area-inset-top);
+        }
+    </style>
+</body></html>

@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .fill-1 {
+        font-variation-settings: 'FILL' 1;
+    }
+}

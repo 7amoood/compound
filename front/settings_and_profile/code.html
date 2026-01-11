@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CommunityApp - Settings &amp; Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#137fec",
+                "background-light": "#f2f2f7", /* iOS grouped background style */
+                "background-dark": "#000000",
+                "surface-light": "#ffffff",
+                "surface-dark": "#1c1c1e",
+                },
+                fontFamily: {
+                "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+        /* Custom switch toggle style to mimic iOS */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #137fec;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #137fec;
+        }
+        
+        /* Hide scrollbar for clean look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#1F2937] dark:text-white font-display overflow-x-hidden antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col mx-auto max-w-md bg-background-light dark:bg-background-dark pb-20">
+<!-- Top App Bar (iOS style) -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+<button class="flex items-center text-primary text-base font-normal -ml-1">
+<span class="material-symbols-outlined text-2xl">chevron_left</span>
+<span>Back</span>
+</button>
+<h1 class="text-[17px] font-semibold text-center text-[#0d141b] dark:text-white absolute left-1/2 transform -translate-x-1/2">Settings</h1>
+<button class="text-primary text-[17px] font-semibold">Save</button>
+</header>
+<!-- Profile Header -->
+<div class="flex flex-col items-center justify-center pt-8 pb-6 px-4">
+<div class="relative group cursor-pointer">
+<div class="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 bg-cover bg-center shadow-sm border-2 border-white dark:border-gray-800" data-alt="Profile picture of Jane Doe smiling in a park" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBJHj0Nhbj-hcYqcvPBhPNU4InJOLG0LYvV7qxSFzLE2tXj1_GsTcqz0r_F6RPDFGE_WCoTBjiGW9fRueWmBt9J634gqg0tLXkB8RE9J2nX8v3gJGrThonVPfqjoW0bntFDHeKwfo_uL-ce_gQumEnRSXMdVz-nNsgFLi4u1c718XXXSrY9HGvSceQ4T6X9v3Ao4Y6Nc2wb1r6KKqvcAnVtTfqkeJjzVnP0bxx-cK79RFEPVcvw6tjeqk1Bt7gpZWZR-YNVOTGjmQ");'>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 shadow-md border-2 border-white dark:border-gray-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] leading-none">edit</span>
+</div>
+</div>
+<div class="mt-3 text-center">
+<h2 class="text-xl font-bold text-[#0d141b] dark:text-white">Jane Doe</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Resident • Apt 402</p>
+</div>
+</div>
+<!-- Personal Information Section -->
+<div class="px-4 mb-6">
+<h3 class="pl-4 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Personal Information</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100 dark:divide-gray-800">
+<!-- Name Field -->
+<div class="flex items-center px-4 py-3 bg-surface-light dark:bg-surface-dark">
+<label class="w-24 text-[16px] text-gray-900 dark:text-white font-normal">Name</label>
+<input class="flex-1 bg-transparent border-none p-0 text-[16px] text-primary text-right focus:ring-0 placeholder:text-gray-400 font-normal" type="text" value="Jane Doe"/>
+</div>
+<!-- Email Field -->
+<div class="flex items-center px-4 py-3 bg-surface-light dark:bg-surface-dark">
+<label class="w-24 text-[16px] text-gray-900 dark:text-white font-normal">Email</label>
+<input class="flex-1 bg-transparent border-none p-0 text-[16px] text-gray-500 dark:text-gray-400 text-right focus:ring-0 placeholder:text-gray-400 font-normal" type="email" value="jane.doe@example.com"/>
+</div>
+<!-- Phone Field -->
+<div class="flex items-center px-4 py-3 bg-surface-light dark:bg-surface-dark">
+<label class="w-24 text-[16px] text-gray-900 dark:text-white font-normal">Phone</label>
+<input class="flex-1 bg-transparent border-none p-0 text-[16px] text-primary text-right focus:ring-0 placeholder:text-gray-400 font-normal" type="tel" value="(555) 123-4567"/>
+</div>
+</div>
+<p class="mt-2 pl-4 text-xs text-gray-400 dark:text-gray-500">Contact admin to update your email address.</p>
+</div>
+<!-- Notifications Section -->
+<div class="px-4 mb-6">
+<h3 class="pl-4 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Notifications</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100 dark:divide-gray-800">
+<!-- Service Updates Toggle -->
+<div class="flex items-center justify-between px-4 py-3">
+<div class="flex flex-col">
+<span class="text-[16px] text-gray-900 dark:text-white font-normal">Service Updates</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 top-0 checked:translate-x-full border-gray-300 checked:border-primary shadow-sm" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer transition-colors duration-300" for="toggle1"></label>
+</div>
+</div>
+<!-- Community Events Toggle -->
+<div class="flex items-center justify-between px-4 py-3">
+<div class="flex flex-col">
+<span class="text-[16px] text-gray-900 dark:text-white font-normal">Community Events</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 top-0 checked:translate-x-5 border-gray-300 checked:border-primary shadow-sm" id="toggle2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer transition-colors duration-300" for="toggle2"></label>
+</div>
+</div>
+<!-- Email Digests Toggle -->
+<div class="flex items-center justify-between px-4 py-3">
+<div class="flex flex-col">
+<span class="text-[16px] text-gray-900 dark:text-white font-normal">Weekly Email Digest</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0 top-0 checked:translate-x-5 border-gray-300 checked:border-primary shadow-sm" id="toggle3" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer transition-colors duration-300" for="toggle3"></label>
+</div>
+</div>
+</div>
+</div>
+<!-- Support & Legal Section -->
+<div class="px-4 mb-8">
+<h3 class="pl-4 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Support &amp; Legal</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100 dark:divide-gray-800">
+<a class="flex items-center justify-between px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">help</span>
+</div>
+<span class="text-[16px] text-gray-900 dark:text-white font-normal">Help Center</span>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-xl">chevron_right</span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-500">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</div>
+<span class="text-[16px] text-gray-900 dark:text-white font-normal">Privacy Policy</span>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-xl">chevron_right</span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-7 h-7 rounded-md bg-purple-500/10 flex items-center justify-center text-purple-500">
+<span class="material-symbols-outlined text-[18px]">description</span>
+</div>
+<span class="text-[16px] text-gray-900 dark:text-white font-normal">Terms of Service</span>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-xl">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Logout Section -->
+<div class="px-4 mb-8">
+<button class="w-full bg-surface-light dark:bg-surface-dark rounded-xl p-3 shadow-sm text-red-500 font-medium text-[16px] active:bg-red-50 dark:active:bg-red-900/20 transition-colors">
+                Log Out
+            </button>
+<p class="text-center text-xs text-gray-400 mt-4">CommunityApp v1.2.4</p>
+</div>
+</div>
+<script>
+        // Simple logic to mimic checkbox toggle behavior for the visual elements
+        document.querySelectorAll('.toggle-checkbox').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const label = this.nextElementSibling;
+                if(this.checked) {
+                    label.classList.remove('bg-gray-300', 'dark:bg-gray-600');
+                    label.classList.add('bg-primary');
+                } else {
+                    label.classList.add('bg-gray-300', 'dark:bg-gray-600');
+                    label.classList.remove('bg-primary');
+                }
+            });
+            // Init state
+            toggle.dispatchEvent(new Event('change'));
+        });
+    </script>
+</body></html>

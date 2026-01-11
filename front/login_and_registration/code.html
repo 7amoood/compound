@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CommunityApp - Login &amp; Registration</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#0d141b] dark:text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden max-w-md mx-auto bg-white dark:bg-background-dark shadow-sm">
+<!-- Header Section -->
+<div class="@container">
+<div class="@[480px]:px-4 @[480px]:py-3 pt-0">
+<div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-slate-50 @[480px]:rounded-lg min-h-[240px] relative" data-alt="Modern residential building facade with blue sky" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDqQjV_awHF8EZfIYir6QEvk36zrolhlN6xie_W-ACr6FKd066X_LtYTxDtTONoyBpom9x0BT8LNFoajaVG4PyyaxPL7Ow5We6193OCxq0JPHfNofxWAh8Ah5_AePtjQIP4MsRtPopluouObs4LPw-Y6pQyGb9CoxX2eWSoGhiQ1_UrvTOELYxi4mCPA8LuCGSHwvh63vER_MPvM5Rq-LQDegDuub8aEdHn2gm3wl_hf2KQulddsSU7ikARF9QhBzdECjS1O5DxTg");'>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="relative p-4">
+<h1 class="text-white tracking-light text-[32px] font-bold leading-tight">Welcome Home</h1>
+<p class="text-white/90 text-base font-normal leading-normal pt-1">Manage your home services with ease.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content Container -->
+<div class="px-4 pb-8 flex flex-col gap-5">
+<!-- Auth Tabs (Sign In / Sign Up) -->
+<div class="flex pt-4">
+<div class="flex h-12 flex-1 items-center justify-center rounded-lg bg-[#e7edf3] dark:bg-slate-800 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md text-[#4c739a] dark:text-slate-400 text-sm font-medium leading-normal transition-all duration-200">
+<span class="truncate">Sign In</span>
+<input class="invisible w-0" name="auth-tab" type="radio" value="Sign In"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md bg-white dark:bg-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.1)] text-primary dark:text-white text-sm font-semibold leading-normal transition-all duration-200">
+<span class="truncate">Sign Up</span>
+<input checked="" class="invisible w-0" name="auth-tab" type="radio" value="Sign Up"/>
+</label>
+</div>
+</div>
+<!-- Role Selection -->
+<div class="flex flex-col gap-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1">I am a</span>
+<div class="flex h-12 w-full items-center justify-center rounded-lg bg-[#e7edf3] dark:bg-slate-800 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md bg-primary shadow-sm text-white text-sm font-medium leading-normal transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-2">home</span>
+<span class="truncate">Resident</span>
+<input checked="" class="invisible w-0" name="role-selector" type="radio" value="Resident"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md text-[#4c739a] dark:text-slate-400 text-sm font-medium leading-normal hover:bg-white/50 dark:hover:bg-slate-700/50 transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-2">engineering</span>
+<span class="truncate">Service Provider</span>
+<input class="invisible w-0" name="role-selector" type="radio" value="Service Provider"/>
+</label>
+</div>
+</div>
+<!-- Form Fields -->
+<form class="flex flex-col gap-4 mt-2">
+<!-- Full Name -->
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#0d141b] dark:text-white ml-1">Full Name</label>
+<div class="relative flex items-center">
+<span class="absolute left-3 text-slate-400 material-symbols-outlined text-[20px]">person</span>
+<input class="w-full h-12 pl-10 pr-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="John Doe" type="text"/>
+</div>
+</div>
+<!-- Phone -->
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#0d141b] dark:text-white ml-1">Mobile Number</label>
+<div class="relative flex items-center">
+<span class="absolute left-3 text-slate-400 material-symbols-outlined text-[20px]">smartphone</span>
+<input class="w-full h-12 pl-10 pr-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+<!-- Address Grid -->
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#0d141b] dark:text-white ml-1">Address Details</label>
+<div class="grid grid-cols-3 gap-3">
+<div class="relative">
+<input class="w-full h-12 px-3 text-center rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="Block" type="text"/>
+<span class="text-[10px] text-slate-400 absolute top-1 right-2 pointer-events-none">No.</span>
+</div>
+<div class="relative">
+<input class="w-full h-12 px-3 text-center rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="Floor" type="text"/>
+</div>
+<div class="relative">
+<input class="w-full h-12 px-3 text-center rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="Apt" type="text"/>
+<span class="text-[10px] text-slate-400 absolute top-1 right-2 pointer-events-none">#</span>
+</div>
+</div>
+</div>
+<!-- Password -->
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-medium text-[#0d141b] dark:text-white ml-1">Password</label>
+<div class="relative flex items-center">
+<span class="absolute left-3 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
+<input class="w-full h-12 pl-10 pr-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="••••••••" type="password"/>
+<button class="absolute right-3 text-slate-400 hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="mt-4 w-full h-12 rounded-lg bg-primary text-white font-bold text-base shadow-md shadow-primary/20 hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="button">
+                    Create Account
+                </button>
+</form>
+<!-- Footer Links -->
+<div class="flex flex-col items-center gap-4 py-2">
+<p class="text-sm text-slate-500 dark:text-slate-400 text-center">
+                    By registering, you agree to our <a class="text-primary font-medium hover:underline" href="#">Terms</a> &amp; <a class="text-primary font-medium hover:underline" href="#">Privacy Policy</a>
+</p>
+<div class="w-full border-t border-slate-100 dark:border-slate-800"></div>
+<div class="flex w-full justify-between items-center px-2">
+<a class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors" href="#">Need help?</a>
+<a class="text-sm font-medium text-primary hover:text-blue-700 transition-colors" href="#">Forgot Password?</a>
+</div>
+</div>
+</div>
+<div class="h-5 bg-transparent"></div>
+</div>
+</body></html>
