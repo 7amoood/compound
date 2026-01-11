@@ -34,7 +34,7 @@
                     <h2 class="text-base font-bold text-slate-900 dark:text-white">خدمات سريعة</h2>
                 </div>
                 <div class="grid grid-cols-4 gap-3">
-                    <button v-for="(cat, index) in categories.slice(0, 4)" :key="cat.id" @click="newRequestForm.service_category_id = cat.id; showNewRequestModal = true" class="flex flex-col items-center gap-2 group">
+                    <button v-for="(cat, index) in categories" :key="cat.id" @click="newRequestForm.service_category_id = cat.id; showNewRequestModal = true" class="flex flex-col items-center gap-2 group">
                         <div class="flex items-center justify-center size-14 rounded-2xl border group-hover:scale-105 transition-transform duration-200 shadow-sm" :class="getServiceColor(index)">
                             <span class="material-symbols-outlined text-[28px]">{{ cat.icon }}</span>
                         </div>

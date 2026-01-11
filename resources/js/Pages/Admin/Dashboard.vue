@@ -945,14 +945,15 @@ export default {
         },
         async toggleServiceStatus(service) {
             try {
-                // Toggle the local state immediately for responsiveness
-                service.is_active = !service.is_active;
-                // You can add API call here when endpoint is ready
-                // await axios.post(`/api/services/${service.id}/toggle-active`);
-                if (window.showToast) window.showToast(`تم ${service.is_active ? 'تفعيل' : 'إيقاف'} الخدمة`, 'success');
+                const response = await axios.post(`/api/admin/services/${service.id}/toggle-status`);
+                if (response.data.success) {
+                    service.is_active = response.data.is_active;
+                    if (window.showToast) window.showToast(`تم ${service.is_active ? 'تفعيل' : 'إيقاف'} الخدمة`, 'success');
+                    // Refresh stats since category counts might change
+                    this.loadStats();
+                }
             } catch (e) {
-                service.is_active = !service.is_active; // Revert on error
-                if (window.showToast) window.showToast('حدث خطأ', 'error');
+                if (window.showToast) window.showToast('حدث خطأ أثناء تحديث حالة الخدمة', 'error');
             }
         },
         formatDate(dateString) {
