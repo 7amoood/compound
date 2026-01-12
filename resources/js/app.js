@@ -71,6 +71,7 @@ if ('BroadcastChannel' in window) {
 }
 
 // Prevent iOS Rubber Banding / Elastic Scrolling on body
+// Also prevents horizontal overscroll
 document.addEventListener('touchmove', function (e) {
     // Only prevent if the target is NOT inside a scrollable element
     let isScrollable = false;
@@ -79,8 +80,16 @@ document.addEventListener('touchmove', function (e) {
     while (el && el !== document.body && el !== document.documentElement) {
         if (el instanceof HTMLElement) {
             const style = window.getComputedStyle(el);
-            const overflow = style.getPropertyValue('overflow-y');
-            if ((overflow === 'auto' || overflow === 'scroll') && el.scrollHeight > el.clientHeight) {
+            const overflowY = style.getPropertyValue('overflow-y');
+            const overflowX = style.getPropertyValue('overflow-x');
+
+            // Check vertical scrollability
+            if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+                isScrollable = true;
+                break;
+            }
+            // Check horizontal scrollability (for carousels, tabs, etc.)
+            if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
                 isScrollable = true;
                 break;
             }
@@ -93,3 +102,14 @@ document.addEventListener('touchmove', function (e) {
     }
 }, { passive: false });
 
+// Prevent overscroll on document
+document.addEventListener('touchstart', function (e) {
+    // Allow normal touch interactions, just set up for tracking
+}, { passive: true });
+
+// Prevent iOS bounce on window
+window.addEventListener('scroll', function (e) {
+    if (window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+    }
+});
