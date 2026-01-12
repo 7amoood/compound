@@ -136,21 +136,17 @@ export default {
             }
         },
         startDrag(e) {
-            // Check if content is scrollable and at top
+            // Store initial touch/mouse position
+            this.startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            this.startTime = Date.now();
+            this.canDrag = false;
+            this.isDragging = false;
+            
+            // Check if we're at the top of scrollable content
             const contentArea = this.$refs.contentArea;
             if (contentArea) {
                 this.initialScrollTop = contentArea.scrollTop;
-                // Only allow drag if we're at the top of scrollable content
-                if (this.initialScrollTop > 5) {
-                    this.canDrag = false;
-                    return;
-                }
             }
-            
-            this.canDrag = true;
-            this.isDragging = false; // Will be set to true on first move
-            this.startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            this.startTime = Date.now();
             
             document.addEventListener('mousemove', this.onDrag);
             document.addEventListener('touchmove', this.onDrag, { passive: false });
@@ -158,27 +154,41 @@ export default {
             document.addEventListener('touchend', this.stopDrag);
         },
         onDrag(e) {
-            if (!this.canDrag) return;
-            
             const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
             const deltaY = clientY - this.startY;
             
-            // Only drag down
-            if (deltaY > 0) {
-                // Start dragging after a small threshold to avoid conflicts
-                if (!this.isDragging && deltaY > 3) {
-                    this.isDragging = true;
+            // Check current scroll position
+            const contentArea = this.$refs.contentArea;
+            const currentScrollTop = contentArea ? contentArea.scrollTop : 0;
+            
+            // Only allow drag-to-close if:
+            // 1. We're at the top of the content (scrollTop <= 5)
+            // 2. User is dragging DOWN (deltaY > 0)
+            if (currentScrollTop <= 5 && deltaY > 0) {
+                // Enable dragging after a small threshold
+                if (!this.canDrag && deltaY > 10) {
+                    this.canDrag = true;
                 }
                 
-                if (this.isDragging) {
-                    // Apply resistance for smoother feel
-                    this.currentY = Math.pow(deltaY, 0.9);
-                    if (e.cancelable) e.preventDefault();
+                if (this.canDrag) {
+                    if (!this.isDragging && deltaY > 15) {
+                        this.isDragging = true;
+                    }
+                    
+                    if (this.isDragging) {
+                        // Apply resistance for smoother feel
+                        this.currentY = Math.pow(deltaY, 0.9);
+                        if (e.cancelable) e.preventDefault();
+                    }
                 }
+            } else {
+                // User is either scrolling up or not at top - allow normal scroll
+                this.canDrag = false;
+                this.isDragging = false;
             }
         },
         stopDrag() {
-            if (!this.canDrag) {
+            if (!this.canDrag && !this.isDragging) {
                 this.cleanup();
                 return;
             }

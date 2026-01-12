@@ -459,8 +459,18 @@ export default {
         activeTab(newTab) {
             const url = new URL(window.location);
             url.searchParams.set('tab', newTab);
+            // Remove request_id when changing tabs
+            url.searchParams.delete('request_id');
             window.history.replaceState(null, '', url);
             this.loadRequests(); // Load requests when tab changes
+        },
+        showRequestDetailsModal(isOpen) {
+            if (!isOpen) {
+                // Remove request_id from URL when closing modal
+                const url = new URL(window.location);
+                url.searchParams.delete('request_id');
+                window.history.replaceState(null, '', url);
+            }
         }
     },
     mounted() {
@@ -542,6 +552,11 @@ export default {
             }
         },
         async openRequestDetails(id) {
+            // Add request_id to URL
+            const url = new URL(window.location);
+            url.searchParams.set('request_id', id);
+            window.history.replaceState(null, '', url);
+            
             this.showRequestDetailsModal = true;
             this.loadingProposals = true;
             this.currentProposals = [];
