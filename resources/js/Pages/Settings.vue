@@ -122,9 +122,10 @@
         
         <!-- Logout Section -->
         <div class="px-4 mb-8">
-            <a href="/logout" class="w-full flex items-center justify-center bg-surface-light dark:bg-surface-dark rounded-xl p-3 shadow-sm text-red-500 font-medium text-[16px] active:bg-red-50 dark:active:bg-red-900/20 transition-colors">
-                تسجيل الخروج
-            </a>
+            <button @click="logout" :disabled="loggingOut" class="w-full flex items-center justify-center gap-2 bg-surface-light dark:bg-surface-dark rounded-xl p-3 shadow-sm text-red-500 font-medium text-[16px] active:bg-red-50 dark:active:bg-red-900/20 transition-colors disabled:opacity-70">
+                <span v-if="loggingOut" class="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+                <span>{{ loggingOut ? 'جاري الخروج...' : 'تسجيل الخروج' }}</span>
+            </button>
             <p class="text-center text-xs text-gray-400 mt-4">CommunityApp v1.0.0</p>
         </div>
 
@@ -150,7 +151,7 @@
 </template>
 
 <script>
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import Toast from '@/Components/Toast.vue';
 import Modal from '@/Components/Modal.vue';
@@ -174,6 +175,7 @@ export default {
             selectingAvatar: false,
             showAvatarGallery: false,
             nextAvatar: null,
+            loggingOut: false,
         };
     },
     computed: {
@@ -281,6 +283,14 @@ export default {
                     document.documentElement.classList.remove('dark');
                 }
             }
+        },
+        logout() {
+            this.loggingOut = true;
+            router.post('/logout', {}, {
+                onFinish: () => {
+                    this.loggingOut = false;
+                }
+            });
         },
     },
 };

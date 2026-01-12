@@ -1,7 +1,7 @@
 <template>
     <Head title="تسجيل الدخول - خدمات المجمع" />
     
-    <div class="relative flex min-h-[100dvh] w-full flex-col overflow-x-hidden overflow-y-auto max-w-md mx-auto bg-white dark:bg-background-dark shadow-sm font-display" dir="rtl">
+    <div class="relative flex min-h-[100vh] w-full flex-col overflow-x-hidden overflow-y-auto max-w-md mx-auto bg-white dark:bg-background-dark shadow-sm font-display" dir="rtl">
         <!-- Header Section - Image goes to very top, content has safe area -->
         <div class="@container">
             <div class="@[480px]:px-4 @[480px]:py-3">
