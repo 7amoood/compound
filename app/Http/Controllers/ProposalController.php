@@ -197,7 +197,7 @@ class ProposalController extends Controller
         $requests = ServiceRequest::whereHas('acceptedProposal', function ($q) use ($user) {
             $q->where('provider_id', $user->id);
         })
-            ->with(['category:id,name,icon', 'resident:id,name,phone,block_no,floor,apt_no', 'acceptedProposal'])
+            ->with(['category:id,name,icon', 'resident:id,name,phone,block_no,floor,apt_no,compound_id', 'resident.compound:id,name,location_url', 'acceptedProposal'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

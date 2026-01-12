@@ -119,7 +119,8 @@ class RequestController extends Controller
         // Load relationships
         $serviceRequest->load([
             'category:id,name,icon',
-            'resident:id,name,phone,block_no,floor,apt_no',
+            'resident:id,name,phone,block_no,floor,apt_no,compound_id',
+            'resident.compound:id,name,location_url',
             'proposals.provider:id,name,phone,photo,rating_average,rating_count',
             'acceptedProposal.provider:id,name,phone,photo,rating_average,rating_count',
             'review',

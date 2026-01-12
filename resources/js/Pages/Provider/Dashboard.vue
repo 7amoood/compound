@@ -139,12 +139,12 @@
                 <template v-else-if="activeTab === 'myjobs'">
                     <!-- Filter Chips -->
                     <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-1">
-                        <button @click="myJobsFilter = 'active'" 
+                        <button @click="setMyJobsFilter('active')" 
                             class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
                             :class="myJobsFilter === 'active' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
                             الأعمال النشطة
                         </button>
-                        <button @click="myJobsFilter = 'completed'" 
+                        <button @click="setMyJobsFilter('completed')" 
                             class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
                             :class="myJobsFilter === 'completed' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
                             مكتمل
@@ -350,7 +350,7 @@ export default {
     components: { Head, Link, Modal, Toast, PullToRefresh },
     data() {
         return {
-            activeTab: (new URLSearchParams(window.location.search)).get('tab') || localStorage.getItem('provider_current_tab') || 'available',
+            activeTab: (new URLSearchParams(window.location.search)).get('tab') || 'available',
             availableJobs: [],
             myJobs: [],
             reviews: [],
@@ -376,7 +376,7 @@ export default {
             confirmAction: null,
             processingConfirm: false,
             // My Jobs filter
-            myJobsFilter: 'active',
+            myJobsFilter: (new URLSearchParams(window.location.search)).get('filter') || 'active',
         };
     },
     computed: {
@@ -460,12 +460,38 @@ export default {
                 return;
             }
         },
+        setMyJobsFilter(filter) {
+            this.myJobsFilter = filter;
+            this.updateUrlParams({ filter });
+        },
         switchToTab(tab) {
             this.activeTab = tab;
-            localStorage.setItem('provider_current_tab', tab);
+            
+            // Clean URL when switching tabs
+            const params = { tab };
+            if (tab !== 'myjobs') {
+                 params.filter = null; // This will remove the param
+            } else {
+                 params.filter = this.myJobsFilter;
+            }
+            this.updateUrlParams(params);
+
             if (tab === 'available') this.loadAvailableJobs();
             else if (tab === 'myjobs') this.loadMyJobs();
             else if (tab === 'reviews') this.loadReviews(true);
+        },
+        updateUrlParams(newParams) {
+            const url = new URL(window.location);
+            
+            Object.keys(newParams).forEach(key => {
+                if (newParams[key] === null) {
+                    url.searchParams.delete(key);
+                } else {
+                    url.searchParams.set(key, newParams[key]);
+                }
+            });
+            
+            window.history.replaceState(window.history.state, '', url);
         },
         async loadStats() {
             try {
