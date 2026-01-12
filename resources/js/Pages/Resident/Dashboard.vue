@@ -633,15 +633,18 @@ export default {
              const requestId = n.data?.request_id;
              
              if (requestId) {
-                 // Directly open request details without closing notifications modal first
-                 // This avoids history.back() being called and triggering page reload
-                 this.showNotificationsModal = false;
-                 // Preserving history state and remove modal flag
+                 // 1. Preserving history state and remove modal flag BEFORE closing the prop
+                 // This prevents the Modal watcher from calling history.back()
                  if (window.history.state?.modal) {
                      const newState = { ...window.history.state };
                      delete newState.modal;
                      window.history.replaceState(newState, '', window.location.href);
                  }
+                 
+                 // 2. Clear notifications modal
+                 this.showNotificationsModal = false;
+                 
+                 // 3. Open request details
                  this.openRequestDetails(requestId);
              } else {
                  this.showNotificationsModal = false;
