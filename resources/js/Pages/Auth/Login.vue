@@ -361,7 +361,11 @@ export default {
         },
         
         submitLogin() {
-            this.loginForm.post('/login');
+            this.loginForm.post('/login', {
+                onSuccess: () => {
+                    sessionStorage.removeItem('fcm_token');
+                }
+            });
         },
         
         onPhoneInput() {
@@ -390,6 +394,9 @@ export default {
             
             this.registerForm.post('/register', {
                 onSuccess: () => {
+                    // Clear keys to force refresh token
+                    sessionStorage.removeItem('fcm_token');
+
                     // Store user data for biometric registration
                     this.pendingUserData = { ...userData, compoundName };
                     
@@ -541,6 +548,7 @@ export default {
                 });
                 
                 if (verifyRes.data.success) {
+                    sessionStorage.removeItem('fcm_token');
                     // Redirect to dashboard
                     router.visit(verifyRes.data.redirect);
                 }

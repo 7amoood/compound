@@ -287,6 +287,9 @@ export default {
         logout() {
             this.loggingOut = true;
             router.post('/logout', {}, {
+                onSuccess: () => {
+                    sessionStorage.removeItem('fcm_token');
+                },
                 onFinish: () => {
                     this.loggingOut = false;
                 }
