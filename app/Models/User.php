@@ -31,6 +31,7 @@ class User extends Authenticatable
         'rating_count',
         'total_earnings',
         'fcm_token',
+        'market_id',
     ];
 
     /**
@@ -81,11 +82,27 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is market staff
+     */
+    public function isMarketStaff(): bool
+    {
+        return $this->role === 'provider' && ! is_null($this->market_id);
+    }
+
+    /**
      * Get the service category for providers
      */
     public function serviceType()
     {
         return $this->belongsTo(ServiceCategory::class, 'service_type_id');
+    }
+
+    /**
+     * Get the market for market staff
+     */
+    public function market()
+    {
+        return $this->belongsTo(Market::class);
     }
 
     /**

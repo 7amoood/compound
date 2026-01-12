@@ -105,6 +105,7 @@ class UserController extends Controller
             'floor'       => 'nullable|string|max:10',
             'apt_no'      => 'nullable|string|max:10',
             'role'        => 'sometimes|in:resident,provider,admin',
+            'market_id'   => 'nullable|exists:markets,id',
         ]);
 
         $user->fill($validated);

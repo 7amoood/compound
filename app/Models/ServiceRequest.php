@@ -17,6 +17,7 @@ class ServiceRequest extends Model
         'notes',
         'delivery_method',
         'location',
+        'market_id',
     ];
 
     const STATUS_PENDING     = 'pending';
@@ -53,6 +54,22 @@ class ServiceRequest extends Model
     public function category()
     {
         return $this->belongsTo(ServiceCategory::class, 'service_category_id');
+    }
+
+    /**
+     * Get the market
+     */
+    public function market()
+    {
+        return $this->belongsTo(Market::class);
+    }
+
+    /**
+     * Get the items for market request
+     */
+    public function items()
+    {
+        return $this->hasMany(RequestItem::class, 'request_id');
     }
 
     /**
@@ -101,5 +118,13 @@ class ServiceRequest extends Model
     public function scopeForCategory($query, $categoryId)
     {
         return $query->where('service_category_id', $categoryId);
+    }
+
+    /**
+     * Scope for requests by market
+     */
+    public function scopeForMarket($query, $marketId)
+    {
+        return $query->where('market_id', $marketId);
     }
 }

@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CompoundController;
+use App\Http\Controllers\MarketController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\RequestController;
+use App\Http\Controllers\RequestItemController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\SettingsController;
@@ -12,7 +14,6 @@ use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,70 +30,16 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/login', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    return Inertia::render('Auth/Login', [
-        'categories' => \App\Models\ServiceCategory::active()->get(['id', 'name', 'icon']),
-        'compounds'  => \App\Models\Compound::active()->get(['id', 'name']),
-    ]);
-})->name('login');
+Route::get('/login', [App\Http\Controllers\AuthController::class, 'loginView'])->name('login');
 
-Route::post('/login', function (Request $request) {
-    $credentials = $request->validate([
-        'phone'    => ['required'],
-        'password' => ['required'],
-    ]);
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'webLogin']);
 
-    $user = User::where('phone', $request->phone)->first();
-
-    if ($user && ! $user->is_active) {
-        return back()->withErrors([
-            'message' => 'حسابك لا يزال بانتظار تفعيل المشرف. يرجى الانتظار.',
-        ]);
-    }
-
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
-        return redirect()->intended('/dashboard');
-    }
-
-    return back()->withErrors([
-        'message' => 'بيانات الدخول غير صحيحة',
-    ]);
-});
-
-Route::post('/register', function (Request $request) {
-    $request->validate([
-        'name'            => 'required|string|max:255',
-        'phone'           => 'required|string|unique:users,phone',
-        'password'        => 'required|string|min:6',
-        'role'            => 'required|in:resident,provider',
-        'compound_id'     => 'required_if:role,resident|nullable|exists:compounds,id',
-        'block_no'        => 'nullable|string',
-        'floor'           => 'nullable|string',
-        'apt_no'          => 'nullable|string',
-        'service_type_id' => 'required_if:role,provider|nullable|exists:service_categories,id',
-    ]);
-
-    $user = User::create([
-        'name'            => $request->name,
-        'phone'           => $request->phone,
-        'password'        => Hash::make($request->password),
-        'role'            => $request->role,
-        'compound_id'     => $request->compound_id,
-        'block_no'        => $request->block_no,
-        'floor'           => $request->floor,
-        'apt_no'          => $request->apt_no,
-        'service_type_id' => $request->service_type_id,
-        'is_active'       => false,
-    ]);
-
-    return redirect()->route('login')->with('message', 'تم إنشاء الحساب بنجاح. يرجى انتظار تفعيل المشرف.');
-});
+Route::post('/register', [App\Http\Controllers\AuthController::class, 'webRegister']);
 
 Route::middleware('auth')->group(function () {
+    Route::get('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout.get');
+    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout.post');
+
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
@@ -119,23 +66,6 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Settings');
     })->name('settings');
 
-    // Settings routes
-    Route::post('/settings/avatar', [SettingsController::class, 'setAvatar'])->name('settings.avatar');
-
-    Route::get('/logout', function () {
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-        return redirect('/login');
-    })->name('logout.get');
-
-    Route::post('/logout', function () {
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-        return redirect('/login');
-    })->name('logout');
-
     // --- Internal API Routes (Session Based) ---
     Route::prefix('api')->group(function () {
         // Shared & Resident
@@ -149,6 +79,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/requests/{serviceRequest}', [RequestController::class, 'show']);
         Route::post('/requests/{serviceRequest}/cancel', [RequestController::class, 'cancel']);
         Route::post('/requests/{serviceRequest}/complete', [RequestController::class, 'complete']);
+        Route::post('/requests/{serviceRequest}/start-market-order', [RequestController::class, 'startMarketOrder']);
 
         // Proposals
         Route::get('/requests/{serviceRequest}/proposals', [ProposalController::class, 'index']);
@@ -187,8 +118,13 @@ Route::middleware('auth')->group(function () {
         // Settings (API endpoints called by Vue)
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile']);
         Route::put('/settings/password', [SettingsController::class, 'changePassword']);
-        // photo routes are already handled above but vue might call /api/settings/photo too?
-        // The Vue component uses /settings/photo (root relative), which hits the lines 103/104 above. Good.
+        Route::post('/settings/avatar', [SettingsController::class, 'setAvatar'])->name('settings.avatar');
+
+        // Markets
+        Route::get('/markets', [MarketController::class, 'index']);
+
+        // Request Items
+        Route::put('/request-items/{item}/toggle', [RequestItemController::class, 'toggle']);
 
         // Admin Routes
         Route::middleware('role:admin')->group(function () {
@@ -213,6 +149,12 @@ Route::middleware('auth')->group(function () {
             Route::put('/admin/compounds/{compound}', [CompoundController::class, 'update']);
             Route::post('/admin/compounds/{compound}/toggle-status', [CompoundController::class, 'toggleActive']);
             Route::delete('/admin/compounds/{compound}', [CompoundController::class, 'destroy']);
+
+            // Markets CRUD
+            Route::get('/admin/markets', [MarketController::class, 'all']);
+            Route::post('/markets', [MarketController::class, 'store']);
+            Route::put('/admin/markets/{market}', [MarketController::class, 'update']);
+            Route::delete('/admin/markets/{market}', [MarketController::class, 'destroy']);
         });
     });
 });

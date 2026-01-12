@@ -159,22 +159,83 @@
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-2" v-if="availableDeliveryMethods.length > 0">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">طريقة تقديم الخدمة</label>
-                        <div class="flex flex-col gap-3">
-                            <div v-for="(method, index) in availableDeliveryMethods" :key="index"
-                                 @click="newRequestForm.delivery_method = method"
-                                 class="cursor-pointer rounded-xl border p-3 text-center transition-all w-full"
-                                 :class="newRequestForm.delivery_method === method ? 'border-primary bg-primary/5 text-primary font-bold' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-slate-300'">
-                                {{ method }}
+
+                    <!-- Market Specific UI -->
+                    <div v-if="isMarketCategory" class="space-y-4 animate-fadeIn">
+                        <!-- Step 1: Market Selection -->
+                        <div v-if="!newRequestForm.market_id" class="space-y-3">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">اختر المتجر</label>
+                            <div v-if="markets.length > 0" class="grid grid-cols-1 gap-3">
+                                <div v-for="market in markets" :key="market.id" 
+                                     @click="newRequestForm.market_id = market.id"
+                                     class="cursor-pointer bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all flex items-center gap-4">
+                                    <div class="size-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                        <span class="material-symbols-outlined">storefront</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900 dark:text-white">{{ market.name }}</p>
+                                        <p class="text-xs text-slate-500">{{ market.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="text-center py-4 text-slate-400">
+                                <span class="material-symbols-outlined text-3xl">store_off</span>
+                                <p class="text-sm mt-1">لا توجد متاجر متاحة حالياً</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Shopping List -->
+                        <div v-else class="space-y-4">
+                            <div class="flex items-center justify-between bg-primary/5 p-3 rounded-lg border border-primary/10">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">store</span>
+                                    <span class="font-bold text-primary">{{ selectedMarket?.name }}</span>
+                                </div>
+                                <button @click="newRequestForm.market_id = ''" class="text-xs font-bold text-slate-500 hover:text-red-500 transition-colors">تغيير</button>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">قائمة الطلبات</label>
+                                <div v-for="(item, idx) in items" :key="idx" class="flex gap-2 animate-fadeIn">
+                                    <input v-model="item.name" placeholder="اسم المنتج (مثال: حليب)" class="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                    <input v-model="item.quantity" placeholder="العدد" class="w-20 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-center">
+                                    <button @click="removeItem(idx)" class="size-11 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" :disabled="items.length === 1">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </div>
+                                <button @click="addItem" class="w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-bold text-sm">
+                                    <span class="material-symbols-outlined">add</span>
+                                    <span>إضافة منتج آخر</span>
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">ملاحظات إضافية</label>
+                                <textarea v-model="newRequestForm.notes" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 text-sm h-20 resize-none focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="أي تعليمات خاصة للمندوب..."></textarea>
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">تفاصيل الطلب</label>
-                        <textarea v-model="newRequestForm.notes" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 text-base font-normal text-slate-900 dark:text-white placeholder-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none transition-colors" placeholder="اكتب تفاصيل المشكلة..." rows="4"></textarea>
+
+                    <!-- Standard Logic -->
+                    <div v-else class="space-y-6">
+                        <div class="space-y-2" v-if="availableDeliveryMethods.length > 0">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">طريقة تقديم الخدمة</label>
+                            <div class="flex flex-col gap-3">
+                                <div v-for="(method, index) in availableDeliveryMethods" :key="index"
+                                     @click="newRequestForm.delivery_method = method"
+                                     class="cursor-pointer rounded-xl border p-3 text-center transition-all w-full"
+                                     :class="newRequestForm.delivery_method === method ? 'border-primary bg-primary/5 text-primary font-bold' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 hover:border-slate-300'">
+                                    {{ method }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">تفاصيل الطلب</label>
+                            <textarea v-model="newRequestForm.notes" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 text-base font-normal text-slate-900 dark:text-white placeholder-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none transition-colors" placeholder="اكتب تفاصيل المشكلة..." rows="4"></textarea>
+                        </div>
                     </div>
-                    <button @click="submitNewRequest" :disabled="submittingRequest || !newRequestForm.service_category_id" class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-base font-bold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all active:scale-[0.98] disabled:opacity-50">
+
+                    <button @click="submitNewRequest" :disabled="submittingRequest || !newRequestForm.service_category_id || (isMarketCategory && !newRequestForm.market_id)" class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-base font-bold text-white shadow-lg shadow-primary/25 hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all active:scale-[0.98] disabled:opacity-50">
                         <span v-if="submittingRequest" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                         <span>تأكيد الطلب</span>
                         <span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span>
@@ -206,6 +267,22 @@
                                 selectedRequest.status === 'completed' ? 'مكتمل' :
                                 selectedRequest.status === 'cancelled' ? 'ملغي' : selectedRequest.status
                             }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Market Request Items -->
+                    <div v-if="selectedRequest.items && selectedRequest.items.length > 0" class="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                        <h4 class="font-bold text-slate-900 dark:text-white mb-3 text-sm flex items-center gap-2">
+                             <span class="material-symbols-outlined text-primary text-[20px]">shopping_cart</span>
+                             قائمة المشتريات
+                        </h4>
+                        <div class="space-y-1">
+                             <div v-for="item in selectedRequest.items" :key="item.id" class="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700 last:border-0 border-dashed">
+                                 <span class="text-slate-800 dark:text-slate-200 font-medium text-sm">{{ item.name }}</span>
+                                 <span v-if="item.quantity" class="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-600 font-bold text-slate-500 dark:text-slate-300">
+                                     {{ item.quantity }}
+                                 </span>
+                             </div>
                         </div>
                     </div>
 
@@ -406,9 +483,12 @@ export default {
             unreadNotificationsCount: 0,
             newRequestForm: {
                 service_category_id: '',
+                market_id: '',
                 delivery_method: '',
                 notes: '',
             },
+            items: [{name: '', quantity: ''}],
+            markets: [],
             submittingRequest: false,
             tabs: [
                 { id: 'pending', label: 'قيد الانتظار' },
@@ -453,6 +533,13 @@ export default {
                  });
             }
             return sorted;
+        },
+        isMarketCategory() {
+            return this.selectedServiceCategory?.name.includes('ماركت') || 
+                   this.selectedServiceCategory?.name.includes('Market');
+        },
+        selectedMarket() {
+            return this.markets.find(m => m.id === this.newRequestForm.market_id);
         }
     },
     watch: {
@@ -463,6 +550,11 @@ export default {
             url.searchParams.delete('request_id');
             window.history.replaceState(window.history.state, '', url);
             this.loadRequests(); // Load requests when tab changes
+        },
+        'newRequestForm.service_category_id'(newId) {
+             if (this.isMarketCategory) {
+                 this.loadMarkets();
+             }
         }
     },
     mounted() {
@@ -527,6 +619,22 @@ export default {
             ];
             return colors[index % colors.length];
         },
+        async loadMarkets() {
+            try {
+                const response = await axios.get('/api/markets');
+                if (response.data.success) {
+                    this.markets = response.data.markets;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        addItem() {
+            this.items.push({name: '', quantity: ''});
+        },
+        removeItem(index) {
+            this.items.splice(index, 1);
+        },
         async loadRequests() {
             this.loading = true;
             try {
@@ -553,10 +661,16 @@ export default {
         async submitNewRequest() {
             this.submittingRequest = true;
             try {
-                const response = await axios.post('/api/requests', this.newRequestForm);
+                const payload = { ...this.newRequestForm };
+                if (this.isMarketCategory && this.newRequestForm.market_id) {
+                    // Filter items to ensure name is present
+                    payload.items = this.items.filter(i => i.name.trim() !== '');
+                }
+                const response = await axios.post('/api/requests', payload);
                 if (response.data.success) {
                     this.showNewRequestModal = false;
-                    this.newRequestForm = { service_category_id: '', notes: '' };
+                    this.newRequestForm = { service_category_id: '', market_id: '', notes: '' };
+                    this.items = [{name: '', quantity: ''}]; // Reset items
                     window.showToast('تم إرسال طلبك بنجاح', 'success');
                     this.activeTab = 'pending';
                     // loadRequests called by watch

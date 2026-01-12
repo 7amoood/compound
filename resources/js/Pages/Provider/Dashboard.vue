@@ -197,13 +197,20 @@
                             <span>{{ job.delivery_method }}</span>
                         </div>
                         <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700">
-                            <span class="font-bold text-xl text-emerald-600">{{ job.accepted_proposal?.price }} ج.م</span>
+                            <span v-if="job.accepted_proposal?.price > 0" class="font-bold text-xl text-emerald-600">{{ job.accepted_proposal?.price }} ج.م</span>
+                            <span v-else class="font-bold text-sm text-slate-500">طلب ماركت</span>
                             <div v-if="job.status !== 'completed'" class="flex gap-2">
                                 <button v-if="job.status === 'accepted_offer'" @click="updateJobStatus(job.id, 'in_progress')"
                                         class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 transition-colors">بدء العمل</button>
                                 <button v-if="job.status === 'in_progress'" @click="updateJobStatus(job.id, 'completed')"
                                         class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-green-700 transition-colors">إكمال</button>
                             </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+                             <button @click="viewRequest(job.id)" class="flex-1 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2">
+                                 <span>عرض التفاصيل</span>
+                                 <span class="material-symbols-outlined text-[18px]">visibility</span>
+                             </button>
                         </div>
                     </div>
                 </template>
@@ -334,6 +341,92 @@
                 </div>
             </div>
         </Modal>
+
+        <!-- Request Details Modal -->
+        <Modal :show="showRequestDetailsModal" title="تفاصيل الطلب" @close="showRequestDetailsModal = false">
+             <div class="space-y-4" v-if="requestDetails">
+                 <!-- Header -->
+                 <div class="flex items-start gap-3">
+                     <div class="size-12 rounded-full bg-slate-100 dark:bg-slate-700 bg-cover bg-center" :style="`background-image: url('${requestDetails.resident?.photo || 'https://ui-avatars.com/api/?name=' + requestDetails.resident?.name}');`"></div>
+                     <div>
+                         <h3 class="font-bold text-slate-900 dark:text-white">{{ requestDetails.resident?.name }}</h3>
+                         <a :href="`tel:${requestDetails.resident?.phone}`" class="text-sm text-slate-500 hover:text-primary flex items-center gap-1">
+                             <span class="material-symbols-outlined text-[16px]">call</span>
+                             {{ requestDetails.resident?.phone }}
+                         </a>
+                     </div>
+                 </div>
+
+                 <!-- Location -->
+                 <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300">
+                      <p class="flex items-center gap-2 mb-1">
+                          <span class="material-symbols-outlined text-primary">location_on</span>
+                          <span class="font-bold">العنوان:</span>
+                      </p>
+                      <p class="mr-6">
+                          {{ requestDetails.resident?.block_no ? `مبنى ${requestDetails.resident.block_no}، الطابق ${requestDetails.resident.floor || '-'}، شقة ${requestDetails.resident.apt_no}` : 'العنوان غير محدد' }}
+                      </p>
+                      <p v-if="requestDetails.resident?.compound" class="mr-6 text-xs mt-1 text-slate-400">
+                          {{ requestDetails.resident.compound.name }}
+                      </p>
+                 </div>
+
+                 <!-- Market Checklist -->
+                 <div v-if="requestDetails.items && requestDetails.items.length > 0">
+                     <div class="flex items-center justify-between mb-2">
+                         <h4 class="font-bold flex items-center gap-2">
+                             <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                             قائمة الطلبات
+                         </h4>
+                         <span class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full text-slate-500 font-bold">
+                             {{ requestDetails.items.filter(i => i.is_picked).length }} / {{ requestDetails.items.length }}
+                         </span>
+                     </div>
+                     <div class="space-y-2">
+                          <div v-for="item in requestDetails.items" :key="item.id" 
+                               @click="(requestDetails.status === 'in_progress' && isMarketStaff) ? toggleItem(item) : null"
+                               class="flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer"
+                               :class="item.is_picked ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800' : 'bg-white border-slate-200 dark:bg-slate-800 dark:border-slate-700'">
+                               
+                               <div class="flex items-center gap-3">
+                                   <div class="size-6 rounded-md border-2 flex items-center justify-center transition-colors"
+                                        :class="item.is_picked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'">
+                                        <span v-if="item.is_picked" class="material-symbols-outlined text-white text-sm font-bold">check</span>
+                                   </div>
+                                   <span class="font-medium" :class="{'line-through text-slate-400': item.is_picked, 'text-slate-700 dark:text-slate-200': !item.is_picked}">{{ item.name }}</span>
+                               </div>
+                               <span class="font-bold bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-xs">{{ item.quantity }}</span>
+                          </div>
+                     </div>
+                 </div>
+                 
+                 <div v-else class="bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-xl border border-yellow-100 dark:border-yellow-800 text-sm text-yellow-700 dark:text-yellow-400">
+                     <p class="font-bold mb-1">تفاصيل الطلب</p>
+                     <p>{{ requestDetails.notes || 'لا توجد تفاصيل إضافية' }}</p>
+                 </div>
+
+                 <!-- Actions -->
+                 <div class="pt-4 border-t border-slate-100 dark:border-slate-700 flex gap-3">
+                     <button v-if="requestDetails.status === 'pending' && isMarketStaff" 
+                             @click="startMarketOrder(requestDetails)"
+                             class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                         <span>بدء التجهيز</span>
+                         <span class="material-symbols-outlined">play_arrow</span>
+                     </button>
+                     
+                     <button v-if="requestDetails.status === 'in_progress'" 
+                             @click="updateJobStatus(requestDetails.id, 'completed')"
+                             class="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+                         <span>إكمال الطلب</span>
+                         <span class="material-symbols-outlined">check_circle</span>
+                     </button>
+
+                     <button @click="showRequestDetailsModal = false" class="px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                         إغلاق
+                     </button>
+                 </div>
+             </div>
+        </Modal>
     </div>
 </template>
 
@@ -377,6 +470,10 @@ export default {
             processingConfirm: false,
             // My Jobs filter
             myJobsFilter: (new URLSearchParams(window.location.search)).get('filter') || 'active',
+            
+            // Market/Details Modal
+            showRequestDetailsModal: false,
+            requestDetails: null,
         };
     },
     computed: {
@@ -477,6 +574,52 @@ export default {
                 });
                 return;
             }
+            
+            // 3. Fallback: Fetch details directly and open Details Modal
+            await this.viewRequest(id);
+        },
+        async viewRequest(id) {
+            this.loading = true;
+            try {
+                const response = await axios.get(`/api/requests/${id}`);
+                if(response.data.success) {
+                    this.requestDetails = response.data.request;
+                    
+                    // If it's a market staff viewing a market request, show details modal
+                    // Or if it's my job (which we might have missed in the list check above)
+                    this.showRequestDetailsModal = true;
+                }
+            } catch(e) {
+                console.error(e);
+                window.showToast('تعذر تحميل تفاصيل الطلب', 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+        async toggleItem(item) {
+             if (!this.requestDetails || this.requestDetails.status !== 'in_progress') return;
+             
+             const originalState = item.is_picked;
+             item.is_picked = !item.is_picked; // Optimistic
+             try {
+                 await axios.put(`/api/request-items/${item.id}/toggle`);
+             } catch (e) {
+                 item.is_picked = originalState; // Revert
+                 window.showToast('فشل تحديث الحالة', 'error');
+             }
+        },
+        async startMarketOrder(inputReq) {
+             const req = inputReq || this.requestDetails;
+             try {
+                  const response = await axios.post(`/api/requests/${req.id}/start-market-order`);
+                  if (response.data.success) {
+                       window.showToast('تم بدء التجهيز', 'success');
+                       this.showRequestDetailsModal = false;
+                       this.triggerRefresh();
+                  }
+             } catch (e) {
+                  window.showToast(e.response?.data?.message || 'حدث خطأ', 'error');
+             }
         },
         setMyJobsFilter(filter) {
             this.myJobsFilter = filter;

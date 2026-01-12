@@ -1,161 +1,108 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Market;
 use App\Models\ServiceCategory;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    /**
-     * تسجيل الدخول
-     * Login with phone and password
+    /*
+     * View Login Page (Web)
      */
-    public function login(Request $request): JsonResponse
+    public function loginView()
     {
-        $request->validate([
-            'phone' => 'required|string',
-            'password' => 'required|string',
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        return Inertia::render('Auth/Login', [
+            'categories' => ServiceCategory::active()->get(['id', 'name', 'icon']),
+            'compounds'  => \App\Models\Compound::active()->get(['id', 'name']),
+            'markets'    => Market::active()->get(['id', 'name']),
+        ]);
+    }
+
+    /**
+     * Handle Login (Web)
+     */
+    public function webLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'phone'    => ['required'],
+            'password' => ['required'],
         ]);
 
         $user = User::where('phone', $request->phone)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'رقم الهاتف أو كلمة المرور غير صحيحة',
-            ], 401);
+        if ($user && ! $user->is_active) {
+            return back()->withErrors([
+                'message' => 'حسابك لا يزال بانتظار تفعيل المشرف. يرجى الانتظار.',
+            ]);
         }
 
-        if (!$user->is_active) {
-            return response()->json([
-                'success' => false,
-                'message' => 'حسابك غير مفعل. يرجى انتظار موافقة المشرف.',
-            ], 403);
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard');
         }
 
-        // Login user into session for web routes
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        // Create token for API
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تسجيل الدخول بنجاح',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'phone' => $user->phone,
-                'role' => $user->role,
-                'photo' => $user->photo,
-                'address' => $user->full_address,
-            ],
-            'token' => $token,
-            'redirect' => match($user->role) {
-                'admin' => '/admin',
-                'provider' => '/provider',
-                default => '/resident',
-            },
+        return back()->withErrors([
+            'message' => 'بيانات الدخول غير صحيحة',
         ]);
     }
 
     /**
-     * تسجيل مستخدم جديد
-     * Register new user
+     * Handle Register (Web)
      */
-    public function register(Request $request): JsonResponse
+    public function webRegister(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|unique:users,phone',
-            'password' => 'required|string|min:6',
-            'role' => 'required|in:resident,provider',
-            'block_no' => 'nullable|string',
-            'floor' => 'nullable|string',
-            'apt_no' => 'nullable|string',
-            'service_type_id' => 'required_if:role,provider|nullable|exists:service_categories,id',
+            'name'            => 'required|string|max:255',
+            'phone'           => 'required|string|unique:users,phone',
+            'password'        => 'required|string|min:6',
+            'role'            => 'required|in:resident,provider',
+            'compound_id'     => 'required_if:role,resident|nullable|exists:compounds,id',
+            'block_no'        => 'nullable|string',
+            'floor'           => 'nullable|string',
+            'apt_no'          => 'nullable|string',
+            // Service Type is required for provider ONLY if NOT associated with a market
+            'service_type_id' => [
+                'nullable',
+                'exists:service_categories,id',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->role === 'provider' && ! $request->market_id && ! $value) {
+                        $fail('يرجى اختيار نوع الخدمة أو الماركت.');
+                    }
+                },
+            ],
+            'market_id'       => 'nullable|exists:markets,id',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'block_no' => $request->block_no,
-            'floor' => $request->floor,
-            'apt_no' => $request->apt_no,
+            'name'            => $request->name,
+            'phone'           => $request->phone,
+            'password'        => Hash::make($request->password),
+            'role'            => $request->role,
+            'compound_id'     => $request->compound_id,
+            'block_no'        => $request->block_no,
+            'floor'           => $request->floor,
+            'apt_no'          => $request->apt_no,
             'service_type_id' => $request->service_type_id,
-            'is_active' => false, // Requires admin activation
+            'market_id'       => $request->market_id,
+            'is_active'       => false,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إنشاء الحساب بنجاح. يرجى انتظار تفعيل المشرف.',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'phone' => $user->phone,
-                'role' => $user->role,
-            ],
-        ], 201);
+        return redirect()->route('login')->with('message', 'تم إنشاء الحساب بنجاح. يرجى انتظار تفعيل المشرف.');
     }
 
-    /**
-     * تسجيل الخروج
-     * Logout
-     */
-    public function logout(Request $request): JsonResponse
+    public function logout()
     {
-        // Revoke current token
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تسجيل الخروج بنجاح',
-        ]);
-    }
-
-    /**
-     * Get current user info
-     */
-    public function me(Request $request): JsonResponse
-    {
-        $user = $request->user();
-        
-        return response()->json([
-            'success' => true,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'phone' => $user->phone,
-                'role' => $user->role,
-                'photo' => $user->photo,
-                'address' => $user->full_address,
-                'block_no' => $user->block_no,
-                'floor' => $user->floor,
-                'apt_no' => $user->apt_no,
-                'service_type' => $user->serviceType?->name,
-            ],
-        ]);
-    }
-
-    /**
-     * Get service categories for registration form
-     */
-    public function serviceCategories(): JsonResponse
-    {
-        $categories = ServiceCategory::active()->get(['id', 'name', 'icon']);
-        
-        return response()->json([
-            'success' => true,
-            'categories' => $categories,
-        ]);
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/login');
     }
 }

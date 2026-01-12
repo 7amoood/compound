@@ -83,6 +83,10 @@
                         <span class="material-symbols-outlined text-2xl mb-1">apartment</span>
                         <span class="text-xs font-bold">الكمبوندات</span>
                     </button>
+                    <button @click="activeSection = 'markets'" class="flex flex-col items-center justify-center min-w-[80px] p-3 rounded-2xl transition-all duration-200" :class="activeSection === 'markets' ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105' : 'bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'">
+                        <span class="material-symbols-outlined text-2xl mb-1">storefront</span>
+                        <span class="text-xs font-bold">المتاجر</span>
+                    </button>
                 </div>
             </section>
 
@@ -90,7 +94,7 @@
             <section class="px-4 py-3">
                 <div class="relative flex items-center w-full h-12 rounded-xl focus-within:ring-2 focus-within:ring-primary/20 transition-shadow bg-white dark:bg-surface-dark shadow-sm border border-slate-200 dark:border-slate-700">
                     <div class="grid place-items-center h-full w-12 text-slate-400"><span class="material-symbols-outlined">search</span></div>
-                    <input v-model="searchQuery" class="peer h-full w-full outline-none text-sm text-text-primary-light dark:text-text-primary-dark pl-2 bg-transparent placeholder-slate-400" :placeholder="activeSection === 'users' ? 'بحث عن مستخدمين...' : activeSection === 'requests' ? 'بحث عن طلبات...' : 'بحث عن خدمات...'" type="text" />
+                    <input v-model="searchQuery" class="peer h-full w-full outline-none text-sm text-text-primary-light dark:text-text-primary-dark pl-2 bg-transparent placeholder-slate-400" :placeholder="activeSection === 'users' ? 'بحث عن مستخدمين...' : activeSection === 'requests' ? 'بحث عن طلبات...' : activeSection === 'markets' ? 'بحث عن متاجر...' : 'بحث عن خدمات/كمبوندات...'" type="text" />
                 </div>
             </section>
 
@@ -231,6 +235,31 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Markets Section -->
+            <section v-if="activeSection === 'markets'" class="px-4 py-2">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-semibold">إدارة المتاجر</h3>
+                    <button @click="openAddMarket" class="text-primary p-1"><span class="material-symbols-outlined">add</span></button>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <div v-if="loadingMarkets" class="text-center py-6 text-slate-400"><span class="material-symbols-outlined text-3xl animate-spin">progress_activity</span></div>
+                    <div v-else-if="markets.length === 0" class="text-center py-6 text-slate-400">
+                        <span class="material-symbols-outlined text-4xl">storefront</span>
+                        <p class="mt-2 text-sm">لا توجد متاجر</p>
+                    </div>
+                    <div v-for="market in markets" :key="market.id" @click="openMarketDetails(market)" class="flex items-center justify-between p-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 active:scale-[0.98] transition-all" :class="!market.is_active && 'opacity-75'">
+                        <div class="flex items-center gap-3">
+                            <div class="size-12 rounded-lg bg-cover bg-center border border-slate-200 dark:border-slate-700" :style="`background-image: url('${market.logo || 'https://ui-avatars.com/api/?name=' + market.name}');`"></div>
+                            <div>
+                                <p class="text-text-primary-light dark:text-text-primary-dark text-sm font-semibold">{{ market.name }}</p>
+                                <p class="text-text-secondary-light dark:text-text-secondary-dark text-xs">{{ market.users_count || 0 }} موظف • {{ market.is_active ? 'نشط' : 'متوقف' }}</p>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400">chevron_left</span>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- Bottom Tab Navigation -->
@@ -325,6 +354,16 @@
                             </select>
                         </div>
                         <!-- Resident-specific fields -->
+                        <template v-if="userForm.role === 'provider'">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">تعيين لماركت (اختياري)</label>
+                                <select v-model="userForm.market_id" class="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                    <option :value="null">غير تابع لماركت</option>
+                                    <option v-for="market in markets" :key="market.id" :value="market.id">{{ market.name }}</option>
+                                </select>
+                                <p class="text-xs text-slate-400 mt-1">تحديد الماركت سيعطي هذا المستخدم صلاحيات إدارة طلبات الماركت المحدد.</p>
+                            </div>
+                        </template>
                         <template v-if="userForm.role === 'resident'">
                             <div>
                                 <label class="block text-sm font-medium mb-1">الكمبوند</label>
@@ -548,6 +587,75 @@
             </div>
         </Modal>
 
+        <!-- Market Details/Edit Modal -->
+        <Modal :show="showMarketModal" :title="editingMarket ? (selectedMarket?.id ? 'تعديل الماركت' : 'إضافة ماركت جديد') : selectedMarket?.name" @close="showMarketModal = false; editingMarket = false">
+            <div v-if="selectedMarket || editingMarket" class="space-y-4">
+                <!-- View Mode -->
+                <template v-if="!editingMarket && selectedMarket">
+                    <div class="flex items-center gap-4 justify-center">
+                        <div class="size-20 rounded-2xl bg-cover bg-center border border-slate-200 shadow-sm" :style="`background-image: url('${selectedMarket.logo || 'https://ui-avatars.com/api/?name=' + selectedMarket.name}');`"></div>
+                    </div>
+                    <div class="text-center">
+                        <p class="font-bold text-xl">{{ selectedMarket.name }}</p>
+                        <p class="text-slate-500">{{ selectedMarket.description || 'لا يوجد وصف' }}</p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 space-y-3">
+                        <div class="flex justify-between items-center" v-if="selectedMarket.phone">
+                            <span class="text-slate-500 text-sm">الهاتف</span>
+                            <a :href="`tel:${selectedMarket.phone}`" class="font-bold text-primary">{{ selectedMarket.phone }}</a>
+                        </div>
+                        <div class="flex justify-between items-center">
+                             <span class="text-slate-500 text-sm">عدد الموظفين</span>
+                             <span class="font-bold">{{ selectedMarket.users_count || 0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-sm">الحالة</span>
+                            <span class="font-bold" :class="selectedMarket.is_active ? 'text-green-600' : 'text-red-500'">{{ selectedMarket.is_active ? 'نشط' : 'متوقف' }}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button @click="startEditMarket" class="flex-1 py-3 rounded-xl font-bold bg-primary text-white">
+                            <span class="material-symbols-outlined text-lg align-middle ml-1">edit</span> تعديل
+                        </button>
+                        <button @click="deleteMarket(selectedMarket)" class="flex-1 py-3 rounded-xl font-bold bg-red-50 text-red-600 hover:bg-red-100">
+                             حذف
+                        </button>
+                    </div>
+                </template>
+                <!-- Edit/Add Mode -->
+                <template v-else>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">اسم الماركت</label>
+                            <input v-model="marketForm.name" type="text" class="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">الوصف</label>
+                            <textarea v-model="marketForm.description" rows="2" class="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">رقم الهاتف</label>
+                            <input v-model="marketForm.phone" type="tel" class="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">رابط الشعار (صورة)</label>
+                            <input v-model="marketForm.logo" type="url" class="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="https://..." dir="ltr" />
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input v-model="marketForm.is_active" type="checkbox" class="size-5 rounded border-slate-300 text-primary focus:ring-primary" />
+                            <label class="text-sm font-medium">نشط (يظهر في التطبيق)</label>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click="saveMarket" :disabled="savingMarket" class="flex-1 py-3 rounded-xl font-bold bg-primary text-white">
+                                {{ savingMarket ? 'جاري الحفظ...' : (selectedMarket?.id ? 'حفظ التغييرات' : 'إضافة الماركت') }}
+                            </button>
+                            <button @click="editingMarket = false; showMarketModal = false" class="flex-1 py-3 rounded-xl font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">إلغاء</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </Modal>
+
         <!-- Change Password Modal -->
         <Modal :show="showPasswordModal" title="تغيير كلمة المرور" @close="showPasswordModal = false">
             <div v-if="passwordChangeUser" class="space-y-4">
@@ -656,6 +764,14 @@ export default {
             // Compounds data
             compounds: [],
             loadingCompounds: false,
+            // Markets data
+            markets: [],
+            loadingMarkets: false,
+            selectedMarket: null,
+            showMarketModal: false,
+            editingMarket: false,
+            savingMarket: false,
+            marketForm: { name: '', description: '', phone: '', logo: '', is_active: true },
             // Pagination
             nextUsersUrl: null,
             nextRequestsUrl: null,
@@ -742,7 +858,7 @@ export default {
         const params = new URLSearchParams(window.location.search);
         
         const tab = params.get('tab');
-        if (tab && ['users', 'requests', 'services', 'compounds'].includes(tab)) {
+        if (tab && ['users', 'requests', 'services', 'compounds', 'markets'].includes(tab)) {
             this.activeSection = tab;
         }
 
@@ -757,6 +873,7 @@ export default {
         this.loadServices();
         this.loadRequests();
         this.loadCompounds();
+        this.loadMarkets();
     },
     methods: {
         async loadStats() {
@@ -1067,6 +1184,84 @@ export default {
             } finally {
                 this.loadingCompounds = false;
             }
+        },
+        // Market Methods
+        async loadMarkets() {
+            this.loadingMarkets = true;
+            try {
+                const response = await axios.get('/api/admin/markets');
+                if (response.data.success) {
+                    this.markets = response.data.markets;
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.loadingMarkets = false;
+            }
+        },
+        openMarketDetails(market) {
+            this.selectedMarket = market;
+            this.editingMarket = false;
+            this.showMarketModal = true;
+        },
+        openAddMarket() {
+            this.selectedMarket = null;
+            this.marketForm = { name: '', description: '', phone: '', logo: '', is_active: true };
+            this.editingMarket = true;
+            this.showMarketModal = true;
+        },
+        startEditMarket() {
+            this.marketForm = {
+                name: this.selectedMarket.name || '',
+                description: this.selectedMarket.description || '',
+                phone: this.selectedMarket.phone || '',
+                logo: this.selectedMarket.logo || '',
+                is_active: this.selectedMarket.is_active,
+            };
+            this.editingMarket = true;
+        },
+        async saveMarket() {
+            this.savingMarket = true;
+            try {
+                let response;
+                if (this.selectedMarket?.id) {
+                     // Update
+                    response = await axios.put(`/api/admin/markets/${this.selectedMarket.id}`, this.marketForm);
+                    if (response.data.success) {
+                        Object.assign(this.selectedMarket, response.data.market);
+                        this.editingMarket = false;
+                        if (window.showToast) window.showToast('تم حفظ بيانات الماركت بنجاح', 'success');
+                    }
+                } else {
+                     // Create
+                    response = await axios.post('/api/markets', this.marketForm);
+                    if (response.data.success) {
+                        this.markets.push(response.data.market);
+                        this.editingMarket = false;
+                        this.showMarketModal = false;
+                        if (window.showToast) window.showToast('تم إضافة الماركت بنجاح', 'success');
+                    }
+                }
+                if (!response.data.success) {
+                     if (window.showToast) window.showToast(response.data.message || 'حدث خطأ', 'error');
+                }
+            } catch (e) {
+                 if (window.showToast) window.showToast(e.response?.data?.message || 'حدث خطأ أثناء الحفظ', 'error');
+            } finally {
+                 this.savingMarket = false;
+            }
+        },
+        async deleteMarket(market) {
+             if (!confirm('هل أنت متأكد من حذف هذا الماركت؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+             try {
+                 const response = await axios.delete(`/api/admin/markets/${market.id}`);
+                 if (response.data.success) {
+                     this.markets = this.markets.filter(m => m.id !== market.id);
+                     if (window.showToast) window.showToast('تم حذف الماركت بنجاح', 'success');
+                 }
+             } catch (e) {
+                 if (window.showToast) window.showToast('حدث خطأ أثناء الحذف', 'error');
+             }
         },
         openCompoundDetails(compound) {
             this.selectedCompound = compound;

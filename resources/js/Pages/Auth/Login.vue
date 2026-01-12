@@ -141,19 +141,50 @@
                     </div>
                 </div>
                 
-                <!-- Service Type (for providers) -->
-                <div v-if="activeRole === 'provider'" class="flex flex-col gap-1.5">
-                    <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">نوع الخدمة</label>
-                    <div class="relative">
-                        <select v-model="registerForm.service_type_id" class="w-full appearance-none h-12 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base">
-                            <option value="">اختر نوع الخدمة</option>
-                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-4 text-slate-500">
-                            <span class="material-symbols-outlined">expand_more</span>
+                <!-- Provider Options -->
+                <template v-if="activeRole === 'provider'">
+                    <div class="flex flex-col gap-2 mb-1">
+                        <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">نوع العمل</label>
+                        <div class="flex gap-4 px-1">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" v-model="registerForm.is_market_staff" :value="false" class="w-4 h-4 text-primary focus:ring-primary border-slate-300" />
+                                <span class="text-sm text-slate-600 dark:text-slate-300">مقدم خدمة مستقل</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" v-model="registerForm.is_market_staff" :value="true" class="w-4 h-4 text-primary focus:ring-primary border-slate-300" />
+                                <span class="text-sm text-slate-600 dark:text-slate-300">موظف ماركت</span>
+                            </label>
                         </div>
                     </div>
-                </div>
+
+                    <!-- Service Type (Independent) -->
+                    <div v-if="!registerForm.is_market_staff" class="flex flex-col gap-1.5">
+                        <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">نوع الخدمة</label>
+                        <div class="relative">
+                            <select v-model="registerForm.service_type_id" class="w-full appearance-none h-12 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base">
+                                <option value="">اختر نوع الخدمة</option>
+                                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-4 text-slate-500">
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Selection (Staff) -->
+                    <div v-else class="flex flex-col gap-1.5">
+                        <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">الماركت</label>
+                        <div class="relative">
+                            <select v-model="registerForm.market_id" class="w-full appearance-none h-12 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base">
+                                <option value="">اختر الماركت الذي تعمل به</option>
+                                <option v-for="m in markets" :key="m.id" :value="m.id">{{ m.name }}</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-4 text-slate-500">
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
                 
                 <!-- Password -->
                 <div class="flex flex-col gap-1.5">
@@ -202,6 +233,7 @@ export default {
     props: {
         categories: Array,
         compounds: Array,
+        markets: Array,
     },
     data() {
         return {
@@ -222,6 +254,8 @@ export default {
                 floor: '',
                 apt_no: '',
                 service_type_id: '',
+                market_id: '',
+                is_market_staff: false,
             }),
         };
     },

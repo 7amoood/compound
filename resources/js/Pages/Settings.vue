@@ -222,7 +222,7 @@ export default {
             this.selectingAvatar = true;
             this.nextAvatar = avatarPath;
             try {
-                const response = await axios.post('/settings/avatar', { avatar: avatarPath });
+                const response = await axios.post('api/settings/avatar', { avatar: avatarPath });
                 if (response.data.success) {
                     window.showToast('تم تحديث الصورة الشخصية', 'success');
                     // Force refresh user data from page props

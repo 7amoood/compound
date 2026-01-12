@@ -23,12 +23,18 @@ class RequestController extends Controller
             // Residents see only their own requests
             $query->where('resident_id', $user->id);
         } elseif ($user->isProvider()) {
-            // Providers see pending requests for their service type
-            $query->where('service_category_id', $user->service_type_id)
-                ->where('status', 'pending')
-                ->with(['proposals' => function ($q) use ($user) {
-                    $q->where('provider_id', $user->id);
-                }]);
+            if ($user->isMarketStaff()) {
+                // Market staff see requests for their market
+                $query->where('market_id', $user->market_id)
+                    ->whereIn('status', ['pending', 'accepted_offer', 'in_progress']); // See all active
+            } else {
+                // Providers see pending requests for their service type
+                $query->where('service_category_id', $user->service_type_id)
+                    ->where('status', 'pending')
+                    ->with(['proposals' => function ($q) use ($user) {
+                        $q->where('provider_id', $user->id);
+                    }]);
+            }
         }
         // Admins see all
 
@@ -67,7 +73,10 @@ class RequestController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'service_category_id' => 'required|exists:service_categories,id',
+            'service_category_id' => 'nullable|exists:service_categories,id', // Make nullable if market_id present? Or keep 1 for "Market Delivery" category
+            'market_id'           => 'nullable|exists:markets,id',
+            'items'               => 'nullable|array',
+            'items.*.name'        => 'required_with:items|string',
             'notes'               => 'nullable|string|max:1000',
             'delivery_method'     => 'nullable|string|max:100',
             'location'            => 'nullable|string|max:100',
@@ -76,6 +85,7 @@ class RequestController extends Controller
         $serviceRequest = ServiceRequest::create([
             'resident_id'         => $request->user()->id,
             'service_category_id' => $request->service_category_id,
+            'market_id'           => $request->market_id, // Add market_id
             'notes'               => $request->notes,
             'delivery_method'     => $request->delivery_method,
             'location'            => $request->location,
@@ -84,19 +94,40 @@ class RequestController extends Controller
 
         $serviceRequest->load('category:id,name,icon');
 
-        // Notify providers of this category about new request
-        $providerIds = User::where('role', 'provider')
-            ->where('service_type_id', $request->service_category_id)
-            ->where('is_active', true)
-            ->pluck('id')
-            ->toArray();
+        // Store items if market request
+        if ($request->has('items') && is_array($request->items)) {
+            foreach ($request->items as $item) {
+                $serviceRequest->items()->create([
+                    'name'     => $item['name'],
+                    'quantity' => $item['quantity'] ?? null,
+                ]);
+            }
+        }
+
+        // Detect target providers
+        $providerIds = [];
+        if ($request->market_id) {
+            // Notify Market Staff
+            $providerIds = User::where('role', 'provider')
+                ->where('market_id', $request->market_id)
+                ->where('is_active', true)
+                ->pluck('id')
+                ->toArray();
+        } else {
+            // Notify Category Providers
+            $providerIds = User::where('role', 'provider')
+                ->where('service_type_id', $request->service_category_id)
+                ->where('is_active', true)
+                ->pluck('id')
+                ->toArray();
+        }
 
         if (! empty($providerIds)) {
             Notification::sendToMany(
                 $providerIds,
                 Notification::TYPE_NEW_REQUEST,
                 'طلب خدمة جديد',
-                "طلب جديد في انتظارك: {$serviceRequest->category->name}",
+                $request->market_id ? "طلب جديد للماركت" : "طلب جديد في انتظارك: {$serviceRequest->category->name}",
                 ['request_id' => $serviceRequest->id]
             );
         }
@@ -119,6 +150,8 @@ class RequestController extends Controller
         // Load relationships
         $serviceRequest->load([
             'category:id,name,icon',
+            'market',
+            'items',
             'resident:id,name,phone,block_no,floor,apt_no,compound_id',
             'resident.compound:id,name,location_url',
             'proposals.provider:id,name,phone,photo,rating_average,rating_count',
@@ -261,6 +294,45 @@ class RequestController extends Controller
             Notification::TYPE_WORK_COMPLETED,
             'تم إكمال الطلب',
             "قام {$user->name} بإكمال طلبك. يمكنك الآن تقييم الخدمة.",
+            ['request_id' => $serviceRequest->id]
+        );
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Start market order (Market Staff only)
+     */
+    public function startMarketOrder(ServiceRequest $serviceRequest): JsonResponse
+    {
+        $user = request()->user();
+
+        // Validation: must be market staff and match market
+        if (! $user->isMarketStaff() || $serviceRequest->market_id !== $user->market_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        if ($serviceRequest->status !== 'pending') {
+            return response()->json(['success' => false, 'message' => 'Request is not pending'], 400);
+        }
+
+        // Create auto-accepted proposal
+        $serviceRequest->proposals()->create([
+            'provider_id' => $user->id,
+            'price'       => 0,
+            'notes'       => 'Started by Market Staff',
+            'is_accepted' => true,
+        ]);
+
+        $serviceRequest->status = 'in_progress';
+        $serviceRequest->save();
+
+        // Notify resident
+        Notification::send(
+            $serviceRequest->resident_id,
+            Notification::TYPE_PROPOSAL_ACCEPTED, // Or distinct type
+            'بدء تحضير الطلب',
+            "جاري تحضير طلبك بواسطة {$user->name}",
             ['request_id' => $serviceRequest->id]
         );
 
