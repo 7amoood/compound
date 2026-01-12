@@ -112,15 +112,15 @@ export default {
 
             const currentY = e.touches[0].clientY;
             const delta = currentY - this.startY;
-            const startThreshold = 45; // Dead zone before movement starts
+            const startThreshold = 30; // Reduced from 45 to be more realistic
 
             if (delta > startThreshold) {
                 this.isDragging = true;
-                // Subtract threshold so movement starts from 0 after the dead zone
-                // Increased exponent slightly for a natural feel after the initial burst
-                this.pullDelta = Math.pow(delta - startThreshold, 0.85);
+                // Once we cross the threshold, the movement starts more firmly
+                // We use a linear scale first then apply slight resistance
+                const activeDelta = delta - startThreshold;
+                this.pullDelta = Math.min(this.threshold + 50, activeDelta * 0.9);
                 
-                // Prevent native scrolling once we've crossed the threshold
                 if (e.cancelable) {
                     e.preventDefault();
                 }
@@ -138,7 +138,7 @@ export default {
 
             if (thresholdMet) {
                 this.isLoading = true;
-                this.pullDelta = 60; // Fixed loading position
+                this.pullDelta = 70; // Position enough to see the loader
                 
                 try {
                     await this.onRefresh();
