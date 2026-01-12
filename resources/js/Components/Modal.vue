@@ -103,7 +103,13 @@ export default {
                     // Only call history.back() if the current state is still our modal state
                     // This prevents issues when parent already manipulated history
                     if (window.history.state?.modal === true) {
-                        window.history.back();
+                         // Instead of back(), use replaceState to revert URL without triggering reload
+                         // This is safer for Single Page Apps to avoid state mismatches
+                         const previousUrl = window.history.state.previousUrl || window.location.href;
+                         const newState = { ...window.history.state };
+                         delete newState.modal;
+                         delete newState.previousUrl;
+                         window.history.replaceState(newState, '', previousUrl);
                     }
                 }
                 document.body.style.overflow = '';
