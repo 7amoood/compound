@@ -148,11 +148,15 @@ class WebAuthnController extends Controller
             return response()->json(['error' => 'البصمة غير مفعلة'], 400);
         }
 
+        // Check if user is active
+        if (! $user->is_active) {
+            return response()->json(['error' => 'الحساب غير مفعل، يرجى التواصل مع الإدارة'], 403);
+        }
+
         // Verify credential ID matches
         if ($user->webauthn_credential_id !== $request->credential_id) {
             return response()->json(['error' => 'بيانات البصمة غير صحيحة'], 400);
         }
-
         // Verify session
         $sessionUserId = session('webauthn_auth_user_id');
         if ($sessionUserId != $user->id) {
@@ -186,8 +190,9 @@ class WebAuthnController extends Controller
 
         $user = User::where('phone', $request->phone)->first();
 
+        // Only allow if user exists, is active, and has biometric enabled
         return response()->json([
-            'biometric_enabled' => $user && $user->biometric_enabled && $user->webauthn_credential_id,
+            'biometric_enabled' => $user && $user->is_active && $user->biometric_enabled && $user->webauthn_credential_id,
         ]);
     }
 }
