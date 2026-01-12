@@ -33,8 +33,9 @@ createInertiaApp({
 // Service worker registration is handled in firebase.js during notification permission request
 
 // Global Service Worker Message Listener for Notification Clicks
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
+if ('BroadcastChannel' in window) {
+    const channel = new BroadcastChannel('notification_channel');
+    channel.onmessage = (event) => {
         if (event.data && event.data.type === 'ON_NOTIFICATION_CLICK') {
             const urlString = event.data.url;
 
@@ -64,6 +65,6 @@ if ('serviceWorker' in navigator) {
                 router.visit(path);
             }
         }
-    });
+    };
 }
 

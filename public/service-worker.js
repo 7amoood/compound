@@ -120,15 +120,17 @@ self.addEventListener('notificationclick', event => {
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
                 if ('focus' in client) {
-                    client.focus().then(() => {
-                        // Wait a bit for the page to wake up fully
-                        setTimeout(() => {
-                            client.postMessage({
-                                type: 'ON_NOTIFICATION_CLICK',
-                                url: urlToOpen
-                            });
-                        }, 200);
-                    }).catch(err => console.error('Focus failed:', err));
+                    client.focus().catch(err => console.error('Focus failed:', err));
+
+                    // Use BroadcastChannel for reliable communication
+                    const channel = new BroadcastChannel('notification_channel');
+                    channel.postMessage({
+                        type: 'ON_NOTIFICATION_CLICK',
+                        url: urlToOpen
+                    });
+
+                    // Close channel after a short delay to ensure message is sent
+                    setTimeout(() => channel.close(), 1000);
 
                     return;
                 }
