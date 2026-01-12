@@ -121,14 +121,15 @@
                                 <p class="text-slate-600 dark:text-slate-300 text-sm line-clamp-2">{{ job.notes || 'لا توجد تفاصيل إضافية' }}</p>
                             </div>
                             <div class="pt-1 flex gap-3">
-                                <button class="flex-1 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                                    تجاهل
+                                <button @click="viewRequest(job.id)" class="flex-1 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
+                                    <span class="material-symbols-outlined">visibility</span>
                                 </button>
-                                <button v-if="isMarketStaff" @click="viewRequest(job.id)" class="flex-[2] h-10 rounded-lg bg-primary text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
-                                    <span>عرض الطلب</span>
-                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+
+                                <button v-if="isMarketStaff" @click="startMarketOrder(job)" class="flex-[3] h-10 rounded-lg bg-emerald-600 text-white font-medium text-sm shadow-md shadow-emerald-500/20 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+                                    <span>التقاط الطلب</span>
+                                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                 </button>
-                                <button v-else @click="openProposalModal(job)" class="flex-[2] h-10 rounded-lg bg-primary text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                                <button v-else @click="openProposalModal(job)" class="flex-[3] h-10 rounded-lg bg-primary text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
                                     <span v-if="job.proposals && job.proposals.length > 0">تعديل العرض ({{ job.proposals[0].price }} ج.م)</span>
                                     <span v-else>تقديم عرض</span>
                                     <span class="material-symbols-outlined text-[18px]">{{ (job.proposals && job.proposals.length > 0) ? 'edit' : 'arrow_back' }}</span>

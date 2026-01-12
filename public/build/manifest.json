@@ -3,8 +3,8 @@
     "file": "assets/Modal-ACkwF3lE.css",
     "src": "_Modal-ACkwF3lE.css"
   },
-  "_Modal-B6eZFU6q.js": {
-    "file": "assets/Modal-B6eZFU6q.js",
+  "_Modal-BVUT9Q6i.js": {
+    "file": "assets/Modal-BVUT9Q6i.js",
     "name": "Modal",
     "imports": [
       "_vendor-CjkqsXjI.js",
@@ -14,8 +14,12 @@
       "assets/Modal-ACkwF3lE.css"
     ]
   },
-  "_firebase-CYiVpQI9.js": {
-    "file": "assets/firebase-CYiVpQI9.js",
+  "_firebase-D-uHIdzp.css": {
+    "file": "assets/firebase-D-uHIdzp.css",
+    "src": "_firebase-D-uHIdzp.css"
+  },
+  "_firebase-DrROVKuk.js": {
+    "file": "assets/firebase-DrROVKuk.js",
     "name": "firebase",
     "imports": [
       "resources/js/app.js",
@@ -30,10 +34,6 @@
     "css": [
       "assets/firebase-D-uHIdzp.css"
     ]
-  },
-  "_firebase-D-uHIdzp.css": {
-    "file": "assets/firebase-D-uHIdzp.css",
-    "src": "_firebase-D-uHIdzp.css"
   },
   "_index.esm-BJAW3Jpj.js": {
     "file": "assets/index.esm-BJAW3Jpj.js",
@@ -62,7 +62,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-Bq7X_rg9.css",
+    "file": "assets/app-disGDPbo.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -71,22 +71,22 @@
     ]
   },
   "resources/js/Pages/Admin/Dashboard.vue": {
-    "file": "assets/Dashboard-BSvNqFZS.js",
+    "file": "assets/Dashboard-BDWcXPwr.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CjkqsXjI.js",
-      "_Modal-B6eZFU6q.js",
+      "_Modal-BVUT9Q6i.js",
       "resources/js/app.js"
     ],
     "css": [
       "assets/Dashboard-D-zUhCwk.css",
-      "assets/app-Bq7X_rg9.css"
+      "assets/app-disGDPbo.css"
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-B4iTycM4.js",
+    "file": "assets/Login-ETZWDHOX.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -95,58 +95,58 @@
       "resources/js/app.js"
     ],
     "css": [
-      "assets/app-Bq7X_rg9.css"
+      "assets/app-disGDPbo.css"
     ]
   },
   "resources/js/Pages/Provider/Dashboard.vue": {
-    "file": "assets/Dashboard-DYntOaV7.js",
+    "file": "assets/Dashboard-CykBaGwZ.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Provider/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CjkqsXjI.js",
-      "_Modal-B6eZFU6q.js",
-      "_firebase-CYiVpQI9.js",
+      "_Modal-BVUT9Q6i.js",
+      "_firebase-DrROVKuk.js",
       "resources/js/app.js"
     ],
     "css": [
-      "assets/Dashboard-DZmDICJX.css",
-      "assets/app-Bq7X_rg9.css"
+      "assets/Dashboard-DmCf8oWi.css",
+      "assets/app-disGDPbo.css"
     ]
   },
   "resources/js/Pages/Resident/Dashboard.vue": {
-    "file": "assets/Dashboard-BFLK7Kgd.js",
+    "file": "assets/Dashboard-BgM0VmTf.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Resident/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CjkqsXjI.js",
-      "_Modal-B6eZFU6q.js",
-      "_firebase-CYiVpQI9.js",
+      "_Modal-BVUT9Q6i.js",
+      "_firebase-DrROVKuk.js",
       "resources/js/app.js"
     ],
     "css": [
       "assets/Dashboard-B04vcZOb.css",
-      "assets/app-Bq7X_rg9.css"
+      "assets/app-disGDPbo.css"
     ]
   },
   "resources/js/Pages/Settings.vue": {
-    "file": "assets/Settings-DTxsLjmj.js",
+    "file": "assets/Settings-CmdCizDR.js",
     "name": "Settings",
     "src": "resources/js/Pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-CjkqsXjI.js",
-      "_Modal-B6eZFU6q.js",
+      "_Modal-BVUT9Q6i.js",
       "resources/js/app.js"
     ],
     "css": [
       "assets/Settings-tn0RQdqM.css",
-      "assets/app-Bq7X_rg9.css"
+      "assets/app-disGDPbo.css"
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BWGZnoQ2.js",
+    "file": "assets/app-B82At_I8.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -161,7 +161,7 @@
       "resources/js/Pages/Settings.vue"
     ],
     "css": [
-      "assets/app-Bq7X_rg9.css"
+      "assets/app-disGDPbo.css"
     ]
   }
 }
