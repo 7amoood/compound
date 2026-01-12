@@ -270,18 +270,30 @@ export default {
             
             this.registerForm.post('/register', {
                 onSuccess: () => {
-                    // Pre-fill WhatsApp message
+                    // Pre-fill WhatsApp message with emojis and formatting
                     const whatsappNumber = "201201763086";
-                    let message = `يرجى تفعيل حسابي باسم: ${userData.name}\n`;
+                    let message = `مرحباً 👋\n\n`;
+                    message += `🔐 *طلب تفعيل حساب جديد*\n`;
+                    message += `━━━━━━━━━━━━━━━━━━\n\n`;
+                    message += `👤 *الاسم:* ${userData.name}\n`;
                     
                     if (userData.role === 'resident') {
-                        message += `المقيم في: ${compoundName}`;
-                        if (userData.block_no) message += `، مبنى ${userData.block_no}`;
-                        if (userData.floor) message += `، طابق ${userData.floor}`;
-                        if (userData.apt_no) message += `، شقة ${userData.apt_no}`;
+                        message += `🏠 *النوع:* ساكن\n`;
+                        message += `📍 *الكمبوند:* ${compoundName}\n`;
+                        if (userData.block_no || userData.floor || userData.apt_no) {
+                            message += `🏢 *العنوان:*\n`;
+                            if (userData.block_no) message += `   • مبنى ${userData.block_no}\n`;
+                            if (userData.floor) message += `   • طابق ${userData.floor}\n`;
+                            if (userData.apt_no) message += `   • شقة ${userData.apt_no}\n`;
+                        }
                     } else {
-                        message += `مزود خدمة`;
+                        message += `🔧 *النوع:* مزود خدمة\n`;
                     }
+                    
+                    message += `\n📱 *رقم الهاتف:* ${userData.phone}\n`;
+                    message += `\n━━━━━━━━━━━━━━━━━━\n`;
+                    message += `يرجى تفعيل حسابي في أقرب وقت ممكن 🙏\n`;
+                    message += `شكراً لكم ✨`;
                     
                     const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
                     

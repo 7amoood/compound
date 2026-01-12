@@ -17,10 +17,10 @@
                 enter-active-class="transition-transform duration-600 cubic-bezier(0.32, 0.72, 0, 1)"
                 enter-from-class="translate-y-full"
                 enter-to-class="translate-y-0"
-                leave-active-class="transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1)"
-                leave-to-class="translate-y-full"
+                :leave-active-class="isClosing ? '' : 'transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1)'"
+                :leave-to-class="isClosing ? '' : 'translate-y-full'"
             >
-                <div v-if="show" 
+                <div v-if="isVisible" 
                      ref="modalSheet"
                      class="relative z-20 flex flex-col max-h-[96vh] w-full max-w-md rounded-t-[2.5rem] bg-surface-light dark:bg-surface-dark shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-white/5 font-display pointer-events-auto"
                      :style="sheetStyle"
@@ -77,6 +77,10 @@ export default {
                 transform: `translateY(${this.currentY}px)`,
                 transition: this.isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.32, 0.72, 0, 1)'
             };
+        },
+        isVisible() {
+            // Keep visible during closing animation
+            return this.show || this.isClosing;
         }
     },
     mounted() {
