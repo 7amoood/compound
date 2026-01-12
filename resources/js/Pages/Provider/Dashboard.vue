@@ -548,7 +548,6 @@ export default {
             }
         },
         async triggerRefresh() {
-            this.loading = true;
             try {
                 await Promise.all([
                     this.loadStats(),
@@ -597,7 +596,6 @@ export default {
             await this.viewRequest(id);
         },
         async viewRequest(id) {
-            this.loading = true;
             try {
                 const response = await axios.get(`/api/requests/${id}`);
                 if(response.data.success) {
