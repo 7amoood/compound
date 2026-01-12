@@ -2,7 +2,7 @@ import './bootstrap';
 import '../css/app.css';
 
 import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 import PWAInstaller from './Components/PWAInstaller.vue';
@@ -22,8 +22,13 @@ createInertiaApp({
         return app;
     },
     progress: {
+        // Show progress bar immediately
+        delay: 0,
         color: '#137fec',
+        includeCSS: true,
+        showSpinner: false,
     },
 });
 
 // Service worker registration is handled in firebase.js during notification permission request
+

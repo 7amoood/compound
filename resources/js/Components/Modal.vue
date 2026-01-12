@@ -22,7 +22,7 @@
             >
                 <div v-if="show" 
                      ref="modalSheet"
-                     class="relative z-20 flex flex-col max-h-[96vh] w-full max-w-md rounded-t-[2.5rem] bg-surface-light dark:bg-surface-dark shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-white/5"
+                     class="relative z-20 flex flex-col max-h-[96vh] w-full max-w-md rounded-t-[2.5rem] bg-surface-light dark:bg-surface-dark shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-white/5 font-display"
                      :style="sheetStyle"
                      dir="rtl">
                     <!-- Handle (Draggable area) -->
@@ -33,7 +33,7 @@
                     </div>
                     <!-- Header -->
                     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/50">
-                        <h2 v-if="title" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{{ title }}</h2>
+                        <h2 v-if="title" class="text-xl font-bold text-slate-900 dark:text-white">{{ title }}</h2>
                         <button @click="closeModal" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95">
                             <span class="material-symbols-outlined" style="font-size: 22px;">close</span>
                         </button>

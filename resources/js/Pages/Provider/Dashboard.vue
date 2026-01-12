@@ -252,14 +252,14 @@
         <!-- Bottom Navigation -->
         <nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe z-40">
             <div class="flex items-center justify-around h-16 max-w-md mx-auto">
-                <a href="/dashboard" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-primary">
+                <Link href="/dashboard" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-primary">
                     <span class="material-symbols-outlined filled">home</span>
                     <span class="text-[10px] font-medium">الرئيسية</span>
-                </a>
-                <a href="/settings" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                </Link>
+                <Link href="/settings" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
                     <span class="material-symbols-outlined">person</span>
                     <span class="text-[10px] font-medium">الحساب</span>
-                </a>
+                </Link>
             </div>
         </nav>
 
@@ -338,7 +338,7 @@
 </template>
 
 <script>
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import Modal from '@/Components/Modal.vue';
 import Toast from '@/Components/Toast.vue';
@@ -347,7 +347,7 @@ import { requestNotificationPermission } from '@/firebase';
 
 export default {
     name: 'ProviderDashboard',
-    components: { Head, Modal, Toast, PullToRefresh },
+    components: { Head, Link, Modal, Toast, PullToRefresh },
     data() {
         return {
             activeTab: localStorage.getItem('provider_current_tab') || 'available',
