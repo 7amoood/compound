@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    body {
+        touch-action: pan-x pan-y;
+        -webkit-text-size-adjust: none;
+        text-size-adjust: none;
+    }
+}
+
+
 @layer utilities {
     .fill-1 {
         font-variation-settings: 'FILL' 1;
