@@ -288,7 +288,7 @@
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">سجل التنبيهات</h3>
                 <button v-if="unreadNotificationsCount > 0" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline">تحديد الكل كمقروء</button>
             </div>
-            <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            <div class="space-y-3">
                 <div v-if="loadingNotifications" class="text-center py-12 text-slate-400">
                     <span class="material-symbols-outlined text-5xl animate-spin">progress_activity</span>
                     <p class="mt-3 text-sm font-medium">جاري تحميل الإشعارات...</p>
@@ -395,7 +395,8 @@ export default {
         this.loadStats();
         this.loadUnreadCount();
         this.switchToTab(this.activeTab);
-        requestNotificationPermission();
+        // Lazy load notification permission request
+        setTimeout(() => requestNotificationPermission(), 1000);
 
         // Handle direct request focus (e.g. from push notifications)
         const params = new URLSearchParams(window.location.search);
@@ -405,12 +406,11 @@ export default {
     },
     methods: {
         async triggerRefresh() {
-            await Promise.all([
-                this.loadStats(),
-                this.loadUnreadCount(),
-                this.loadAvailableJobs(),
-                this.loadMyJobs()
-            ]);
+            // Refresh in parallel but don't block UI
+            this.loadStats();
+            this.loadUnreadCount();
+            this.loadAvailableJobs();
+            this.loadMyJobs();
         },
         async focusRequest(id) {
             // 1. Try to find in My Jobs first (active/completed)

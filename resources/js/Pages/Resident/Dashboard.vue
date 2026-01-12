@@ -308,7 +308,7 @@
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">سجل التنبيهات</h3>
                     <button v-if="unreadNotificationsCount > 0" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline">تحديد الكل كمقروء</button>
                 </div>
-                <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                <div class="space-y-3">
                     <div v-if="loadingNotifications" class="text-center py-12 text-slate-400">
                         <span class="material-symbols-outlined text-5xl animate-spin">progress_activity</span>
                         <p class="mt-3 text-sm font-medium">جاري تحميل الإشعارات...</p>
@@ -486,17 +486,17 @@ export default {
         }
         
         this.loadCategories();
-        this.loadRequests(); // This might be double call due to watch, but safe
+        this.loadRequests();
         this.loadUnreadCount();
-        requestNotificationPermission();
+        // Lazy load notification permission request
+        setTimeout(() => requestNotificationPermission(), 1000);
     },
     methods: {
         async triggerRefresh() {
-            await Promise.all([
-                this.loadCategories(),
-                this.loadRequests(),
-                this.loadUnreadCount()
-            ]);
+            // Refresh in parallel but don't block UI
+            this.loadRequests();
+            this.loadCategories();
+            this.loadUnreadCount();
         },
         getServiceColor(index) {
              const colors = [

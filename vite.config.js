@@ -17,4 +17,21 @@ export default defineConfig({
             },
         }),
     ],
+    build: {
+        // Optimize for production
+        target: 'es2020',
+        // Use esbuild for minification (faster, built-in)
+        minify: 'esbuild',
+        rollupOptions: {
+            output: {
+                // Manual chunk splitting for better caching
+                manualChunks: {
+                    'vendor': ['vue', '@inertiajs/vue3', 'axios'],
+                },
+            },
+        },
+        // Reduce chunk size warnings
+        chunkSizeWarningLimit: 1000,
+    },
 });
+
