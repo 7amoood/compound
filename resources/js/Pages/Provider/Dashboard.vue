@@ -605,9 +605,17 @@ export default {
                  n.is_read = true;
                  this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
              }
+             
+             const requestId = n.data?.request_id;
+             
+             // Close notifications modal first
              this.showNotificationsModal = false;
-             if (n.data && n.data.request_id) {
-                 this.focusRequest(n.data.request_id);
+             
+             // Wait for modal close animation, then focus on request
+             if (requestId) {
+                 setTimeout(() => {
+                     this.focusRequest(requestId);
+                 }, 600); // Wait for modal to fully close
              }
         },
         async loadNotifications() {

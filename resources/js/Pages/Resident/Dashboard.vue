@@ -586,18 +586,13 @@ export default {
             this.selectedRequest = this.requests.find(r => r.id === id);
 
             try {
-                // Fetch fresh details with proposals
-                const [reqResponse, propResponse] = await Promise.all([
-                    axios.get(`/api/requests/${id}`),
-                    axios.get(`/api/requests/${id}/proposals`)
-                ]);
-
-                if (reqResponse.data.success) {
-                    this.selectedRequest = reqResponse.data.request;
-                }
+                // Single request - includes proposals
+                const response = await axios.get(`/api/requests/${id}`);
                 
-                if (propResponse.data.success) {
-                    this.currentProposals = propResponse.data.proposals;
+                if (response.data.success) {
+                    this.selectedRequest = response.data.request;
+                    // Proposals are included in the request response
+                    this.currentProposals = response.data.request?.proposals || [];
                 }
             } catch (e) {
                 console.error(e);
@@ -639,11 +634,16 @@ export default {
                  this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
              }
              
+             const requestId = n.data?.request_id;
+             
+             // Close notifications modal first
              this.showNotificationsModal = false;
              
-             // Redirect logic based on notification type or data
-             if (n.data && n.data.request_id) {
-                 this.openRequestDetails(n.data.request_id);
+             // Wait for modal close animation, then open details
+             if (requestId) {
+                 setTimeout(() => {
+                     this.openRequestDetails(requestId);
+                 }, 600); // Wait for modal to fully close
              }
         },
         openRating(request) {
