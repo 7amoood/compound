@@ -22,7 +22,7 @@
         </header>
 
         <!-- Scrollable Area -->
-        <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-24">
             <PullToRefresh :onRefresh="triggerRefresh">
                 <main class="flex flex-col gap-6 pt-4">
                     <!-- Welcome Title -->
@@ -64,8 +64,8 @@
                                 <a class="text-sm font-semibold text-primary hover:text-blue-500" href="#">عرض الكل</a>
                             </div>
                             <!-- Filter Chips -->
-                            <div class="flex flex-col gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
-                                <div class="flex gap-2 min-w-max">
+                            <div class="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+                                <div class="flex gap-2 min-w-max pr-4">
                                     <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
                                         class="h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors border"
                                         :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white' : 'bg-white dark:bg-surface-dark border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">

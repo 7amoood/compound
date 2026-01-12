@@ -24,7 +24,7 @@
         </div>
         
         <!-- Scrollable Content Area -->
-        <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-24">
             <PullToRefresh :onRefresh="triggerRefresh" class="h-full">
             <!-- Segmented Control Tabs -->
             <div class="px-4 py-3 sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm overflow-x-auto no-scrollbar">
