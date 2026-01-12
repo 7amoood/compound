@@ -125,10 +125,16 @@
                                     <span class="material-symbols-outlined">visibility</span>
                                 </button>
 
-                                <button v-if="isMarketStaff" @click="startMarketOrder(job)" class="flex-[3] h-10 rounded-lg bg-emerald-600 text-white font-medium text-sm shadow-md shadow-emerald-500/20 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
-                                    <span>التقاط الطلب</span>
-                                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
-                                </button>
+                                <template v-if="isMarketStaff">
+                                    <button v-if="job.status === 'pending'" @click="startMarketOrder(job)" class="flex-[3] h-10 rounded-lg bg-emerald-600 text-white font-medium text-sm shadow-md shadow-emerald-500/20 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+                                        <span>التقاط الطلب</span>
+                                        <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                    </button>
+                                    <button v-else @click="viewRequest(job.id)" class="flex-[3] h-10 rounded-lg bg-blue-600 text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                                        <span>إكمال الطلب</span>
+                                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                                    </button>
+                                </template>
                                 <button v-else @click="openProposalModal(job)" class="flex-[3] h-10 rounded-lg bg-primary text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
                                     <span v-if="job.proposals && job.proposals.length > 0">تعديل العرض ({{ job.proposals[0].price }} ج.م)</span>
                                     <span v-else>تقديم عرض</span>
@@ -774,7 +780,11 @@ export default {
                 this.processingConfirm = true;
                 try {
                     // Find the job to get proposal id
-                    const job = this.myJobs.find(j => j.id === jobId);
+                    const job = this.myJobs.find(j => j.id === jobId) || this.availableJobs.find(j => j.id === jobId);
+                    if (!job && status === 'in_progress') {
+                        window.showToast('لم يتم العثور على الطلب', 'error');
+                        return;
+                    }
                     let url = '';
                     
                     if (status === 'in_progress') {
@@ -789,9 +799,9 @@ export default {
                     
                     if (response.data.success) {
                         window.showToast('تم تحديث حالة العمل', 'success');
-                        this.loadMyJobs();
-                        if (status === 'completed') this.loadStats();
+                        this.triggerRefresh(); // Refresh everything
                         this.showConfirmModal = false;
+                        this.showRequestDetailsModal = false;
                     } else {
                         window.showToast(response.data.message || 'حدث خطأ', 'error');
                         this.showConfirmModal = false;
