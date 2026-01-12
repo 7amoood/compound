@@ -4,7 +4,7 @@
     
     <div class="relative flex h-[100dvh] w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl font-display" dir="rtl">
         <!-- Top App Bar -->
-        <div class="flex items-center px-4 py-3 pb-2 justify-between z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md sticky top-0 transition-all duration-300">
+        <div class="flex items-center px-4 py-3 pb-2 justify-between z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md sticky top-0 transition-all duration-300" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
             <div class="flex items-center gap-3">
                 <div class="relative">
                     <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-primary/20" :style="`background-image: url('${user.photo || 'https://ui-avatars.com/api/?name=' + user.name}');`"></div>

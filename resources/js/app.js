@@ -101,15 +101,3 @@ document.addEventListener('touchmove', function (e) {
         e.preventDefault();
     }
 }, { passive: false });
-
-// Prevent overscroll on document
-document.addEventListener('touchstart', function (e) {
-    // Allow normal touch interactions, just set up for tracking
-}, { passive: true });
-
-// Prevent iOS bounce on window
-window.addEventListener('scroll', function (e) {
-    if (window.scrollY !== 0) {
-        window.scrollTo(0, 0);
-    }
-});

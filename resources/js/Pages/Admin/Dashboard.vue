@@ -4,7 +4,7 @@
 
     <div class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col antialiased selection:bg-primary/30 selection:text-primary" dir="rtl">
         <!-- Top App Bar -->
-        <header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
+        <header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800" style="padding-top: env(safe-area-inset-top);">
             <div class="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
                 <div class="flex items-center gap-3">
                     <div class="bg-center bg-no-repeat bg-cover rounded-full size-9 border border-slate-200 dark:border-slate-700 shadow-sm" :style="`background-image: url('${user.photo || 'https://ui-avatars.com/api/?name=Admin'}');`"></div>
