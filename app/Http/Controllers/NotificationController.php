@@ -18,7 +18,7 @@ class NotificationController extends Controller
 
         $notifications = Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(5);
 
         $unreadCount = Notification::where('user_id', $user->id)
             ->where('is_read', false)

@@ -11,6 +11,7 @@ const firebaseConfig = {
 
 let app = null;
 let messaging = null;
+let onMessageUnsubscribe = null;
 
 async function initFirebase() {
     if (!app) {
@@ -20,6 +21,23 @@ async function initFirebase() {
         messaging = getMessaging(app);
     }
     return messaging;
+}
+
+// Setup foreground message handler
+async function setupOnMessageListener() {
+    if (onMessageUnsubscribe) return; // Already set up
+
+    const { onMessage } = await import("firebase/messaging");
+    const messaging = await initFirebase();
+
+    onMessageUnsubscribe = onMessage(messaging, (payload) => {
+        console.log('Foreground message received:', payload);
+
+        // Dispatch custom event for dashboards to listen
+        window.dispatchEvent(new CustomEvent('fcm-message', {
+            detail: payload
+        }));
+    });
 }
 
 export async function requestNotificationPermission() {
@@ -50,6 +68,9 @@ export async function requestNotificationPermission() {
             if (token) {
                 await axios.post('/api/notifications/save-token', { token });
             }
+
+            // Setup foreground message listener after successful token registration
+            await setupOnMessageListener();
         }
     } catch (error) {
         console.error('FCM Error:', error);
@@ -57,4 +78,5 @@ export async function requestNotificationPermission() {
 }
 
 export { messaging };
+
 

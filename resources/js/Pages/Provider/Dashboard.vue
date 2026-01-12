@@ -403,8 +403,30 @@ export default {
         if (params.has('request_id')) {
             this.focusRequest(parseInt(params.get('request_id')));
         }
+        
+        // Listen for incoming push notifications while app is open
+        window.addEventListener('fcm-message', this.handleFcmMessage);
+    },
+    beforeUnmount() {
+        window.removeEventListener('fcm-message', this.handleFcmMessage);
     },
     methods: {
+        handleFcmMessage(event) {
+            // Update unread count
+            this.unreadNotificationsCount++;
+            
+            // Reload notifications if modal is open
+            if (this.showNotificationsModal) {
+                this.loadNotifications();
+            }
+            
+            // Reload available jobs if it's a new request notification
+            const payload = event.detail;
+            if (payload?.data?.request_id) {
+                this.loadAvailableJobs();
+                this.loadMyJobs();
+            }
+        },
         async triggerRefresh() {
             // Refresh in parallel but don't block UI
             this.loadStats();

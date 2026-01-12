@@ -490,8 +490,29 @@ export default {
         this.loadUnreadCount();
         // Lazy load notification permission request
         setTimeout(() => requestNotificationPermission(), 1000);
+        
+        // Listen for incoming push notifications while app is open
+        window.addEventListener('fcm-message', this.handleFcmMessage);
+    },
+    beforeUnmount() {
+        window.removeEventListener('fcm-message', this.handleFcmMessage);
     },
     methods: {
+        handleFcmMessage(event) {
+            // Update unread count
+            this.unreadNotificationsCount++;
+            
+            // Reload notifications if modal is open
+            if (this.showNotificationsModal) {
+                this.loadNotifications();
+            }
+            
+            // Optionally reload requests if it's a request-related notification
+            const payload = event.detail;
+            if (payload?.data?.request_id) {
+                this.loadRequests();
+            }
+        },
         async triggerRefresh() {
             // Refresh in parallel but don't block UI
             this.loadRequests();
