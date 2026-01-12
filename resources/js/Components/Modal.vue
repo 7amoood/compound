@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import { router } from '@inertiajs/vue3';
+
 export default {
     name: 'Modal',
     props: {
@@ -69,6 +71,7 @@ export default {
             canDrag: false,
             initialScrollTop: 0,
             isClosing: false,
+            removeInertiaListener: null,
         };
     },
     computed: {
@@ -89,21 +92,40 @@ export default {
     beforeUnmount() {
         document.removeEventListener('keydown', this.handleEscape);
         this.stopDrag();
+        // Clean up Inertia listener
+        if (this.removeInertiaListener) {
+            this.removeInertiaListener();
+        }
     },
     watch: {
         show(val) {
             if (val) {
                 this.currentY = 0;
                 this.closedByBack = false;
-                // Add a modal marker to current state without changing URL
-                const currentState = window.history.state || {};
-                if (!currentState.modal) {
-                    window.history.pushState({ ...currentState, modal: true }, '', window.location.href);
-                }
+                
+                // Push a modal state to history
+                window.history.pushState({ modal: true }, '', window.location.href);
+                
+                // Listen for popstate (back button)
                 window.addEventListener('popstate', this.handlePopState);
+                
+                // Listen for Inertia navigation and cancel it if modal is open
+                this.removeInertiaListener = router.on('before', (event) => {
+                    if (this.show && !this.closedByBack) {
+                        event.preventDefault();
+                        this.closedByBack = true;
+                        this.closeModal();
+                        return false;
+                    }
+                });
+                
                 document.body.style.overflow = 'hidden';
             } else {
                 window.removeEventListener('popstate', this.handlePopState);
+                if (this.removeInertiaListener) {
+                    this.removeInertiaListener();
+                    this.removeInertiaListener = null;
+                }
                 document.body.style.overflow = '';
             }
         }
@@ -114,13 +136,11 @@ export default {
             this.isClosing = true;
             
             // Animate the modal sliding down
-            // Using a slightly larger value than innerHeight to ensure it's completely off-screen
             this.currentY = window.innerHeight + 100;
             
-            // Wait for the slide-down animation to finish (matching the 500ms transition in sheetStyle)
+            // Wait for the slide-down animation to finish
             setTimeout(() => {
                 this.$emit('close');
-                // Use nextTick or a tiny timeout to reset state AFTER show becomes false
                 setTimeout(() => {
                     this.isClosing = false;
                     this.currentY = 0;
@@ -133,16 +153,10 @@ export default {
             }
         },
         handlePopState(event) {
+            // Back button was pressed
             if (this.show && !this.isClosing) {
-                // Immediately push back to prevent Inertia from navigating
-                // This keeps us on the same page
-                event.preventDefault?.();
-                window.history.pushState(
-                    { ...window.history.state, modal: false, preventNav: true }, 
-                    '', 
-                    window.location.href
-                );
-                
+                // Push state back to stay on same page
+                window.history.pushState({ modal: false }, '', window.location.href);
                 this.closedByBack = true;
                 this.closeModal();
             }
