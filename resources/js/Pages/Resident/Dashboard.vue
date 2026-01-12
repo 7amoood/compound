@@ -35,12 +35,14 @@
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="text-base font-bold text-slate-900 dark:text-white">خدمات سريعة</h2>
                         </div>
-                        <div class="grid grid-cols-4 gap-3">
-                            <button v-for="(cat, index) in categories" :key="cat.id" @click="newRequestForm.service_category_id = cat.id; showNewRequestModal = true" class="flex flex-col items-center gap-2 group">
-                                <div class="flex items-center justify-center size-14 rounded-2xl border group-hover:scale-105 transition-transform duration-200 shadow-sm" :class="getServiceColor(index)">
-                                    <span class="material-symbols-outlined text-[28px]">{{ cat.icon }}</span>
+                        <div class="flex flex-wrap justify-center gap-y-6 gap-x-2">
+                            <button v-for="(cat, index) in categories" :key="cat.id" 
+                                @click="newRequestForm.service_category_id = cat.id; showNewRequestModal = true" 
+                                class="flex flex-col items-center gap-2 group flex-1 min-w-[75px] max-w-[45%] transition-all duration-300">
+                                <div class="flex items-center justify-center size-16 rounded-[22px] border group-hover:scale-110 group-active:scale-95 transition-all duration-300 shadow-sm" :class="getServiceColor(index)">
+                                    <span class="material-symbols-outlined text-[32px]">{{ cat.icon }}</span>
                                 </div>
-                                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ cat.name }}</span>
+                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 text-center px-1">{{ cat.name }}</span>
                             </button>
                         </div>
                     </div>
@@ -62,11 +64,11 @@
                                 <a class="text-sm font-semibold text-primary hover:text-blue-500" href="#">عرض الكل</a>
                             </div>
                             <!-- Filter Chips -->
-                            <div class="flex gap-3 px-4 -mx-4 overflow-x-auto no-scrollbar pb-2 px-4">
-                                <div class="flex gap-2 pr-4">
+                            <div class="flex flex-col gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+                                <div class="flex gap-2 min-w-max">
                                     <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-                                        class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
-                                        :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
+                                        class="h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors border"
+                                        :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white' : 'bg-white dark:bg-surface-dark border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
                                         {{ tab.label }}
                                     </button>
                                 </div>
@@ -799,6 +801,12 @@ export default {
                 if (response.data.success) {
                     window.showToast('شكراً لتقييمك!', 'success');
                     this.showRatingModal = false;
+                    
+                    // Delay closing the details modal for a smoother transition
+                    setTimeout(() => {
+                        this.showRequestDetailsModal = false;
+                    }, 300);
+                    
                     this.loadRequests();
                 } else {
                     window.showToast(response.data.message, 'error');

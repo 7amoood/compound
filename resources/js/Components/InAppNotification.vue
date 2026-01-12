@@ -67,10 +67,10 @@ export default {
                 this.notification = null;
             }, 6000);
             
-            // Play notification sound
+            // Play premium notification sound
             try { 
-                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                audio.volume = 0.5;
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+                audio.volume = 0.4;
                 audio.play(); 
             } catch(e) {
                 console.warn('Sound play failed', e);

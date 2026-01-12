@@ -97,6 +97,18 @@ class Notification extends Model
                         'title' => $notification->title,
                         'body'  => $notification->body,
                     ],
+                    'android'      => [
+                        'notification' => [
+                            'sound' => 'default',
+                        ],
+                    ],
+                    'apns'         => [
+                        'payload' => [
+                            'aps' => [
+                                'sound' => 'default',
+                            ],
+                        ],
+                    ],
                     'data'         => [
                         'type'         => $notification->type,
                         'request_id'   => (string) ($notification->data['request_id'] ?? ''),
@@ -104,9 +116,10 @@ class Notification extends Model
                     ],
                     'webpush'      => [
                         'notification' => [
-                            'icon'  => '/icons/icon-192x192.png',
-                            'badge' => '/icons/badge-72x72.png',
-                            'dir'   => 'rtl',
+                            'icon'        => '/icons/icon-192x192.png',
+                            'badge'       => '/icons/badge-72x72.png',
+                            'dir'         => 'rtl',
+                            'allow_sound' => true,
                         ],
                         'fcm_options'  => [
                             'link' => isset($notification->data['request_id']) ? "/dashboard?request_id=" . $notification->data['request_id'] : '/dashboard',
