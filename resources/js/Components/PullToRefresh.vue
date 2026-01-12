@@ -47,22 +47,16 @@ export default {
     },
     computed: {
         indicatorStyle() {
-            const opacity = Math.min(this.pullDelta / this.threshold, 1);
+            const progress = Math.min(this.pullDelta / this.threshold, 1);
             return {
-                height: `${this.pullDelta}px`,
-                opacity: opacity,
-                transition: this.isDragging ? 'none' : 'height 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease'
+                transform: `translateY(${this.pullDelta - 40}px)`, // Offset so it stays hidden initially
+                opacity: progress,
+                transition: this.isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease'
             };
         },
         contentStyle() {
-            // Calculate opacity based on pull distance (fade out content to focus on loader)
-            const minOpacity = 0.25;
-            const progress = Math.min(this.pullDelta / this.threshold, 1);
-            const opacity = 1 - (progress * (1 - minOpacity));
-
             return {
                 transform: `translateY(${this.pullDelta}px)`,
-                opacity: opacity,
                 transition: this.isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease'
             };
         },
@@ -75,7 +69,6 @@ export default {
         }
     },
     mounted() {
-        // We use non-passive listeners to allow e.preventDefault()
         this.$refs.container.addEventListener('touchstart', this.onTouchStart, { passive: true });
         this.$refs.container.addEventListener('touchmove', this.onTouchMove, { passive: false });
         this.$refs.container.addEventListener('touchend', this.onTouchEnd, { passive: true });
@@ -112,20 +105,24 @@ export default {
 
             const currentY = e.touches[0].clientY;
             const delta = currentY - this.startY;
-            const startDragThreshold = 40; // User must pull 40px before ANY UI movement
+            
+            // Deliberate "Long Pull" logic:
+            // First 50px: Dead zone (nothing moves)
+            // 50px - 150px: UI starts moving
+            const startThreshold = 50;
 
-            if (delta > startDragThreshold) {
+            if (delta > startThreshold) {
                 this.isDragging = true;
-                const activeDelta = delta - startDragThreshold;
+                const activeDelta = delta - startThreshold;
                 
-                // Start with a base of 25px so the icon is immediately visible once movement starts
-                // then apply resistance for the rest of the pull
-                this.pullDelta = 25 + Math.pow(activeDelta, 0.85);
+                // Linear movement after threshold for predictable feel
+                // max pull allowed to prevent breaking layout
+                this.pullDelta = Math.min(150, activeDelta * 0.8);
                 
                 if (e.cancelable) {
                     e.preventDefault();
                 }
-            } else if (delta < 0) {
+            } else {
                 this.pullDelta = 0;
                 this.isDragging = false;
             }
@@ -133,14 +130,13 @@ export default {
         async onTouchEnd() {
             if (!this.canPull || this.isLoading) return;
 
-            // Use a consistent threshold (approx 100px total pull)
-            const thresholdMet = this.pullDelta >= 90;
+            const thresholdMet = this.pullDelta >= 80;
             this.isDragging = false;
             this.canPull = false;
 
             if (thresholdMet) {
                 this.isLoading = true;
-                this.pullDelta = 70; 
+                this.pullDelta = 60; 
                 
                 try {
                     await this.onRefresh();
@@ -172,39 +168,41 @@ export default {
 .pull-to-refresh-wrapper {
     position: relative;
     width: 100%;
-    overscroll-behavior-y: contain; /* Prevent native pull-to-refresh */
+    overscroll-behavior-y: contain;
 }
 
 .ptr-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
     width: 100%;
+    height: 60px; /* Fixed height for the container */
     background: transparent;
     pointer-events: none;
     position: absolute;
-    top: 0;
+    top: -60px; /* Start outside the view */
     left: 0;
-    z-index: 10;
+    z-index: 50; /* Higher z-index to be sure */
 }
 
 .ptr-icon-box {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     background: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
     color: #137fec;
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 .dark .ptr-icon-box {
     background: #1e293b;
     color: #3b82f6;
     border: 1px solid #334155;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
 .ptr-loading span {
