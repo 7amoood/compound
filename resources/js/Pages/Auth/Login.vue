@@ -375,7 +375,7 @@ export default {
                 
                 const options = optionsRes.data;
                 
-                // Decode challenge
+                // Decode challenge and user.id
                 options.challenge = Uint8Array.from(atob(options.challenge), c => c.charCodeAt(0));
                 options.user.id = Uint8Array.from(atob(options.user.id), c => c.charCodeAt(0));
                 
@@ -384,15 +384,22 @@ export default {
                     publicKey: options
                 });
                 
-                // Prepare data for server
+                if (!credential) {
+                    throw new Error('لم يتم إنشاء البصمة');
+                }
+                
+                // Prepare data for server - use rawId and attestationObject
                 const credentialId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-                const publicKey = btoa(String.fromCharCode(...new Uint8Array(credential.response.getPublicKey())));
+                // Use attestationObject which contains the public key info
+                const attestationObject = btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject)));
+                const clientDataJSON = btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON)));
                 
                 // Store credential on server
                 await axios.post('/api/webauthn/register/store', {
                     phone: this.pendingUserData.phone,
                     credential_id: credentialId,
-                    public_key: publicKey
+                    public_key: attestationObject,
+                    client_data: clientDataJSON
                 });
                 
                 this.showBiometricPrompt = false;
@@ -402,7 +409,15 @@ export default {
                 
             } catch (e) {
                 console.error('Biometric registration failed:', e);
-                this.biometricError = 'فشل تسجيل البصمة. يرجى المحاولة مرة أخرى.';
+                if (e.name === 'NotAllowedError') {
+                    this.biometricError = 'تم إلغاء تسجيل البصمة';
+                } else if (e.name === 'NotSupportedError') {
+                    this.biometricError = 'الجهاز لا يدعم البصمة';
+                } else if (e.response?.data?.error) {
+                    this.biometricError = e.response.data.error;
+                } else {
+                    this.biometricError = 'فشل تسجيل البصمة. يرجى المحاولة مرة أخرى.';
+                }
             } finally {
                 this.biometricLoading = false;
             }
