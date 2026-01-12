@@ -390,7 +390,7 @@ export default {
             requests: [],
             categories: [],
             loading: true,
-            activeTab: 'pending',
+            activeTab: (new URLSearchParams(window.location.search)).get('tab') || 'pending',
             showNewRequestModal: false,
             showRequestDetailsModal: false,
             showRatingModal: false,
@@ -461,7 +461,7 @@ export default {
             url.searchParams.set('tab', newTab);
             // Remove request_id when changing tabs
             url.searchParams.delete('request_id');
-            window.history.replaceState(null, '', url);
+            window.history.replaceState(window.history.state, '', url);
             this.loadRequests(); // Load requests when tab changes
         },
         showRequestDetailsModal(isOpen) {
@@ -469,16 +469,12 @@ export default {
                 // Remove request_id from URL when closing modal
                 const url = new URL(window.location);
                 url.searchParams.delete('request_id');
-                window.history.replaceState(null, '', url);
+                window.history.replaceState(window.history.state, '', url);
             }
         }
     },
     mounted() {
-        // Restore tab from URL
         const params = new URLSearchParams(window.location.search);
-        if (params.has('tab')) {
-            this.activeTab = params.get('tab');
-        }
         
         // Handle direct request detail opening (e.g. from push notifications)
         if (params.has('request_id')) {
@@ -576,7 +572,7 @@ export default {
             // Add request_id to URL
             const url = new URL(window.location);
             url.searchParams.set('request_id', id);
-            window.history.replaceState(null, '', url);
+            window.history.replaceState(window.history.state, '', url);
             
             this.showRequestDetailsModal = true;
             this.loadingProposals = true;
@@ -636,15 +632,19 @@ export default {
              
              const requestId = n.data?.request_id;
              
-             // Close notifications modal
-             this.showNotificationsModal = false;
-             
-             // Open request details if there's a request_id
              if (requestId) {
-                 // Use nextTick to ensure the first modal is closed before opening the second
-                 this.$nextTick(() => {
-                     this.openRequestDetails(requestId);
-                 });
+                 // Directly open request details without closing notifications modal first
+                 // This avoids history.back() being called and triggering page reload
+                 this.showNotificationsModal = false;
+                 // Preserving history state and remove modal flag
+                 if (window.history.state?.modal) {
+                     const newState = { ...window.history.state };
+                     delete newState.modal;
+                     window.history.replaceState(newState, '', window.location.href);
+                 }
+                 this.openRequestDetails(requestId);
+             } else {
+                 this.showNotificationsModal = false;
              }
         },
         openRating(request) {

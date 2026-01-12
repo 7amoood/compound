@@ -66,7 +66,11 @@ export async function requestNotificationPermission() {
             });
 
             if (token) {
-                await axios.post('/api/notifications/save-token', { token });
+                // Only save if token changed or not saved in this session to reduce redundant requests
+                if (sessionStorage.getItem('fcm_token') !== token) {
+                    await axios.post('/api/notifications/save-token', { token });
+                    sessionStorage.setItem('fcm_token', token);
+                }
             }
 
             // Setup foreground message listener after successful token registration

@@ -92,7 +92,7 @@ export default {
                 this.currentY = 0;
                 // Save current URL with query params before pushing modal state
                 const currentUrl = window.location.href;
-                window.history.pushState({ modal: true, previousUrl: currentUrl }, '');
+                window.history.pushState({ ...window.history.state, modal: true, previousUrl: currentUrl }, '');
                 window.addEventListener('popstate', this.handlePopState);
                 document.body.style.overflow = 'hidden';
             } else {
@@ -100,8 +100,9 @@ export default {
                 if (this.closedByBack) {
                     this.closedByBack = false;
                 } else {
-                    // Go back to restore the previous URL with query params
-                    if (window.history.state?.modal) {
+                    // Only call history.back() if the current state is still our modal state
+                    // This prevents issues when parent already manipulated history
+                    if (window.history.state?.modal === true) {
                         window.history.back();
                     }
                 }

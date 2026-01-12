@@ -350,7 +350,7 @@ export default {
     components: { Head, Link, Modal, Toast, PullToRefresh },
     data() {
         return {
-            activeTab: localStorage.getItem('provider_current_tab') || 'available',
+            activeTab: (new URLSearchParams(window.location.search)).get('tab') || localStorage.getItem('provider_current_tab') || 'available',
             availableJobs: [],
             myJobs: [],
             reviews: [],
@@ -450,6 +450,11 @@ export default {
             if (availableJob) {
                 this.switchToTab('available');
                 this.openProposalModal(availableJob);
+                // Also update URL to show this tab
+                const url = new URL(window.location);
+                url.searchParams.set('tab', 'available');
+                url.searchParams.set('request_id', id);
+                window.history.replaceState(window.history.state, '', url);
                 return;
             }
         },
@@ -608,14 +613,19 @@ export default {
              
              const requestId = n.data?.request_id;
              
-             // Close notifications modal
-             this.showNotificationsModal = false;
-             
-             // Focus on request if there's a request_id
              if (requestId) {
-                 this.$nextTick(() => {
-                     this.focusRequest(requestId);
-                 });
+                 // Directly focus on request without closing notifications modal first
+                 // This avoids history.back() being called and triggering page reload
+                 this.showNotificationsModal = false;
+                 // Preserving history state and remove modal flag
+                 if (window.history.state?.modal) {
+                     const newState = { ...window.history.state };
+                     delete newState.modal;
+                     window.history.replaceState(newState, '', window.location.href);
+                 }
+                 this.focusRequest(requestId);
+             } else {
+                 this.showNotificationsModal = false;
              }
         },
         async loadNotifications() {
