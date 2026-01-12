@@ -116,11 +116,17 @@ self.addEventListener('notificationclick', event => {
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-            // 1. If a window is already open, focus it and redirect
+            // 1. If a window is already open, focus it and send message
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
                 if ('focus' in client) {
-                    return client.focus().then(c => c.navigate(urlToOpen));
+                    client.focus();
+                    // Send message to let the app handle navigation smoothly (SPA)
+                    client.postMessage({
+                        type: 'ON_NOTIFICATION_CLICK',
+                        url: urlToOpen
+                    });
+                    return;
                 }
             }
             // 2. Otherwise open a new window

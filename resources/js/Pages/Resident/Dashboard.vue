@@ -481,11 +481,20 @@ export default {
         
         // Listen for incoming push notifications while app is open
         window.addEventListener('fcm-message', this.handleFcmMessage);
+        
+        // Listen for global notification clicks (from Service Worker)
+        window.addEventListener('open-request-details', this.handleOpenRequestDetails);
     },
     beforeUnmount() {
         window.removeEventListener('fcm-message', this.handleFcmMessage);
+        window.removeEventListener('open-request-details', this.handleOpenRequestDetails);
     },
     methods: {
+        handleOpenRequestDetails(event) {
+            if (event.detail && event.detail.requestId) {
+                this.openRequestDetails(event.detail.requestId);
+            }
+        },
         handleFcmMessage(event) {
             // Update unread count
             this.unreadNotificationsCount++;
