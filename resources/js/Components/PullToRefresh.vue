@@ -112,14 +112,15 @@ export default {
 
             const currentY = e.touches[0].clientY;
             const delta = currentY - this.startY;
-            const startThreshold = 30; // Reduced from 45 to be more realistic
+            const startDragThreshold = 40; // User must pull 40px before ANY UI movement
 
-            if (delta > startThreshold) {
+            if (delta > startDragThreshold) {
                 this.isDragging = true;
-                // Once we cross the threshold, the movement starts more firmly
-                // We use a linear scale first then apply slight resistance
-                const activeDelta = delta - startThreshold;
-                this.pullDelta = Math.min(this.threshold + 50, activeDelta * 0.9);
+                const activeDelta = delta - startDragThreshold;
+                
+                // Start with a base of 25px so the icon is immediately visible once movement starts
+                // then apply resistance for the rest of the pull
+                this.pullDelta = 25 + Math.pow(activeDelta, 0.85);
                 
                 if (e.cancelable) {
                     e.preventDefault();
@@ -132,13 +133,14 @@ export default {
         async onTouchEnd() {
             if (!this.canPull || this.isLoading) return;
 
-            const thresholdMet = this.pullDelta >= this.threshold;
+            // Use a consistent threshold (approx 100px total pull)
+            const thresholdMet = this.pullDelta >= 90;
             this.isDragging = false;
             this.canPull = false;
 
             if (thresholdMet) {
                 this.isLoading = true;
-                this.pullDelta = 70; // Position enough to see the loader
+                this.pullDelta = 70; 
                 
                 try {
                     await this.onRefresh();
