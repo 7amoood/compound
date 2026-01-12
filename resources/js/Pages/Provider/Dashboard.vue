@@ -27,17 +27,17 @@
         <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
             <PullToRefresh :onRefresh="triggerRefresh" class="h-full">
             <!-- Segmented Control Tabs -->
-            <div class="px-4 py-3 sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
-                <div class="flex h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-slate-800 p-1">
-                    <label @click="switchToTab('available')" class="group relative flex cursor-pointer h-full flex-1 items-center justify-center overflow-hidden rounded-lg px-2 transition-all duration-200">
+            <div class="px-4 py-3 sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm overflow-x-auto no-scrollbar">
+                <div class="flex h-12 min-w-max items-center rounded-xl bg-slate-200 dark:bg-slate-800 p-1">
+                    <label @click="switchToTab('available')" class="group relative flex cursor-pointer h-full min-w-[100px] flex-1 items-center justify-center overflow-hidden rounded-lg px-6 transition-all duration-200">
                         <span class="relative z-10 truncate text-sm font-semibold transition-colors" :class="activeTab === 'available' ? 'text-white' : 'text-slate-500 dark:text-slate-400'">الطلبات المتاحة</span>
                         <div v-if="activeTab === 'available'" class="absolute inset-0 z-0 rounded-lg bg-primary shadow-sm"></div>
                     </label>
-                    <label @click="switchToTab('myjobs')" class="group relative flex cursor-pointer h-full flex-1 items-center justify-center overflow-hidden rounded-lg px-2 transition-all duration-200">
+                    <label @click="switchToTab('myjobs')" class="group relative flex cursor-pointer h-full min-w-[100px] flex-1 items-center justify-center overflow-hidden rounded-lg px-6 transition-all duration-200">
                         <span class="relative z-10 truncate text-sm font-semibold transition-colors" :class="activeTab === 'myjobs' ? 'text-white' : 'text-slate-500 dark:text-slate-400'">أعمالي</span>
                         <div v-if="activeTab === 'myjobs'" class="absolute inset-0 z-0 rounded-lg bg-primary shadow-sm"></div>
                     </label>
-                    <label @click="switchToTab('reviews')" class="group relative flex cursor-pointer h-full flex-1 items-center justify-center overflow-hidden rounded-lg px-2 transition-all duration-200">
+                    <label @click="switchToTab('reviews')" class="group relative flex cursor-pointer h-full min-w-[100px] flex-1 items-center justify-center overflow-hidden rounded-lg px-6 transition-all duration-200">
                         <span class="relative z-10 truncate text-sm font-semibold transition-colors" :class="activeTab === 'reviews' ? 'text-white' : 'text-slate-500 dark:text-slate-400'">التقييمات</span>
                         <div v-if="activeTab === 'reviews'" class="absolute inset-0 z-0 rounded-lg bg-primary shadow-sm"></div>
                     </label>
@@ -46,7 +46,7 @@
             
             <!-- Stats Overview -->
             <div class="px-4 mb-2 grid grid-cols-2 gap-3">
-                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div @click="switchToTab('myjobs'); setMyJobsFilter('completed')" class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm cursor-pointer active:scale-95 transition-transform">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="material-symbols-outlined text-xl" :class="isMarketStaff ? 'text-primary' : 'text-green-500'">{{ isMarketStaff ? 'shopping_bag' : 'payments' }}</span>
                         <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ isMarketStaff ? 'طلبات اليوم' : 'الأرباح اليوم' }}</span>
@@ -54,7 +54,7 @@
                     <p v-if="isMarketStaff" class="text-xl font-bold text-slate-900 dark:text-white">{{ stats.today_completed_jobs || 0 }} <span class="text-xs font-normal text-slate-400">طلب</span></p>
                     <p v-else class="text-xl font-bold text-slate-900 dark:text-white">{{ stats.today_earnings || 0 }} ج.م</p>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div @click="switchToTab('reviews')" class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm cursor-pointer active:scale-95 transition-transform">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="material-symbols-outlined text-primary text-xl">star</span>
                         <span class="text-xs font-medium text-slate-500 dark:text-slate-400">التقييم</span>
@@ -157,7 +157,8 @@
                 <!-- My Jobs -->
                 <template v-else-if="activeTab === 'myjobs'">
                     <!-- Filter Chips -->
-                    <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-1">
+                    <div class="flex gap-3 mb-4 overflow-x-auto no-scrollbar pb-2 px-4 -mx-4">
+                        <div class="flex gap-2 pr-4 child-shrink-0">
                         <button @click="setMyJobsFilter('active')" 
                             class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
                             :class="myJobsFilter === 'active' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
@@ -168,6 +169,7 @@
                             :class="myJobsFilter === 'completed' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
                             مكتمل
                         </button>
+                        </div>
                     </div>
                     
                     <div v-if="filteredMyJobs.length === 0" class="flex flex-col items-center justify-center p-8 text-center opacity-60">

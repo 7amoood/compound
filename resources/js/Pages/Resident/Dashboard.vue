@@ -62,12 +62,14 @@
                                 <a class="text-sm font-semibold text-primary hover:text-blue-500" href="#">عرض الكل</a>
                             </div>
                             <!-- Filter Chips -->
-                            <div class="flex gap-2 px-4 overflow-x-auto no-scrollbar pb-1">
-                                <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-                                    class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
-                                    :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
-                                    {{ tab.label }}
-                                </button>
+                            <div class="flex gap-3 px-4 -mx-4 overflow-x-auto no-scrollbar pb-2 px-4">
+                                <div class="flex gap-2 pr-4">
+                                    <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+                                        class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
+                                        :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
+                                        {{ tab.label }}
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
