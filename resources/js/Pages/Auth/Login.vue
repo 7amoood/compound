@@ -75,8 +75,8 @@
                 <div v-if="loginForm.errors.message" class="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-2 rounded">{{ loginForm.errors.message }}</div>
                 
                 <!-- Submit Button -->
-                <button type="submit" :disabled="loginForm.processing || biometricLoading" class="mt-2 w-full h-12 rounded-lg bg-primary text-white font-bold text-base shadow-md shadow-primary/20 hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70">
-                    <span v-if="loginForm.processing || biometricLoading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <button type="submit" :disabled="loginForm.processing || biometricLoading || checkingBiometric" class="mt-2 w-full h-12 rounded-lg bg-primary text-white font-bold text-base shadow-md shadow-primary/20 hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                    <span v-if="loginForm.processing || biometricLoading || checkingBiometric" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span v-else-if="loginStep === 'phone' && biometricEnabledForPhone" class="material-symbols-outlined text-[20px]">fingerprint</span>
                     <span>{{ getLoginButtonText }}</span>
                 </button>
@@ -301,11 +301,12 @@ export default {
             biometricError: '',
             // Login step: 'phone' or 'password'
             loginStep: 'phone',
+            checkingBiometric: false,
         };
     },
     computed: {
         getLoginButtonText() {
-            if (this.loginForm.processing || this.biometricLoading) {
+            if (this.loginForm.processing || this.biometricLoading || this.checkingBiometric) {
                 return 'جاري الدخول...';
             }
             if (this.loginStep === 'password') {
@@ -332,18 +333,24 @@ export default {
                     return;
                 }
                 
-                // Check if biometric is enabled for this phone
-                await this.checkBiometricForPhone(this.loginForm.phone);
+                this.checkingBiometric = true;
                 
-                if (this.biometricEnabledForPhone && this.biometricAvailable) {
-                    // Try biometric login
-                    await this.loginWithBiometric();
-                } else {
-                    // No biometric, show password field
-                    this.loginStep = 'password';
-                    this.$nextTick(() => {
-                        this.$refs.passwordInput?.focus();
-                    });
+                try {
+                    // Check if biometric is enabled for this phone
+                    await this.checkBiometricForPhone(this.loginForm.phone);
+                    
+                    if (this.biometricEnabledForPhone && this.biometricAvailable) {
+                        // Try biometric login
+                        await this.loginWithBiometric();
+                    } else {
+                        // No biometric, show password field
+                        this.loginStep = 'password';
+                        this.$nextTick(() => {
+                            this.$refs.passwordInput?.focus();
+                        });
+                    }
+                } finally {
+                    this.checkingBiometric = false;
                 }
             } else {
                 // Step 2: Password entered, login normally
