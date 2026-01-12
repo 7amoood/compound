@@ -124,7 +124,11 @@
                                 <button class="flex-1 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                     تجاهل
                                 </button>
-                                <button @click="openProposalModal(job)" class="flex-[2] h-10 rounded-lg bg-primary text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                                <button v-if="isMarketStaff" @click="viewRequest(job.id)" class="flex-[2] h-10 rounded-lg bg-primary text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                                    <span>عرض الطلب</span>
+                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                </button>
+                                <button v-else @click="openProposalModal(job)" class="flex-[2] h-10 rounded-lg bg-primary text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
                                     <span v-if="job.proposals && job.proposals.length > 0">تعديل العرض ({{ job.proposals[0].price }} ج.م)</span>
                                     <span v-else>تقديم عرض</span>
                                     <span class="material-symbols-outlined text-[18px]">{{ (job.proposals && job.proposals.length > 0) ? 'edit' : 'arrow_back' }}</span>
@@ -487,6 +491,9 @@ export default {
             }
             return this.myJobs.filter(job => job.status === this.myJobsFilter);
         },
+        isMarketStaff() {
+            return this.user.role === 'provider' && this.user.market_id;
+        },
     },
     mounted() {
         this.loadStats();
@@ -564,7 +571,11 @@ export default {
             const availableJob = this.availableJobs.find(j => j.id === id);
             if (availableJob) {
                 this.switchToTab('available');
-                this.openProposalModal(availableJob);
+                if (this.isMarketStaff) {
+                    this.viewRequest(id);
+                } else {
+                    this.openProposalModal(availableJob);
+                }
                 // Also update URL to show this tab (AFTER modal opens)
                 this.$nextTick(() => {
                     const url = new URL(window.location);
