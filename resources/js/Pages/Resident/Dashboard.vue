@@ -1,7 +1,7 @@
 <template>
     <Head title="لوحة التحكم - ساكن" />
     <Toast />
-    <div class="relative flex h-[100dvh] w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark font-display" dir="rtl">
+    <div class="relative flex h-[100vh] w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark font-display" dir="rtl">
         <!-- Top App Bar & Profile Header Combined -->
         <header class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/10 transition-all duration-200" style="padding-top: env(safe-area-inset-top);">
             <div class="flex items-center justify-between px-4 py-3">
