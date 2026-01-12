@@ -1,24 +1,20 @@
 {
-  "_Modal-dn2I92pI.css": {
-    "file": "assets/Modal-dn2I92pI.css",
-    "src": "_Modal-dn2I92pI.css"
+  "_Modal-DhPgE4V1.css": {
+    "file": "assets/Modal-DhPgE4V1.css",
+    "src": "_Modal-DhPgE4V1.css"
   },
-  "_Modal-o_tqbGjb.js": {
-    "file": "assets/Modal-o_tqbGjb.js",
+  "_Modal-jUnNiBdy.js": {
+    "file": "assets/Modal-jUnNiBdy.js",
     "name": "Modal",
     "imports": [
       "resources/js/app.js"
     ],
     "css": [
-      "assets/Modal-dn2I92pI.css"
+      "assets/Modal-DhPgE4V1.css"
     ]
   },
-  "_firebase-Ds0gXKq9.css": {
-    "file": "assets/firebase-Ds0gXKq9.css",
-    "src": "_firebase-Ds0gXKq9.css"
-  },
-  "_firebase-cDtr4OEL.js": {
-    "file": "assets/firebase-cDtr4OEL.js",
+  "_firebase-C_lV_Ewo.js": {
+    "file": "assets/firebase-C_lV_Ewo.js",
     "name": "firebase",
     "imports": [
       "resources/js/app.js"
@@ -27,8 +23,12 @@
       "assets/firebase-Ds0gXKq9.css"
     ]
   },
+  "_firebase-Ds0gXKq9.css": {
+    "file": "assets/firebase-Ds0gXKq9.css",
+    "src": "_firebase-Ds0gXKq9.css"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-DuWQSzrn.css",
+    "file": "assets/app-BcYE8BGv.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -37,21 +37,21 @@
     ]
   },
   "resources/js/Pages/Admin/Dashboard.vue": {
-    "file": "assets/Dashboard-CTwfDdhG.js",
+    "file": "assets/Dashboard-YoRwkYFB.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-o_tqbGjb.js"
+      "_Modal-jUnNiBdy.js"
     ],
     "css": [
       "assets/Dashboard-mJyLfMy6.css",
-      "assets/app-DuWQSzrn.css"
+      "assets/app-BcYE8BGv.css"
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-BHnZaAv-.js",
+    "file": "assets/Login-DCabg1C_.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -59,55 +59,55 @@
       "resources/js/app.js"
     ],
     "css": [
-      "assets/app-DuWQSzrn.css"
+      "assets/app-BcYE8BGv.css"
     ]
   },
   "resources/js/Pages/Provider/Dashboard.vue": {
-    "file": "assets/Dashboard-GP1YiHKd.js",
+    "file": "assets/Dashboard-DeKyMdiG.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Provider/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-o_tqbGjb.js",
-      "_firebase-cDtr4OEL.js"
+      "_Modal-jUnNiBdy.js",
+      "_firebase-C_lV_Ewo.js"
     ],
     "css": [
-      "assets/Dashboard-BQRYt995.css",
-      "assets/app-DuWQSzrn.css"
+      "assets/Dashboard-B7T3Lg7_.css",
+      "assets/app-BcYE8BGv.css"
     ]
   },
   "resources/js/Pages/Resident/Dashboard.vue": {
-    "file": "assets/Dashboard-Chq8Mt8p.js",
+    "file": "assets/Dashboard-CIvauTpo.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Resident/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-o_tqbGjb.js",
-      "_firebase-cDtr4OEL.js"
+      "_Modal-jUnNiBdy.js",
+      "_firebase-C_lV_Ewo.js"
     ],
     "css": [
-      "assets/Dashboard-BFdQ50Kg.css",
-      "assets/app-DuWQSzrn.css"
+      "assets/Dashboard-CU140i2d.css",
+      "assets/app-BcYE8BGv.css"
     ]
   },
   "resources/js/Pages/Settings.vue": {
-    "file": "assets/Settings-CVqjYdCp.js",
+    "file": "assets/Settings-ClteA42t.js",
     "name": "Settings",
     "src": "resources/js/Pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-o_tqbGjb.js"
+      "_Modal-jUnNiBdy.js"
     ],
     "css": [
       "assets/Settings-tn0RQdqM.css",
-      "assets/app-DuWQSzrn.css"
+      "assets/app-BcYE8BGv.css"
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-XtWE72qU.js",
+    "file": "assets/app-CFR2QNxL.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -119,7 +119,7 @@
       "resources/js/Pages/Settings.vue"
     ],
     "css": [
-      "assets/app-DuWQSzrn.css"
+      "assets/app-BcYE8BGv.css"
     ]
   }
 }

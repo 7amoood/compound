@@ -90,7 +90,9 @@ export default {
         show(val) {
             if (val) {
                 this.currentY = 0;
-                window.history.pushState({ modal: true }, '');
+                // Save current URL with query params before pushing modal state
+                const currentUrl = window.location.href;
+                window.history.pushState({ modal: true, previousUrl: currentUrl }, '');
                 window.addEventListener('popstate', this.handlePopState);
                 document.body.style.overflow = 'hidden';
             } else {
@@ -98,6 +100,7 @@ export default {
                 if (this.closedByBack) {
                     this.closedByBack = false;
                 } else {
+                    // Go back to restore the previous URL with query params
                     if (window.history.state?.modal) {
                         window.history.back();
                     }

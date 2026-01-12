@@ -289,7 +289,11 @@
                 <button v-if="unreadNotificationsCount > 0" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline">تحديد الكل كمقروء</button>
             </div>
             <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                <div v-if="notifications.length === 0" class="text-center py-8 text-slate-400">
+                <div v-if="loadingNotifications" class="text-center py-12 text-slate-400">
+                    <span class="material-symbols-outlined text-5xl animate-spin">progress_activity</span>
+                    <p class="mt-3 text-sm font-medium">جاري تحميل الإشعارات...</p>
+                </div>
+                <div v-else-if="notifications.length === 0" class="text-center py-8 text-slate-400">
                     <span class="material-symbols-outlined text-4xl">notifications_off</span>
                     <p class="mt-2">لا توجد إشعارات</p>
                 </div>
@@ -357,6 +361,7 @@ export default {
             showProposalModal: false,
             showNotificationsModal: false,
             notifications: [],
+            loadingNotifications: false,
             nextNotificationsUrl: null,
             loadingMoreNotifications: false,
             unreadNotificationsCount: 0,
@@ -584,13 +589,18 @@ export default {
              }
         },
         async loadNotifications() {
+            this.loadingNotifications = true;
             try {
                 const response = await axios.get('/api/notifications');
                 if (response.data.success) {
                     this.notifications = response.data.notifications.data;
                     this.nextNotificationsUrl = response.data.notifications.next_page_url || null;
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.loadingNotifications = false;
+            }
         },
         async loadMoreNotifications() {
             if (!this.nextNotificationsUrl || this.loadingMoreNotifications) return;
