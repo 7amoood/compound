@@ -94,28 +94,16 @@ export default {
         show(val) {
             if (val) {
                 this.currentY = 0;
-                // Save current URL with query params before pushing modal state
-                const currentUrl = window.location.href;
-                window.history.pushState({ ...window.history.state, modal: true, previousUrl: currentUrl }, '');
+                this.closedByBack = false;
+                // Add a modal marker to current state without changing URL
+                const currentState = window.history.state || {};
+                if (!currentState.modal) {
+                    window.history.pushState({ ...currentState, modal: true }, '', window.location.href);
+                }
                 window.addEventListener('popstate', this.handlePopState);
                 document.body.style.overflow = 'hidden';
             } else {
                 window.removeEventListener('popstate', this.handlePopState);
-                if (this.closedByBack) {
-                    this.closedByBack = false;
-                } else {
-                    // Only call history.back() if the current state is still our modal state
-                    // This prevents issues when parent already manipulated history
-                    if (window.history.state?.modal === true) {
-                         // Instead of back(), use replaceState to revert URL without triggering reload
-                         // This is safer for Single Page Apps to avoid state mismatches
-                         const previousUrl = window.history.state.previousUrl || window.location.href;
-                         const newState = { ...window.history.state };
-                         delete newState.modal;
-                         delete newState.previousUrl;
-                         window.history.replaceState(newState, '', previousUrl);
-                    }
-                }
                 document.body.style.overflow = '';
             }
         }
@@ -144,8 +132,17 @@ export default {
                 this.closeModal();
             }
         },
-        handlePopState() {
-            if (this.show) {
+        handlePopState(event) {
+            if (this.show && !this.isClosing) {
+                // Immediately push back to prevent Inertia from navigating
+                // This keeps us on the same page
+                event.preventDefault?.();
+                window.history.pushState(
+                    { ...window.history.state, modal: false, preventNav: true }, 
+                    '', 
+                    window.location.href
+                );
+                
                 this.closedByBack = true;
                 this.closeModal();
             }
