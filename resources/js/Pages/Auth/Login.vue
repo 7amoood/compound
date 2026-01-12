@@ -43,44 +43,47 @@
             </div>
             
             <!-- Login Form -->
-            <form v-if="activeTab === 'login'" @submit.prevent="submitLogin" class="flex flex-col gap-4 mt-2">
+            <form v-if="activeTab === 'login'" @submit.prevent="handleLoginSubmit" class="flex flex-col gap-4 mt-2">
                 <!-- Phone -->
                 <div class="flex flex-col gap-1.5">
                     <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">رقم الهاتف</label>
                     <div class="relative flex items-center">
                         <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">smartphone</span>
-                        <input v-model="loginForm.phone" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="01xxxxxxxxx" type="tel" required/>
+                        <input v-model="loginForm.phone" @input="onPhoneInput" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="01xxxxxxxxx" type="tel" required :disabled="loginStep === 'password'"/>
                     </div>
                     <div v-if="loginForm.errors.phone" class="text-red-500 text-xs mr-1">{{ loginForm.errors.phone }}</div>
                 </div>
                 
-                <!-- Password -->
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">كلمة المرور</label>
-                    <div class="relative flex items-center">
-                        <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
-                        <input v-model="loginForm.password" :type="passwordVisible ? 'text' : 'password'" class="w-full h-12 pr-10 pl-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="••••••••" required/>
-                        <button class="absolute left-3 text-slate-400 hover:text-primary transition-colors" type="button" @click="passwordVisible = !passwordVisible">
-                            <span class="material-symbols-outlined text-[20px]">{{ passwordVisible ? 'visibility' : 'visibility_off' }}</span>
-                        </button>
+                <!-- Password (shown only in step 2 or when biometric skipped) -->
+                <transition name="fade">
+                    <div v-if="loginStep === 'password'" class="flex flex-col gap-1.5">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">كلمة المرور</label>
+                            <button type="button" @click="resetLoginStep" class="text-xs text-primary hover:underline">تغيير الرقم</button>
+                        </div>
+                        <div class="relative flex items-center">
+                            <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
+                            <input v-model="loginForm.password" :type="passwordVisible ? 'text' : 'password'" class="w-full h-12 pr-10 pl-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="••••••••" required ref="passwordInput"/>
+                            <button class="absolute left-3 text-slate-400 hover:text-primary transition-colors" type="button" @click="passwordVisible = !passwordVisible">
+                                <span class="material-symbols-outlined text-[20px]">{{ passwordVisible ? 'visibility' : 'visibility_off' }}</span>
+                            </button>
+                        </div>
+                        <div v-if="loginForm.errors.password" class="text-red-500 text-xs mr-1">{{ loginForm.errors.password }}</div>
                     </div>
-                    <div v-if="loginForm.errors.password" class="text-red-500 text-xs mr-1">{{ loginForm.errors.password }}</div>
-                </div>
+                </transition>
 
-                <div v-if="loginForm.errors.message" class="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{{ loginForm.errors.message }}</div>
+                <div v-if="loginForm.errors.message" class="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-2 rounded">{{ loginForm.errors.message }}</div>
                 
                 <!-- Submit Button -->
-                <button type="submit" :disabled="loginForm.processing" class="mt-4 w-full h-12 rounded-lg bg-primary text-white font-bold text-base shadow-md shadow-primary/20 hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70">
-                    <span v-if="loginForm.processing" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>{{ loginForm.processing ? 'جاري الدخول...' : 'تسجيل الدخول' }}</span>
+                <button type="submit" :disabled="loginForm.processing || biometricLoading" class="mt-2 w-full h-12 rounded-lg bg-primary text-white font-bold text-base shadow-md shadow-primary/20 hover:bg-blue-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                    <span v-if="loginForm.processing || biometricLoading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span v-else-if="loginStep === 'phone' && biometricEnabledForPhone" class="material-symbols-outlined text-[20px]">fingerprint</span>
+                    <span>{{ getLoginButtonText }}</span>
                 </button>
                 
-                <!-- Biometric Login Button -->
-                <button v-if="biometricEnabledForPhone" type="button" @click="loginWithBiometric" :disabled="biometricLoading" 
-                        class="w-full h-12 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-base hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 border border-slate-200 dark:border-slate-700">
-                    <span v-if="biometricLoading" class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
-                    <span v-else class="material-symbols-outlined text-[22px]">fingerprint</span>
-                    <span>{{ biometricLoading ? 'جاري التحقق...' : 'الدخول بالبصمة' }}</span>
+                <!-- Skip Biometric Link (shown when biometric is available but user wants password) -->
+                <button v-if="loginStep === 'phone' && biometricEnabledForPhone && biometricAvailable" type="button" @click="skipToBiometric" class="text-sm text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+                    الدخول بكلمة المرور بدلاً من البصمة
                 </button>
             </form>
             
@@ -296,26 +299,80 @@ export default {
             showBiometricPrompt: false,
             pendingUserData: null,
             biometricError: '',
+            // Login step: 'phone' or 'password'
+            loginStep: 'phone',
         };
     },
-    watch: {
-        'loginForm.phone': {
-            handler(newPhone) {
-                if (newPhone && newPhone.length >= 10) {
-                    this.checkBiometricForPhone(newPhone);
-                } else {
-                    this.biometricEnabledForPhone = false;
-                }
-            },
-            immediate: false
+    computed: {
+        getLoginButtonText() {
+            if (this.loginForm.processing || this.biometricLoading) {
+                return 'جاري الدخول...';
+            }
+            if (this.loginStep === 'password') {
+                return 'تسجيل الدخول';
+            }
+            if (this.biometricEnabledForPhone && this.biometricAvailable) {
+                return 'الدخول بالبصمة';
+            }
+            return 'التالي';
         }
     },
     mounted() {
         this.checkBiometricSupport();
     },
     methods: {
+        // Handle main login form submission
+        async handleLoginSubmit() {
+            this.loginForm.errors.message = '';
+            
+            if (this.loginStep === 'phone') {
+                // Step 1: Phone entered, check biometric
+                if (!this.loginForm.phone || this.loginForm.phone.length < 10) {
+                    this.loginForm.errors.phone = 'يرجى إدخال رقم هاتف صحيح';
+                    return;
+                }
+                
+                // Check if biometric is enabled for this phone
+                await this.checkBiometricForPhone(this.loginForm.phone);
+                
+                if (this.biometricEnabledForPhone && this.biometricAvailable) {
+                    // Try biometric login
+                    await this.loginWithBiometric();
+                } else {
+                    // No biometric, show password field
+                    this.loginStep = 'password';
+                    this.$nextTick(() => {
+                        this.$refs.passwordInput?.focus();
+                    });
+                }
+            } else {
+                // Step 2: Password entered, login normally
+                this.submitLogin();
+            }
+        },
+        
         submitLogin() {
             this.loginForm.post('/login');
+        },
+        
+        onPhoneInput() {
+            // Reset biometric check when phone changes
+            this.biometricEnabledForPhone = false;
+            this.loginForm.errors.message = '';
+        },
+        
+        resetLoginStep() {
+            this.loginStep = 'phone';
+            this.loginForm.password = '';
+            this.loginForm.errors = {};
+        },
+        
+        skipToBiometric() {
+            // User wants to use password instead of biometric
+            this.loginStep = 'password';
+            this.$nextTick(() => {
+                this.$refs.passwordInput?.focus();
+            });
         },
         submitRegister() {
             const userData = { ...this.registerForm.data() };
@@ -521,3 +578,14 @@ export default {
     },
 };
 </script>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
