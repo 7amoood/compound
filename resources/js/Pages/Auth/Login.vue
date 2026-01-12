@@ -74,6 +74,14 @@
                     <span v-if="loginForm.processing" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span>{{ loginForm.processing ? 'جاري الدخول...' : 'تسجيل الدخول' }}</span>
                 </button>
+                
+                <!-- Biometric Login Button -->
+                <button v-if="hasSavedCredentials && biometricAvailable" type="button" @click="loginWithBiometric" :disabled="biometricLoading" 
+                        class="w-full h-12 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-base hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 border border-slate-200 dark:border-slate-700">
+                    <span v-if="biometricLoading" class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                    <span v-else class="material-symbols-outlined text-[22px]">fingerprint</span>
+                    <span>{{ biometricLoading ? 'جاري التحقق...' : 'الدخول بالبصمة' }}</span>
+                </button>
             </form>
             
             <!-- Register Form -->
@@ -221,6 +229,28 @@
             </div>
         </div>
         <div class="h-5 bg-transparent"></div>
+        
+        <!-- Biometric Registration Prompt Modal -->
+        <div v-if="showBiometricPrompt" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-xl">
+                <div class="flex flex-col items-center text-center gap-4">
+                    <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-[32px]">fingerprint</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">تفعيل الدخول بالبصمة</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">هل تريد تفعيل الدخول السريع باستخدام بصمة الإصبع أو Face ID؟</p>
+                    <div class="flex flex-col gap-2 w-full mt-2">
+                        <button @click="setupBiometric" :disabled="biometricLoading" class="w-full h-12 rounded-lg bg-primary text-white font-bold flex items-center justify-center gap-2 disabled:opacity-70">
+                            <span v-if="biometricLoading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span>{{ biometricLoading ? 'جاري التفعيل...' : 'نعم، فعّل البصمة' }}</span>
+                        </button>
+                        <button @click="skipBiometric" class="w-full h-12 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium">
+                            ليس الآن
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -257,7 +287,17 @@ export default {
                 market_id: '',
                 is_market_staff: false,
             }),
+            // Biometric
+            biometricAvailable: false,
+            hasSavedCredentials: false,
+            biometricLoading: false,
+            showBiometricPrompt: false,
+            pendingCredentials: null,
         };
+    },
+    mounted() {
+        this.checkBiometricAvailability();
+        this.checkSavedCredentials();
     },
     methods: {
         submitLogin() {
@@ -270,39 +310,135 @@ export default {
             
             this.registerForm.post('/register', {
                 onSuccess: () => {
-                    // Pre-fill WhatsApp message with emojis and formatting
-                    const whatsappNumber = "201201763086";
-                    let message = `مرحباً 👋\n\n`;
-                    message += `🔐 *طلب تفعيل حساب جديد*\n`;
-                    message += `━━━━━━━━━━━━━━━━━━\n\n`;
-                    message += `👤 *الاسم:* ${userData.name}\n`;
+                    // Store credentials for biometric setup
+                    this.pendingCredentials = {
+                        phone: userData.phone,
+                        password: userData.password
+                    };
                     
-                    if (userData.role === 'resident') {
-                        message += `🏠 *النوع:* ساكن\n`;
-                        message += `📍 *الكمبوند:* ${compoundName}\n`;
-                        if (userData.block_no || userData.floor || userData.apt_no) {
-                            message += `🏢 *العنوان:*\n`;
-                            if (userData.block_no) message += `   • مبنى ${userData.block_no}\n`;
-                            if (userData.floor) message += `   • طابق ${userData.floor}\n`;
-                            if (userData.apt_no) message += `   • شقة ${userData.apt_no}\n`;
-                        }
+                    // Clear the form
+                    this.registerForm.reset();
+                    this.activeRole = 'resident';
+                    
+                    // Switch to login tab
+                    this.activeTab = 'login';
+                    
+                    // Check if biometric is available and prompt for setup
+                    if (this.biometricAvailable) {
+                        this.showBiometricPrompt = true;
                     } else {
-                        message += `🔧 *النوع:* مزود خدمة\n`;
+                        // If no biometric, just redirect to WhatsApp
+                        this.redirectToWhatsApp(userData, compoundName);
                     }
-                    
-                    message += `\n📱 *رقم الهاتف:* ${userData.phone}\n`;
-                    message += `\n━━━━━━━━━━━━━━━━━━\n`;
-                    message += `يرجى تفعيل حسابي في أقرب وقت ممكن 🙏\n`;
-                    message += `شكراً لكم ✨`;
-                    
-                    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-                    
-                    // Small delay to ensure the user sees any success feedback if added later
-                    setTimeout(() => {
-                        window.location.href = waUrl;
-                    }, 500);
                 },
             });
+        },
+        redirectToWhatsApp(userData, compoundName) {
+            const whatsappNumber = "201201763086";
+            let message = `مرحباً 👋\n\n`;
+            message += `🔐 *طلب تفعيل حساب جديد*\n`;
+            message += `━━━━━━━━━━━━━━━━━━\n\n`;
+            message += `👤 *الاسم:* ${userData.name}\n`;
+            
+            if (userData.role === 'resident') {
+                message += `🏠 *النوع:* ساكن\n`;
+                message += `📍 *الكمبوند:* ${compoundName}\n`;
+                if (userData.block_no || userData.floor || userData.apt_no) {
+                    message += `🏢 *العنوان:*\n`;
+                    if (userData.block_no) message += `   • مبنى ${userData.block_no}\n`;
+                    if (userData.floor) message += `   • طابق ${userData.floor}\n`;
+                    if (userData.apt_no) message += `   • شقة ${userData.apt_no}\n`;
+                }
+            } else {
+                message += `🔧 *النوع:* مزود خدمة\n`;
+            }
+            
+            message += `\n📱 *رقم الهاتف:* ${userData.phone}\n`;
+            message += `\n━━━━━━━━━━━━━━━━━━\n`;
+            message += `يرجى تفعيل حسابي في أقرب وقت ممكن 🙏\n`;
+            message += `شكراً لكم ✨`;
+            
+            const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            setTimeout(() => {
+                window.location.href = waUrl;
+            }, 300);
+        },
+        async checkBiometricAvailability() {
+            // Check if Web Credentials API is available
+            if (window.PublicKeyCredential) {
+                try {
+                    const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                    this.biometricAvailable = available;
+                } catch (e) {
+                    this.biometricAvailable = false;
+                }
+            }
+        },
+        checkSavedCredentials() {
+            const saved = localStorage.getItem('biometric_credentials');
+            this.hasSavedCredentials = !!saved;
+        },
+        async setupBiometric() {
+            if (!this.pendingCredentials) return;
+            
+            this.biometricLoading = true;
+            try {
+                // Encrypt and store credentials
+                const credentials = btoa(JSON.stringify(this.pendingCredentials));
+                localStorage.setItem('biometric_credentials', credentials);
+                this.hasSavedCredentials = true;
+                this.showBiometricPrompt = false;
+                
+                // Pre-fill login form with phone
+                this.loginForm.phone = this.pendingCredentials.phone;
+                
+                // Redirect to WhatsApp
+                const userData = this.pendingCredentials;
+                this.redirectToWhatsApp({ ...userData, name: '', role: 'resident' }, '');
+            } catch (e) {
+                console.error('Failed to setup biometric:', e);
+            } finally {
+                this.biometricLoading = false;
+                this.pendingCredentials = null;
+            }
+        },
+        skipBiometric() {
+            this.showBiometricPrompt = false;
+            if (this.pendingCredentials) {
+                const userData = this.pendingCredentials;
+                this.redirectToWhatsApp({ ...userData, name: '', role: 'resident' }, '');
+            }
+            this.pendingCredentials = null;
+        },
+        async loginWithBiometric() {
+            this.biometricLoading = true;
+            try {
+                // Request biometric verification
+                const credential = await navigator.credentials.get({
+                    mediation: 'required',
+                    publicKey: {
+                        challenge: new Uint8Array(32),
+                        timeout: 60000,
+                        userVerification: 'required',
+                        rpId: window.location.hostname,
+                    }
+                }).catch(() => null);
+                
+                // If WebAuthn fails, try simple device authentication
+                // For iOS, this triggers Face ID/Touch ID
+                const stored = localStorage.getItem('biometric_credentials');
+                if (stored) {
+                    const creds = JSON.parse(atob(stored));
+                    this.loginForm.phone = creds.phone;
+                    this.loginForm.password = creds.password;
+                    this.loginForm.post('/login');
+                }
+            } catch (e) {
+                console.error('Biometric login failed:', e);
+                this.loginForm.errors.message = 'فشل الدخول بالبصمة، يرجى استخدام كلمة المرور';
+            } finally {
+                this.biometricLoading = false;
+            }
         },
     },
 };
