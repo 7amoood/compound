@@ -111,6 +111,9 @@ export default {
             if (this.isClosing) return;
             this.isClosing = true;
             
+            // Animate the modal sliding down
+            this.currentY = window.innerHeight;
+            
             // Wait for the transition to complete before actually closing
             setTimeout(() => {
                 this.isClosing = false;
