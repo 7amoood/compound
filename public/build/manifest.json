@@ -1,20 +1,20 @@
 {
-  "_Modal-CnELRMaC.css": {
-    "file": "assets/Modal-CnELRMaC.css",
-    "src": "_Modal-CnELRMaC.css"
-  },
-  "_Modal-CtnpIegH.js": {
-    "file": "assets/Modal-CtnpIegH.js",
+  "_Modal-CYbs7RYY.js": {
+    "file": "assets/Modal-CYbs7RYY.js",
     "name": "Modal",
     "imports": [
       "resources/js/app.js"
     ],
     "css": [
-      "assets/Modal-CnELRMaC.css"
+      "assets/Modal-IIrBL0dd.css"
     ]
   },
-  "_firebase-BR8VAwja.js": {
-    "file": "assets/firebase-BR8VAwja.js",
+  "_Modal-IIrBL0dd.css": {
+    "file": "assets/Modal-IIrBL0dd.css",
+    "src": "_Modal-IIrBL0dd.css"
+  },
+  "_firebase-B4CNJ3Nt.js": {
+    "file": "assets/firebase-B4CNJ3Nt.js",
     "name": "firebase",
     "imports": [
       "resources/js/app.js"
@@ -37,13 +37,13 @@
     ]
   },
   "resources/js/Pages/Admin/Dashboard.vue": {
-    "file": "assets/Dashboard-B5JTpkb6.js",
+    "file": "assets/Dashboard-ScAYL-6_.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-CtnpIegH.js"
+      "_Modal-CYbs7RYY.js"
     ],
     "css": [
       "assets/Dashboard-mJyLfMy6.css",
@@ -51,7 +51,7 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-C4gASrgM.js",
+    "file": "assets/Login-T7szLpxR.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -63,14 +63,14 @@
     ]
   },
   "resources/js/Pages/Provider/Dashboard.vue": {
-    "file": "assets/Dashboard-BZC8FP89.js",
+    "file": "assets/Dashboard-QC1hGXM3.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Provider/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-CtnpIegH.js",
-      "_firebase-BR8VAwja.js"
+      "_Modal-CYbs7RYY.js",
+      "_firebase-B4CNJ3Nt.js"
     ],
     "css": [
       "assets/Dashboard-BQRYt995.css",
@@ -78,14 +78,14 @@
     ]
   },
   "resources/js/Pages/Resident/Dashboard.vue": {
-    "file": "assets/Dashboard-8Hl9P_ZR.js",
+    "file": "assets/Dashboard-WVMTQr8f.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Resident/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-CtnpIegH.js",
-      "_firebase-BR8VAwja.js"
+      "_Modal-CYbs7RYY.js",
+      "_firebase-B4CNJ3Nt.js"
     ],
     "css": [
       "assets/Dashboard-BFdQ50Kg.css",
@@ -93,13 +93,13 @@
     ]
   },
   "resources/js/Pages/Settings.vue": {
-    "file": "assets/Settings-DVKxh4EA.js",
+    "file": "assets/Settings-B113CvI6.js",
     "name": "Settings",
     "src": "resources/js/Pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_Modal-CtnpIegH.js"
+      "_Modal-CYbs7RYY.js"
     ],
     "css": [
       "assets/Settings-tn0RQdqM.css",
@@ -107,7 +107,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-v5crh6tZ.js",
+    "file": "assets/app-CTf1uwxU.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

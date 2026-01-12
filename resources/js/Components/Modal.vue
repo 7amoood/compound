@@ -3,11 +3,10 @@
         <div v-show="show" class="fixed inset-0 z-[100] flex items-end justify-center overflow-hidden">
             <!-- Backdrop Overlay -->
             <Transition
-                enter-active-class="transition-opacity duration-300 ease-out"
+                enter-active-class="transition-opacity duration-500 ease-out"
                 enter-from-class="opacity-0"
                 enter-to-class="opacity-100"
-                leave-active-class="transition-opacity duration-200 ease-in"
-                leave-from-class="opacity-100"
+                leave-active-class="transition-opacity duration-300 ease-in"
                 leave-to-class="opacity-0"
             >
                 <div v-if="show" class="absolute inset-0 bg-[#0d141b]/60 backdrop-blur-[4px]" @click="closeModal"></div>
@@ -15,11 +14,10 @@
             
             <!-- Bottom Sheet Modal -->
             <Transition
-                enter-active-class="transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1)"
+                enter-active-class="transition-transform duration-600 cubic-bezier(0.32, 0.72, 0, 1)"
                 enter-from-class="translate-y-full"
                 enter-to-class="translate-y-0"
-                leave-active-class="transition-transform duration-400 cubic-bezier(0.32, 0.72, 0, 1)"
-                leave-from-class="translate-y-0"
+                leave-active-class="transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1)"
                 leave-to-class="translate-y-full"
             >
                 <div v-if="show" 
@@ -69,8 +67,8 @@ export default {
     computed: {
         sheetStyle() {
             return {
-                transform: this.isDragging ? `translateY(${this.currentY}px)` : '',
-                transition: this.isDragging ? 'none' : ''
+                transform: `translateY(${this.currentY}px)`,
+                transition: this.isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.32, 0.72, 0, 1)'
             };
         }
     },
@@ -147,6 +145,8 @@ export default {
             
             if (this.currentY > 120) {
                 this.closeModal();
+                // Optionally keep a small delay before clearing currentY to let the transition finish
+                // but Transition component will apply its own transform so it's usually fine.
             } else {
                 this.currentY = 0;
             }
@@ -160,7 +160,7 @@ export default {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 .translate-y-full {
-    transform: translateY(100%);
+    transform: translateY(100%) !important;
 }
 .translate-y-0 {
     transform: translateY(0);
