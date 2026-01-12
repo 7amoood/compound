@@ -49,7 +49,7 @@
                     <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">رقم الهاتف</label>
                     <div class="relative flex items-center">
                         <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">smartphone</span>
-                        <input v-model="loginForm.phone" @input="onPhoneInput" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="01xxxxxxxxx" type="tel" required :disabled="loginStep === 'password'"/>
+                        <input v-model="loginForm.phone" @input="onPhoneInput" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="01xxxxxxxxx" type="tel" required :disabled="loginStep === 'password'" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
                     </div>
                     <div v-if="loginForm.errors.phone" class="text-red-500 text-xs mr-1">{{ loginForm.errors.phone }}</div>
                 </div>
@@ -63,7 +63,7 @@
                         </div>
                         <div class="relative flex items-center">
                             <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
-                            <input v-model="loginForm.password" :type="passwordVisible ? 'text' : 'password'" class="w-full h-12 pr-10 pl-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="••••••••" required ref="passwordInput"/>
+                            <input v-model="loginForm.password" :type="passwordVisible ? 'text' : 'password'" class="w-full h-12 pr-10 pl-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="••••••••" required ref="passwordInput" autocomplete="new-password"/>
                             <button class="absolute left-3 text-slate-400 hover:text-primary transition-colors" type="button" @click="passwordVisible = !passwordVisible">
                                 <span class="material-symbols-outlined text-[20px]">{{ passwordVisible ? 'visibility' : 'visibility_off' }}</span>
                             </button>
@@ -109,8 +109,9 @@
                     <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">الاسم الكامل</label>
                     <div class="relative flex items-center">
                         <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">person</span>
-                        <input v-model="registerForm.name" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="أحمد محمد" type="text" required/>
+                        <input v-model="registerForm.name" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="أحمد محمد" type="text" required autocomplete="off"/>
                     </div>
+                    <div v-if="registerForm.errors.name" class="text-red-500 text-xs mr-1">{{ registerForm.errors.name }}</div>
                 </div>
                 
                 <!-- Phone -->
@@ -118,8 +119,9 @@
                     <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">رقم الهاتف</label>
                     <div class="relative flex items-center">
                         <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">smartphone</span>
-                        <input v-model="registerForm.phone" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="01xxxxxxxxx" type="tel" required/>
+                        <input v-model="registerForm.phone" class="w-full h-12 pr-10 pl-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="01xxxxxxxxx" type="tel" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
                     </div>
+                    <div v-if="registerForm.errors.phone" class="text-red-500 text-xs mr-1">{{ registerForm.errors.phone }}</div>
                 </div>
 
                 <!-- Compound Selection (for residents) -->
@@ -202,7 +204,7 @@
                     <label class="text-sm font-medium text-[#0d141b] dark:text-white mr-1">كلمة المرور</label>
                     <div class="relative flex items-center">
                         <span class="absolute right-3 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
-                        <input v-model="registerForm.password" :type="passwordVisible ? 'text' : 'password'" class="w-full h-12 pr-10 pl-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="••••••••" required minlength="6"/>
+                        <input v-model="registerForm.password" :type="passwordVisible ? 'text' : 'password'" class="w-full h-12 pr-10 pl-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#0d141b] dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base" placeholder="••••••••" required minlength="6" autocomplete="new-password"/>
                         <button class="absolute left-3 text-slate-400 hover:text-primary transition-colors" type="button" @click="passwordVisible = !passwordVisible">
                             <span class="material-symbols-outlined text-[20px]">{{ passwordVisible ? 'visibility' : 'visibility_off' }}</span>
                         </button>
@@ -395,6 +397,11 @@ export default {
                     this.registerForm.reset();
                     this.activeRole = 'resident';
                     
+                    // Switch to login tab
+                    this.activeTab = 'login';
+                    this.loginForm.phone = userData.phone; // Pre-fill phone in login form for convenience
+                    this.resetLoginStep(); // Ensure it starts at phone step
+                    
                     // Check if device supports biometric and prompt for registration
                     if (this.biometricAvailable) {
                         this.showBiometricPrompt = true;
@@ -578,9 +585,9 @@ export default {
             const waUrl = /Android|iPhone|iPad/i.test(navigator.userAgent)
             ? `whatsapp://send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`
             : `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-            setTimeout(() => {
-                window.location.href = waUrl;
-            }, 300);
+            
+            // Open in new tab so user stays on login screen
+            window.open(waUrl, '_blank');
         },
     },
 };
