@@ -2,9 +2,9 @@
     <Head title="الإعدادات - خدمات المجمع" />
     <Toast />
     
-    <div class="relative flex h-full min-h-screen w-full flex-col mx-auto max-w-md bg-background-light dark:bg-background-dark pb-20 font-display" dir="rtl">
+    <div class="relative flex h-[100dvh] w-full flex-col mx-auto max-w-md bg-background-light dark:bg-background-dark font-display" dir="rtl">
         <!-- Top App Bar (iOS style) -->
-        <header class="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        <header class="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
             <Link href="/dashboard" class="flex items-center text-primary text-base font-normal -mr-1">
                 <span class="material-symbols-outlined text-2xl">chevron_right</span>
                 <span>رجوع</span>
@@ -12,6 +12,8 @@
             <h1 class="text-[17px] font-semibold text-center text-[#0d141b] dark:text-white absolute left-1/2 transform -translate-x-1/2">الإعدادات</h1>
             <button @click="saveProfile" :disabled="saving" class="text-primary text-[17px] font-semibold">{{ saving ? '...' : 'حفظ' }}</button>
         </header>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar pb-24 px-0">
         
         <!-- Profile Header -->
         <div class="flex flex-col items-center justify-center pt-8 pb-6 px-4">
@@ -144,6 +146,7 @@
             <p class="text-center text-xs text-slate-400 mt-6 pb-2">اختر الصورة التي تعبر عنك وسيتم تحديثها فوراً</p>
         </Modal>
     </div>
+</div>
 </template>
 
 <script>
