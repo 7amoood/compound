@@ -463,14 +463,6 @@ export default {
             url.searchParams.delete('request_id');
             window.history.replaceState(window.history.state, '', url);
             this.loadRequests(); // Load requests when tab changes
-        },
-        showRequestDetailsModal(isOpen) {
-            if (!isOpen) {
-                // Remove request_id from URL when closing modal
-                const url = new URL(window.location);
-                url.searchParams.delete('request_id');
-                window.history.replaceState(window.history.state, '', url);
-            }
         }
     },
     mounted() {

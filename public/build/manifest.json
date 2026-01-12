@@ -1,6 +1,6 @@
 {
-  "_Modal-DdWbOCmr.js": {
-    "file": "assets/Modal-DdWbOCmr.js",
+  "_Modal-H87zj5Qt.js": {
+    "file": "assets/Modal-H87zj5Qt.js",
     "name": "Modal",
     "imports": [
       "_vendor-DhvMcwBQ.js",
@@ -14,8 +14,8 @@
     "file": "assets/Modal-mwXE0m-9.css",
     "src": "_Modal-mwXE0m-9.css"
   },
-  "_firebase-Chfp7gmw.js": {
-    "file": "assets/firebase-Chfp7gmw.js",
+  "_firebase-DN_u9StK.js": {
+    "file": "assets/firebase-DN_u9StK.js",
     "name": "firebase",
     "imports": [
       "resources/js/app.js",
@@ -71,13 +71,13 @@
     ]
   },
   "resources/js/Pages/Admin/Dashboard.vue": {
-    "file": "assets/Dashboard-Bbo3knER.js",
+    "file": "assets/Dashboard-CwW7EF6O.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-DhvMcwBQ.js",
-      "_Modal-DdWbOCmr.js",
+      "_Modal-H87zj5Qt.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -86,7 +86,7 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-BjFG4T_L.js",
+    "file": "assets/Login-DWc2Cj2y.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -99,14 +99,14 @@
     ]
   },
   "resources/js/Pages/Provider/Dashboard.vue": {
-    "file": "assets/Dashboard-BsKRJiHT.js",
+    "file": "assets/Dashboard-BAuCcv4a.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Provider/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-DhvMcwBQ.js",
-      "_Modal-DdWbOCmr.js",
-      "_firebase-Chfp7gmw.js",
+      "_Modal-H87zj5Qt.js",
+      "_firebase-DN_u9StK.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -115,29 +115,29 @@
     ]
   },
   "resources/js/Pages/Resident/Dashboard.vue": {
-    "file": "assets/Dashboard-DKmzThYd.js",
+    "file": "assets/Dashboard-DgTUNOT9.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Resident/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-DhvMcwBQ.js",
-      "_Modal-DdWbOCmr.js",
-      "_firebase-Chfp7gmw.js",
+      "_Modal-H87zj5Qt.js",
+      "_firebase-DN_u9StK.js",
       "resources/js/app.js"
     ],
     "css": [
-      "assets/Dashboard-Ck-g2InJ.css",
+      "assets/Dashboard-sUIJKkoi.css",
       "assets/app-B_N8p06R.css"
     ]
   },
   "resources/js/Pages/Settings.vue": {
-    "file": "assets/Settings-B0V4Jlcx.js",
+    "file": "assets/Settings-C_ERTOZx.js",
     "name": "Settings",
     "src": "resources/js/Pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-DhvMcwBQ.js",
-      "_Modal-DdWbOCmr.js",
+      "_Modal-H87zj5Qt.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -146,7 +146,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BzXfJ-3z.js",
+    "file": "assets/app-zgBlwGFw.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
