@@ -800,9 +800,12 @@ export default {
                 });
                 if (response.data.success) {
                     window.showToast('شكراً لتقييمك!', 'success');
-                    this.showRatingModal = false;
+                    
+                    // Switch to completed tab so user sees the result
+                    this.activeTab = 'completed';
                     
                     // Delay closing the details modal for a smoother transition
+                    this.showRatingModal = false;
                     setTimeout(() => {
                         this.showRequestDetailsModal = false;
                     }, 300);

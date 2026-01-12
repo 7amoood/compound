@@ -69,8 +69,8 @@ export default {
             
             // Play premium notification sound
             try { 
-                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-                audio.volume = 0.4;
+                const audio = new Audio('/sounds/notification.wav');
+                audio.volume = 0.5;
                 audio.play(); 
             } catch(e) {
                 console.warn('Sound play failed', e);

@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <div v-show="show" class="fixed inset-0 z-[100] flex items-end justify-center overflow-hidden">
+        <div class="fixed inset-0 z-[100] flex items-end justify-center overflow-hidden pointer-events-none">
             <!-- Backdrop Overlay -->
             <Transition
                 enter-active-class="transition-opacity duration-500 ease-out"
@@ -9,7 +9,7 @@
                 leave-active-class="transition-opacity duration-300 ease-in"
                 leave-to-class="opacity-0"
             >
-                <div v-if="show" class="absolute inset-0 bg-[#0d141b]/60 backdrop-blur-[4px]" @click="closeModal"></div>
+                <div v-if="show" class="absolute inset-0 bg-[#0d141b]/60 backdrop-blur-[4px] pointer-events-auto" @click="closeModal"></div>
             </Transition>
             
             <!-- Bottom Sheet Modal -->
@@ -22,7 +22,7 @@
             >
                 <div v-if="show" 
                      ref="modalSheet"
-                     class="relative z-20 flex flex-col max-h-[96vh] w-full max-w-md rounded-t-[2.5rem] bg-surface-light dark:bg-surface-dark shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-white/5 font-display"
+                     class="relative z-20 flex flex-col max-h-[96vh] w-full max-w-md rounded-t-[2.5rem] bg-surface-light dark:bg-surface-dark shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-white/5 font-display pointer-events-auto"
                      :style="sheetStyle"
                      dir="rtl">
                     <!-- Handle (Draggable area) -->
