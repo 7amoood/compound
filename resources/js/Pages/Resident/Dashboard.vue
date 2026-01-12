@@ -1,147 +1,151 @@
 <template>
     <Head title="لوحة التحكم - ساكن" />
     <Toast />
-    <PullToRefresh :onRefresh="triggerRefresh">
-        <div class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display transition-colors duration-200 antialiased pb-24" dir="rtl">
-            <!-- Top App Bar & Profile Header Combined -->
-            <header class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-transparent transition-all duration-200">
-                <div class="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-white dark:ring-slate-700 shadow-sm" :style="`background-image: url('${user.photo || 'https://ui-avatars.com/api/?name=' + user.name}');`"></div>
-                        <div class="flex flex-col">
-                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">ساكن</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white leading-none">
-                                {{ (user.block_no && user.apt_no) ? `مبنى ${user.block_no}${user.floor ? '، الطابق ' + user.floor : ''}، شقة ${user.apt_no}` : 'يرجى تحديث العنوان' }}
-                            </span>
+    <div class="relative flex h-[100dvh] w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark font-display" dir="rtl">
+        <!-- Top App Bar & Profile Header Combined -->
+        <header class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/10 transition-all duration-200">
+            <div class="flex items-center justify-between px-4 py-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-white dark:ring-slate-700 shadow-sm" :style="`background-image: url('${user.photo || 'https://ui-avatars.com/api/?name=' + user.name}');`"></div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">ساكن</span>
+                        <span class="text-sm font-bold text-slate-900 dark:text-white leading-none">
+                            {{ (user.block_no && user.apt_no) ? `مبنى ${user.block_no}${user.floor ? '، الطابق ' + user.floor : ''}، شقة ${user.apt_no}` : 'يرجى تحديث العنوان' }}
+                        </span>
+                    </div>
+                </div>
+                <button @click="showNotificationsModal = true; loadNotifications()" class="flex items-center justify-center size-10 rounded-full bg-white dark:bg-surface-dark text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors relative">
+                    <span class="material-symbols-outlined text-[24px]">notifications</span>
+                    <span v-if="unreadNotificationsCount > 0" class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white dark:border-surface-dark"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Area -->
+        <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+            <PullToRefresh :onRefresh="triggerRefresh">
+                <main class="flex flex-col gap-6 pt-4">
+                    <!-- Welcome Title -->
+                    <div class="px-4">
+                        <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">صباح الخير،<br/>{{ user.name?.split(' ')[0] }}</h1>
+                    </div>
+
+                    <!-- Quick Actions Grid -->
+                    <div class="px-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-slate-900 dark:text-white">خدمات سريعة</h2>
+                        </div>
+                        <div class="grid grid-cols-4 gap-3">
+                            <button v-for="(cat, index) in categories" :key="cat.id" @click="newRequestForm.service_category_id = cat.id; showNewRequestModal = true" class="flex flex-col items-center gap-2 group">
+                                <div class="flex items-center justify-center size-14 rounded-2xl border group-hover:scale-105 transition-transform duration-200 shadow-sm" :class="getServiceColor(index)">
+                                    <span class="material-symbols-outlined text-[28px]">{{ cat.icon }}</span>
+                                </div>
+                                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ cat.name }}</span>
+                            </button>
                         </div>
                     </div>
-                    <button @click="showNotificationsModal = true; loadNotifications()" class="flex items-center justify-center size-10 rounded-full bg-white dark:bg-surface-dark text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors relative">
-                        <span class="material-symbols-outlined text-[24px]">notifications</span>
-                        <span v-if="unreadNotificationsCount > 0" class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white dark:border-surface-dark"></span>
-                    </button>
-                </div>
-            </header>
 
-            <main class="flex flex-col gap-6 pt-4 max-w-md mx-auto">
-                <!-- Welcome Title -->
-                <div class="px-4">
-                    <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">صباح الخير،<br/>{{ user.name?.split(' ')[0] }}</h1>
-                </div>
-
-                <!-- Quick Actions Grid -->
-                <div class="px-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h2 class="text-base font-bold text-slate-900 dark:text-white">خدمات سريعة</h2>
-                    </div>
-                    <div class="grid grid-cols-4 gap-3">
-                        <button v-for="(cat, index) in categories" :key="cat.id" @click="newRequestForm.service_category_id = cat.id; showNewRequestModal = true" class="flex flex-col items-center gap-2 group">
-                            <div class="flex items-center justify-center size-14 rounded-2xl border group-hover:scale-105 transition-transform duration-200 shadow-sm" :class="getServiceColor(index)">
-                                <span class="material-symbols-outlined text-[28px]">{{ cat.icon }}</span>
-                            </div>
-                            <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ cat.name }}</span>
+                    <!-- Primary Action Button -->
+                    <div class="px-4">
+                        <button @click="showNewRequestModal = true" class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all duration-200">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            <span>طلب خدمة جديدة</span>
                         </button>
                     </div>
-                </div>
 
-                <!-- Primary Action Button -->
-                <div class="px-4">
-                    <button @click="showNewRequestModal = true" class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all duration-200">
-                        <span class="material-symbols-outlined">add_circle</span>
-                        <span>طلب خدمة جديدة</span>
-                    </button>
-                </div>
-
-                <!-- Service History Section -->
-                <div class="flex flex-col gap-4">
-                    <!-- Header & Filters -->
-                    <div class="flex flex-col gap-3">
-                        <div class="px-4 flex items-center justify-between">
-                            <h2 class="text-lg font-bold text-slate-900 dark:text-white">سجل الطلبات</h2>
-                            <a class="text-sm font-semibold text-primary hover:text-blue-500" href="#">عرض الكل</a>
-                        </div>
-                        <!-- Filter Chips -->
-                        <div class="flex gap-2 px-4 overflow-x-auto no-scrollbar pb-1">
-                            <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-                                class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
-                                :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
-                                {{ tab.label }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- List of Cards -->
-                    <div class="flex flex-col gap-3 px-4">
-                        <div v-if="loading" class="text-center py-8 text-slate-400">
-                            <span class="material-symbols-outlined text-4xl animate-spin">progress_activity</span>
-                        </div>
-                        <div v-else-if="requests.length === 0" class="text-center py-8 text-slate-400">
-                            <span class="material-symbols-outlined text-4xl">inbox</span>
-                            <p class="mt-2">لا توجد طلبات</p>
-                        </div>
-
-                        <div v-for="(req, index) in requests" :key="req.id" @click="openRequestDetails(req.id)"
-                             class="group flex flex-col bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer">
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex items-center justify-center size-12 rounded-xl shrink-0" :class="getServiceColor(index)">
-                                        <span class="material-symbols-outlined">{{ req.category?.icon }}</span>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">{{ req.category?.name }}</h3>
-                                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ formatDate(req.created_at) }}</p>
-                                    </div>
-                                </div>
-                                <div class="shrink-0">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
-                                          :class="{
-                                              'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300': req.status === 'pending',
-                                              'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300': req.status === 'accepted_offer',
-                                              'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300': req.status === 'in_progress',
-                                              'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300': req.status === 'completed',
-                                              'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300': req.status === 'cancelled'
-                                          }">
-                                        {{ 
-                                            req.status === 'pending' ? 'قيد الانتظار' : 
-                                            req.status === 'accepted_offer' ? 'تم قبول عرض' : 
-                                            req.status === 'in_progress' ? 'جاري التنفيذ' : 
-                                            req.status === 'completed' ? 'مكتمل' :
-                                            req.status === 'cancelled' ? 'ملغي' : req.status
-                                        }}
-                                    </span>
-                                </div>
+                    <!-- Service History Section -->
+                    <div class="flex flex-col gap-4">
+                        <!-- Header & Filters -->
+                        <div class="flex flex-col gap-3">
+                            <div class="px-4 flex items-center justify-between">
+                                <h2 class="text-lg font-bold text-slate-900 dark:text-white">سجل الطلبات</h2>
+                                <a class="text-sm font-semibold text-primary hover:text-blue-500" href="#">عرض الكل</a>
                             </div>
-                            <div v-if="req.delivery_method" class="mt-3 flex items-center justify-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-xl w-full">
-                                <span class="material-symbols-outlined text-[16px]">directions_car</span>
-                                <span>{{ req.delivery_method }}</span>
+                            <!-- Filter Chips -->
+                            <div class="flex gap-2 px-4 overflow-x-auto no-scrollbar pb-1">
+                                <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+                                    class="shrink-0 h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors"
+                                    :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
+                                    {{ tab.label }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- List of Cards -->
+                        <div class="flex flex-col gap-3 px-4">
+                            <div v-if="loading" class="text-center py-8 text-slate-400">
+                                <span class="material-symbols-outlined text-4xl animate-spin">progress_activity</span>
+                            </div>
+                            <div v-else-if="requests.length === 0" class="text-center py-8 text-slate-400">
+                                <span class="material-symbols-outlined text-4xl">inbox</span>
+                                <p class="mt-2">لا توجد طلبات</p>
                             </div>
 
-                            <!-- Rating Button -->
-                            <button v-if="req.status === 'completed' && !req.review" @click.stop="openRating(req)"
-                                    class="mt-3 w-full py-2 bg-amber-400 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-amber-500 transition-colors flex items-center justify-center gap-1">
-                                <span class="material-symbols-outlined text-[18px]">star</span>
-                                تقييم الخدمة
-                            </button>
+                            <div v-for="(req, index) in requests" :key="req.id" @click="openRequestDetails(req.id)"
+                                 class="group flex flex-col bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex items-center justify-center size-12 rounded-xl shrink-0" :class="getServiceColor(index)">
+                                            <span class="material-symbols-outlined">{{ req.category?.icon }}</span>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">{{ req.category?.name }}</h3>
+                                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ formatDate(req.created_at) }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
+                                              :class="{
+                                                  'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300': req.status === 'pending',
+                                                  'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300': req.status === 'accepted_offer',
+                                                  'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300': req.status === 'in_progress',
+                                                  'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300': req.status === 'completed',
+                                                  'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300': req.status === 'cancelled'
+                                              }">
+                                            {{ 
+                                                req.status === 'pending' ? 'قيد الانتظار' : 
+                                                req.status === 'accepted_offer' ? 'تم قبول عرض' : 
+                                                req.status === 'in_progress' ? 'جاري التنفيذ' : 
+                                                req.status === 'completed' ? 'مكتمل' :
+                                                req.status === 'cancelled' ? 'ملغي' : req.status
+                                            }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div v-if="req.delivery_method" class="mt-3 flex items-center justify-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-xl w-full">
+                                    <span class="material-symbols-outlined text-[16px]">directions_car</span>
+                                    <span>{{ req.delivery_method }}</span>
+                                </div>
+
+                                <!-- Rating Button -->
+                                <button v-if="req.status === 'completed' && !req.review" @click.stop="openRating(req)"
+                                        class="mt-3 w-full py-2 bg-amber-400 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-amber-500 transition-colors flex items-center justify-center gap-1">
+                                    <span class="material-symbols-outlined text-[18px]">star</span>
+                                    تقييم الخدمة
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </main>
+                </main>
+            </PullToRefresh>
+        </div>
 
-            <!-- Bottom Navigation -->
-            <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800 pb-safe z-30">
-                <div class="flex items-center justify-around h-16 max-w-lg mx-auto">
-                    <a href="/dashboard" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-primary">
-                        <span class="material-symbols-outlined fill-1">home</span>
-                        <span class="text-[10px] font-bold">الرئيسية</span>
-                    </a>
-                    <a href="/settings" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                        <span class="material-symbols-outlined">person</span>
-                        <span class="text-[10px] font-medium">الحساب</span>
-                    </a>
-                </div>
-            </nav>
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-surface-dark/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe z-40">
+            <div class="flex items-center justify-around h-16 max-w-md mx-auto">
+                <a href="/dashboard" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-primary">
+                    <span class="material-symbols-outlined fill-1">home</span>
+                    <span class="text-[10px] font-bold">الرئيسية</span>
+                </a>
+                <a href="/settings" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="text-[10px] font-medium">الحساب</span>
+                </a>
+            </div>
+        </nav>
 
-            <!-- New Request Modal -->
-            <Modal :show="showNewRequestModal" title="طلب خدمة جديدة" @close="showNewRequestModal = false">
+        <!-- New Request Modal -->
+        <Modal :show="showNewRequestModal" title="طلب خدمة جديدة" @close="showNewRequestModal = false">
                 <div class="space-y-6">
                     <div class="space-y-2">
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">نوع الخدمة</label>
@@ -364,7 +368,6 @@
             </div>
         </Modal>
     </div>
-    </PullToRefresh>
 </template>
 
 <script>

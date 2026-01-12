@@ -2,9 +2,9 @@
     <Head title="لوحة التحكم - مقدم الخدمة" />
     <Toast />
     
-    <div class="relative flex h-screen w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl font-display" dir="rtl">
+    <div class="relative flex h-[100dvh] w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl font-display" dir="rtl">
         <!-- Top App Bar -->
-        <div class="flex items-center px-4 py-3 pb-2 justify-between z-10 bg-background-light dark:bg-background-dark sticky top-0">
+        <div class="flex items-center px-4 py-3 pb-2 justify-between z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md sticky top-0 transition-all duration-300">
             <div class="flex items-center gap-3">
                 <div class="relative">
                     <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-primary/20" :style="`background-image: url('${user.photo || 'https://ui-avatars.com/api/?name=' + user.name}');`"></div>
@@ -250,16 +250,18 @@
         </div>
 
         <!-- Bottom Navigation -->
-        <div class="h-20 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-around items-center pb-5 px-2 absolute bottom-0 w-full z-20">
-            <a href="/dashboard" class="flex flex-col items-center justify-center w-16 gap-1 text-primary">
-                <span class="material-symbols-outlined filled">home</span>
-                <span class="text-[10px] font-medium">الرئيسية</span>
-            </a>
-            <a href="/settings" class="flex flex-col items-center justify-center w-16 gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                <span class="material-symbols-outlined">person</span>
-                <span class="text-[10px] font-medium">الحساب</span>
-            </a>
-        </div>
+        <nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe z-40">
+            <div class="flex items-center justify-around h-16 max-w-md mx-auto">
+                <a href="/dashboard" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-primary">
+                    <span class="material-symbols-outlined filled">home</span>
+                    <span class="text-[10px] font-medium">الرئيسية</span>
+                </a>
+                <a href="/settings" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="text-[10px] font-medium">الحساب</span>
+                </a>
+            </div>
+        </nav>
 
         <!-- Proposal Modal -->
         <Modal :show="showProposalModal" title="تقديم عرض سعر" @close="showProposalModal = false">

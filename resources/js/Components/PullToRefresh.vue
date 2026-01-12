@@ -51,21 +51,20 @@ export default {
             return {
                 height: `${this.pullDelta}px`,
                 opacity: opacity,
-                transition: this.isDragging ? 'none' : 'height 0.3s ease, opacity 0.3s ease'
+                transition: this.isDragging ? 'none' : 'height 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease'
             };
         },
         contentStyle() {
             return {
                 transform: `translateY(${this.pullDelta}px)`,
-                transition: this.isDragging ? 'none' : 'transform 0.3s ease'
+                transition: this.isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.19, 1, 0.22, 1)'
             };
         },
         iconRotateStyle() {
             if (this.isLoading) return {};
-            const rotation = Math.min(this.pullDelta / this.threshold, 1) * 180;
             return {
                 transform: `rotate(${this.pullDelta > this.threshold ? 180 : 0}deg)`,
-                transition: 'transform 0.2s ease'
+                transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
             };
         }
     },
