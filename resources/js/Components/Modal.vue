@@ -68,6 +68,7 @@ export default {
             startTime: 0,
             canDrag: false,
             initialScrollTop: 0,
+            isClosing: false,
         };
     },
     computed: {
@@ -107,7 +108,15 @@ export default {
     },
     methods: {
         closeModal() {
-            this.$emit('close');
+            if (this.isClosing) return;
+            this.isClosing = true;
+            
+            // Wait for the transition to complete before actually closing
+            setTimeout(() => {
+                this.isClosing = false;
+                this.currentY = 0;
+                this.$emit('close');
+            }, 500); // Match the leave-active-class duration
         },
         handleEscape(e) {
             if (e.key === 'Escape' && this.show) {
@@ -184,6 +193,8 @@ export default {
             // 1. Dragged more than 80px (reduced from 120px)
             // 2. Fast swipe down (velocity > 0.5)
             if (this.currentY > 80 || velocity > 0.5) {
+                // Animate to bottom before closing
+                this.currentY = window.innerHeight;
                 this.closeModal();
             } else {
                 // Bounce back smoothly
