@@ -437,11 +437,20 @@ export default {
             }
         },
         async triggerRefresh() {
-            // Refresh in parallel but don't block UI
-            this.loadStats();
-            this.loadUnreadCount();
-            this.loadAvailableJobs();
-            this.loadMyJobs();
+            this.loading = true;
+            try {
+                await Promise.all([
+                    this.loadStats(),
+                    this.loadUnreadCount(),
+                    this.loadAvailableJobs(false),
+                    this.loadMyJobs(false),
+                    this.activeTab === 'reviews' ? this.loadReviews(false, false) : Promise.resolve()
+                ]);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.loading = false;
+            }
         },
         async focusRequest(id) {
             // 1. Try to find in My Jobs first (active/completed)
@@ -510,8 +519,8 @@ export default {
                 }
             } catch (e) {}
         },
-        async loadAvailableJobs() {
-            this.loading = true;
+        async loadAvailableJobs(handleLoading = true) {
+            if (handleLoading) this.loading = true;
             try {
                 const response = await axios.get('/api/provider/available-requests');
                 if (response.data.success) {
@@ -520,11 +529,11 @@ export default {
             } catch (e) {
                 console.error(e);
             } finally {
-                this.loading = false;
+                if (handleLoading) this.loading = false;
             }
         },
-        async loadMyJobs() {
-            this.loading = true;
+        async loadMyJobs(handleLoading = true) {
+            if (handleLoading) this.loading = true;
             try {
                 const response = await axios.get('/api/provider/my-jobs');
                 if (response.data.success) {
@@ -533,15 +542,15 @@ export default {
             } catch (e) {
                 console.error(e);
             } finally {
-                this.loading = false;
+                if (handleLoading) this.loading = false;
             }
         },
-        async loadReviews(reset = true) {
+        async loadReviews(reset = true, handleLoading = true) {
             if (reset) {
                 this.reviewsPage = 1;
                 this.reviews = [];
             }
-            this.loading = true;
+            if (handleLoading) this.loading = true;
             try {
                 const response = await axios.get(`/api/provider/reviews?page=${this.reviewsPage}`);
                 if (response.data.success) {
@@ -555,7 +564,7 @@ export default {
             } catch (e) {
                 console.error(e);
             } finally {
-                this.loading = false;
+                if (handleLoading) this.loading = false;
             }
         },
         loadMoreReviews() {
