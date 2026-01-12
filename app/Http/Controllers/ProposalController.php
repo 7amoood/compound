@@ -199,7 +199,7 @@ class ProposalController extends Controller
         })
             ->with(['category:id,name,icon', 'resident:id,name,phone,block_no,floor,apt_no,compound_id', 'resident.compound:id,name,location_url', 'acceptedProposal'])
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
 
         return response()->json([
             'success' => true,

@@ -122,14 +122,18 @@ export default {
             this.isClosing = true;
             
             // Animate the modal sliding down
-            this.currentY = window.innerHeight;
+            // Using a slightly larger value than innerHeight to ensure it's completely off-screen
+            this.currentY = window.innerHeight + 100;
             
-            // Wait for the transition to complete before actually closing
+            // Wait for the slide-down animation to finish (matching the 500ms transition in sheetStyle)
             setTimeout(() => {
-                this.isClosing = false;
-                this.currentY = 0;
                 this.$emit('close');
-            }, 500); // Match the leave-active-class duration
+                // Use nextTick or a tiny timeout to reset state AFTER show becomes false
+                setTimeout(() => {
+                    this.isClosing = false;
+                    this.currentY = 0;
+                }, 100);
+            }, 450);
         },
         handleEscape(e) {
             if (e.key === 'Escape' && this.show) {

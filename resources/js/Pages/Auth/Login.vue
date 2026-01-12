@@ -264,10 +264,31 @@ export default {
             this.loginForm.post('/login');
         },
         submitRegister() {
+            const userData = { ...this.registerForm.data() };
+            const selectedCompound = this.compounds.find(c => c.id === userData.compound_id);
+            const compoundName = selectedCompound ? selectedCompound.name : '';
+            
             this.registerForm.post('/register', {
                 onSuccess: () => {
-                    this.activeTab = 'login';
-                    this.registerForm.reset();
+                    // Pre-fill WhatsApp message
+                    const whatsappNumber = "201201763086";
+                    let message = `يرجى تفعيل حسابي باسم: ${userData.name}\n`;
+                    
+                    if (userData.role === 'resident') {
+                        message += `المقيم في: ${compoundName}`;
+                        if (userData.block_no) message += `، مبنى ${userData.block_no}`;
+                        if (userData.floor) message += `، طابق ${userData.floor}`;
+                        if (userData.apt_no) message += `، شقة ${userData.apt_no}`;
+                    } else {
+                        message += `مزود خدمة`;
+                    }
+                    
+                    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+                    
+                    // Small delay to ensure the user sees any success feedback if added later
+                    setTimeout(() => {
+                        window.location.href = waUrl;
+                    }, 500);
                 },
             });
         },

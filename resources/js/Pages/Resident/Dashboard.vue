@@ -279,13 +279,33 @@
 
                     <!-- Market Request Items -->
                     <div v-if="selectedRequest.items && selectedRequest.items.length > 0" class="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-3 text-sm flex items-center gap-2">
-                             <span class="material-symbols-outlined text-primary text-[20px]">shopping_cart</span>
-                             قائمة المشتريات
-                        </h4>
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[20px]">shopping_cart</span>
+                                قائمة المشتريات
+                            </h4>
+                            <span v-if="selectedRequest.status === 'in_progress' || selectedRequest.status === 'completed'" 
+                                  class="text-[10px] font-bold bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full text-primary border border-primary/20">
+                                {{ selectedRequest.items.filter(i => i.is_picked).length }} / {{ selectedRequest.items.length }}
+                            </span>
+                        </div>
                         <div class="space-y-1">
-                             <div v-for="item in selectedRequest.items" :key="item.id" class="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700 last:border-0 border-dashed">
-                                 <span class="text-slate-800 dark:text-slate-200 font-medium text-sm">{{ item.name }}</span>
+                             <div v-for="item in selectedRequest.items" :key="item.id" 
+                                  class="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700 last:border-0 border-dashed transition-all">
+                                 <div class="flex items-center gap-2">
+                                     <div v-if="selectedRequest.status === 'in_progress' || selectedRequest.status === 'completed'" 
+                                          class="size-5 rounded-md border flex items-center justify-center transition-all duration-300"
+                                          :class="item.is_picked ? 'bg-emerald-500 border-emerald-500 shadow-sm shadow-emerald-500/20' : 'border-slate-300 dark:border-slate-600'">
+                                         <span v-if="item.is_picked" class="material-symbols-outlined text-white text-[12px] font-bold">check</span>
+                                     </div>
+                                     <div class="flex flex-col">
+                                         <span class="font-bold text-sm transition-all duration-300" 
+                                               :class="item.is_picked ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-slate-200'">
+                                             {{ item.name }}
+                                         </span>
+                                         <span v-if="item.is_picked" class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">تم التجهيز</span>
+                                     </div>
+                                 </div>
                                  <span v-if="item.quantity" class="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-600 font-bold text-slate-500 dark:text-slate-300">
                                      {{ item.quantity }}
                                  </span>

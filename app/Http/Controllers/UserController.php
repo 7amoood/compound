@@ -36,7 +36,7 @@ class UserController extends Controller
 
         $users = $query->with(['serviceType:id,name', 'compound:id,name,location_url'])
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
 
         return response()->json([
             'success' => true,

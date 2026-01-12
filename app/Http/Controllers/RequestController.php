@@ -58,7 +58,7 @@ class RequestController extends Controller
 
         $requests = $query->withCount('proposals')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
 
         return response()->json([
             'success'  => true,

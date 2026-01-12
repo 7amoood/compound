@@ -400,11 +400,17 @@
                                :class="item.is_picked ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800' : 'bg-white border-slate-200 dark:bg-slate-800 dark:border-slate-700'">
                                
                                <div class="flex items-center gap-3">
-                                   <div class="size-6 rounded-md border-2 flex items-center justify-center transition-colors"
-                                        :class="item.is_picked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600'">
+                                   <div class="size-6 rounded-md border-2 flex items-center justify-center transition-all duration-300"
+                                        :class="item.is_picked ? 'bg-emerald-500 border-emerald-500 shadow-sm shadow-emerald-500/20' : 'border-slate-300 dark:border-slate-600'">
                                         <span v-if="item.is_picked" class="material-symbols-outlined text-white text-sm font-bold">check</span>
                                    </div>
-                                   <span class="font-medium" :class="{'line-through text-slate-400': item.is_picked, 'text-slate-700 dark:text-slate-200': !item.is_picked}">{{ item.name }}</span>
+                                   <div class="flex flex-col">
+                                       <span class="font-bold text-sm transition-all duration-300" 
+                                             :class="item.is_picked ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-200'">
+                                           {{ item.name }}
+                                       </span>
+                                       <span v-if="item.is_picked" class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">تم التجهيز</span>
+                                   </div>
                                </div>
                                <span class="font-bold bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-xs">{{ item.quantity }}</span>
                           </div>
