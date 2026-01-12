@@ -25,6 +25,7 @@
         
         <!-- Scrollable Content Area -->
         <div class="flex-1 overflow-y-auto no-scrollbar pb-24">
+            <PullToRefresh :onRefresh="triggerRefresh" class="h-full">
             <!-- Segmented Control Tabs -->
             <div class="px-4 py-3 sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
                 <div class="flex h-12 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-slate-800 p-1">
@@ -245,6 +246,7 @@
                     </div>
                 </template>
             </div>
+            </PullToRefresh>
         </div>
 
         <!-- Bottom Navigation -->
@@ -334,11 +336,12 @@ import { Head, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import Modal from '@/Components/Modal.vue';
 import Toast from '@/Components/Toast.vue';
+import PullToRefresh from '@/Components/PullToRefresh.vue';
 import { requestNotificationPermission } from '@/firebase';
 
 export default {
     name: 'ProviderDashboard',
-    components: { Head, Modal, Toast },
+    components: { Head, Modal, Toast, PullToRefresh },
     data() {
         return {
             activeTab: localStorage.getItem('provider_current_tab') || 'available',
@@ -394,6 +397,14 @@ export default {
         }
     },
     methods: {
+        async triggerRefresh() {
+            await Promise.all([
+                this.loadStats(),
+                this.loadUnreadCount(),
+                this.loadAvailableJobs(),
+                this.loadMyJobs()
+            ]);
+        },
         async focusRequest(id) {
             // 1. Try to find in My Jobs first (active/completed)
             if (this.myJobs.length === 0) await this.loadMyJobs();
