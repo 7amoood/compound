@@ -55,9 +55,15 @@ export default {
             };
         },
         contentStyle() {
+            // Calculate opacity based on pull distance (fade out content to focus on loader)
+            const minOpacity = 0.25;
+            const progress = Math.min(this.pullDelta / this.threshold, 1);
+            const opacity = 1 - (progress * (1 - minOpacity));
+
             return {
                 transform: `translateY(${this.pullDelta}px)`,
-                transition: this.isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.19, 1, 0.22, 1)'
+                opacity: opacity,
+                transition: this.isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease'
             };
         },
         iconRotateStyle() {
