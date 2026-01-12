@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ServiceCategoryController;
+use App\Http\Controllers\WebAuthnController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +24,13 @@ Route::get('/public/services', [ServiceCategoryController::class, 'active']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// WebAuthn (Biometric) Routes
+Route::prefix('webauthn')->group(function () {
+    Route::post('/register/options', [WebAuthnController::class, 'registerOptions']);
+    Route::post('/register/store', [WebAuthnController::class, 'registerStore']);
+    Route::post('/auth/options', [WebAuthnController::class, 'authOptions']);
+    Route::post('/auth/verify', [WebAuthnController::class, 'authVerify']);
+    Route::post('/check', [WebAuthnController::class, 'checkBiometric']);
 });

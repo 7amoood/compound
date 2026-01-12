@@ -76,7 +76,7 @@
                 </button>
                 
                 <!-- Biometric Login Button -->
-                <button v-if="hasSavedCredentials && biometricAvailable" type="button" @click="loginWithBiometric" :disabled="biometricLoading" 
+                <button v-if="biometricEnabledForPhone" type="button" @click="loginWithBiometric" :disabled="biometricLoading" 
                         class="w-full h-12 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium text-base hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 border border-slate-200 dark:border-slate-700">
                     <span v-if="biometricLoading" class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                     <span v-else class="material-symbols-outlined text-[22px]">fingerprint</span>
@@ -239,8 +239,9 @@
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white">تفعيل الدخول بالبصمة</h3>
                     <p class="text-slate-500 dark:text-slate-400 text-sm">هل تريد تفعيل الدخول السريع باستخدام بصمة الإصبع أو Face ID؟</p>
+                    <p v-if="biometricError" class="text-red-500 text-sm">{{ biometricError }}</p>
                     <div class="flex flex-col gap-2 w-full mt-2">
-                        <button @click="setupBiometric" :disabled="biometricLoading" class="w-full h-12 rounded-lg bg-primary text-white font-bold flex items-center justify-center gap-2 disabled:opacity-70">
+                        <button @click="registerBiometric" :disabled="biometricLoading" class="w-full h-12 rounded-lg bg-primary text-white font-bold flex items-center justify-center gap-2 disabled:opacity-70">
                             <span v-if="biometricLoading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                             <span>{{ biometricLoading ? 'جاري التفعيل...' : 'نعم، فعّل البصمة' }}</span>
                         </button>
@@ -255,7 +256,8 @@
 </template>
 
 <script>
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
+import axios from 'axios';
 
 export default {
     name: 'Login',
@@ -287,17 +289,29 @@ export default {
                 market_id: '',
                 is_market_staff: false,
             }),
-            // Biometric
+            // Biometric state
             biometricAvailable: false,
-            hasSavedCredentials: false,
+            biometricEnabledForPhone: false,
             biometricLoading: false,
             showBiometricPrompt: false,
-            pendingCredentials: null,
+            pendingUserData: null,
+            biometricError: '',
         };
     },
+    watch: {
+        'loginForm.phone': {
+            handler(newPhone) {
+                if (newPhone && newPhone.length >= 10) {
+                    this.checkBiometricForPhone(newPhone);
+                } else {
+                    this.biometricEnabledForPhone = false;
+                }
+            },
+            immediate: false
+        }
+    },
     mounted() {
-        this.checkBiometricAvailability();
-        this.checkSavedCredentials();
+        this.checkBiometricSupport();
     },
     methods: {
         submitLogin() {
@@ -310,29 +324,153 @@ export default {
             
             this.registerForm.post('/register', {
                 onSuccess: () => {
-                    // Store credentials for biometric setup
-                    this.pendingCredentials = {
-                        phone: userData.phone,
-                        password: userData.password
-                    };
+                    // Store user data for biometric registration
+                    this.pendingUserData = { ...userData, compoundName };
                     
-                    // Clear the form
+                    // Clear form
                     this.registerForm.reset();
                     this.activeRole = 'resident';
                     
-                    // Switch to login tab
-                    this.activeTab = 'login';
-                    
-                    // Check if biometric is available and prompt for setup
+                    // Check if device supports biometric and prompt for registration
                     if (this.biometricAvailable) {
                         this.showBiometricPrompt = true;
                     } else {
-                        // If no biometric, just redirect to WhatsApp
+                        // No biometric support, redirect to WhatsApp
                         this.redirectToWhatsApp(userData, compoundName);
                     }
                 },
             });
         },
+        
+        async checkBiometricSupport() {
+            if (window.PublicKeyCredential) {
+                try {
+                    this.biometricAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                } catch (e) {
+                    this.biometricAvailable = false;
+                }
+            }
+        },
+        
+        async checkBiometricForPhone(phone) {
+            try {
+                const response = await axios.post('/api/webauthn/check', { phone });
+                this.biometricEnabledForPhone = response.data.biometric_enabled;
+            } catch (e) {
+                this.biometricEnabledForPhone = false;
+            }
+        },
+        
+        async registerBiometric() {
+            if (!this.pendingUserData) return;
+            
+            this.biometricLoading = true;
+            this.biometricError = '';
+            
+            try {
+                // Get registration options from server
+                const optionsRes = await axios.post('/api/webauthn/register/options', {
+                    phone: this.pendingUserData.phone
+                });
+                
+                const options = optionsRes.data;
+                
+                // Decode challenge
+                options.challenge = Uint8Array.from(atob(options.challenge), c => c.charCodeAt(0));
+                options.user.id = Uint8Array.from(atob(options.user.id), c => c.charCodeAt(0));
+                
+                // Create credential using WebAuthn API
+                const credential = await navigator.credentials.create({
+                    publicKey: options
+                });
+                
+                // Prepare data for server
+                const credentialId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+                const publicKey = btoa(String.fromCharCode(...new Uint8Array(credential.response.getPublicKey())));
+                
+                // Store credential on server
+                await axios.post('/api/webauthn/register/store', {
+                    phone: this.pendingUserData.phone,
+                    credential_id: credentialId,
+                    public_key: publicKey
+                });
+                
+                this.showBiometricPrompt = false;
+                
+                // Redirect to WhatsApp after successful registration
+                this.redirectToWhatsApp(this.pendingUserData, this.pendingUserData.compoundName);
+                
+            } catch (e) {
+                console.error('Biometric registration failed:', e);
+                this.biometricError = 'فشل تسجيل البصمة. يرجى المحاولة مرة أخرى.';
+            } finally {
+                this.biometricLoading = false;
+            }
+        },
+        
+        skipBiometric() {
+            this.showBiometricPrompt = false;
+            if (this.pendingUserData) {
+                this.redirectToWhatsApp(this.pendingUserData, this.pendingUserData.compoundName);
+            }
+            this.pendingUserData = null;
+        },
+        
+        async loginWithBiometric() {
+            if (!this.loginForm.phone) {
+                this.loginForm.errors.message = 'يرجى إدخال رقم الهاتف أولاً';
+                return;
+            }
+            
+            this.biometricLoading = true;
+            this.loginForm.errors.message = '';
+            
+            try {
+                // Get authentication options from server
+                const optionsRes = await axios.post('/api/webauthn/auth/options', {
+                    phone: this.loginForm.phone
+                });
+                
+                const options = optionsRes.data;
+                
+                // Decode challenge and credential IDs
+                options.challenge = Uint8Array.from(atob(options.challenge), c => c.charCodeAt(0));
+                options.allowCredentials = options.allowCredentials.map(cred => ({
+                    ...cred,
+                    id: Uint8Array.from(atob(cred.id), c => c.charCodeAt(0))
+                }));
+                
+                // Get assertion using WebAuthn API (triggers biometric)
+                const assertion = await navigator.credentials.get({
+                    publicKey: options
+                });
+                
+                // Send assertion to server for verification
+                const verifyRes = await axios.post('/api/webauthn/auth/verify', {
+                    phone: this.loginForm.phone,
+                    credential_id: btoa(String.fromCharCode(...new Uint8Array(assertion.rawId))),
+                    authenticator_data: btoa(String.fromCharCode(...new Uint8Array(assertion.response.authenticatorData))),
+                    client_data_json: btoa(String.fromCharCode(...new Uint8Array(assertion.response.clientDataJSON))),
+                    signature: btoa(String.fromCharCode(...new Uint8Array(assertion.response.signature)))
+                });
+                
+                if (verifyRes.data.success) {
+                    // Redirect to dashboard
+                    router.visit(verifyRes.data.redirect);
+                }
+                
+            } catch (e) {
+                console.error('Biometric login failed:', e);
+                if (e.response?.data?.error) {
+                    this.loginForm.errors.message = e.response.data.error;
+                } else {
+                    this.loginForm.errors.message = 'فشل الدخول بالبصمة، يرجى استخدام كلمة المرور';
+                }
+            } finally {
+                this.biometricLoading = false;
+            }
+        },
+        
         redirectToWhatsApp(userData, compoundName) {
             const whatsappNumber = "201201763086";
             let message = `مرحباً 👋\n\n`;
@@ -358,87 +496,12 @@ export default {
             message += `يرجى تفعيل حسابي في أقرب وقت ممكن 🙏\n`;
             message += `شكراً لكم ✨`;
             
-            const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            const waUrl = /Android|iPhone|iPad/i.test(navigator.userAgent)
+            ? `whatsapp://send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`
+            : `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
             setTimeout(() => {
                 window.location.href = waUrl;
             }, 300);
-        },
-        async checkBiometricAvailability() {
-            // Check if Web Credentials API is available
-            if (window.PublicKeyCredential) {
-                try {
-                    const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-                    this.biometricAvailable = available;
-                } catch (e) {
-                    this.biometricAvailable = false;
-                }
-            }
-        },
-        checkSavedCredentials() {
-            const saved = localStorage.getItem('biometric_credentials');
-            this.hasSavedCredentials = !!saved;
-        },
-        async setupBiometric() {
-            if (!this.pendingCredentials) return;
-            
-            this.biometricLoading = true;
-            try {
-                // Encrypt and store credentials
-                const credentials = btoa(JSON.stringify(this.pendingCredentials));
-                localStorage.setItem('biometric_credentials', credentials);
-                this.hasSavedCredentials = true;
-                this.showBiometricPrompt = false;
-                
-                // Pre-fill login form with phone
-                this.loginForm.phone = this.pendingCredentials.phone;
-                
-                // Redirect to WhatsApp
-                const userData = this.pendingCredentials;
-                this.redirectToWhatsApp({ ...userData, name: '', role: 'resident' }, '');
-            } catch (e) {
-                console.error('Failed to setup biometric:', e);
-            } finally {
-                this.biometricLoading = false;
-                this.pendingCredentials = null;
-            }
-        },
-        skipBiometric() {
-            this.showBiometricPrompt = false;
-            if (this.pendingCredentials) {
-                const userData = this.pendingCredentials;
-                this.redirectToWhatsApp({ ...userData, name: '', role: 'resident' }, '');
-            }
-            this.pendingCredentials = null;
-        },
-        async loginWithBiometric() {
-            this.biometricLoading = true;
-            try {
-                // Request biometric verification
-                const credential = await navigator.credentials.get({
-                    mediation: 'required',
-                    publicKey: {
-                        challenge: new Uint8Array(32),
-                        timeout: 60000,
-                        userVerification: 'required',
-                        rpId: window.location.hostname,
-                    }
-                }).catch(() => null);
-                
-                // If WebAuthn fails, try simple device authentication
-                // For iOS, this triggers Face ID/Touch ID
-                const stored = localStorage.getItem('biometric_credentials');
-                if (stored) {
-                    const creds = JSON.parse(atob(stored));
-                    this.loginForm.phone = creds.phone;
-                    this.loginForm.password = creds.password;
-                    this.loginForm.post('/login');
-                }
-            } catch (e) {
-                console.error('Biometric login failed:', e);
-                this.loginForm.errors.message = 'فشل الدخول بالبصمة، يرجى استخدام كلمة المرور';
-            } finally {
-                this.biometricLoading = false;
-            }
         },
     },
 };

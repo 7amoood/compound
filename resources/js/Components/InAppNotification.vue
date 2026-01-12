@@ -2,7 +2,8 @@
     <transition name="notif">
         <div v-if="notification" 
              @click="handleClick"
-             class="fixed top-4 left-4 right-4 z-[110] bg-white dark:bg-slate-800 shadow-2xl rounded-2xl p-4 border border-slate-100 dark:border-slate-700 flex items-start gap-4 cursor-pointer active:scale-95 transition-transform max-w-md mx-auto pointer-events-auto"
+             class="fixed left-4 right-4 z-[110] bg-white dark:bg-slate-800 shadow-2xl rounded-2xl p-4 border border-slate-100 dark:border-slate-700 flex items-start gap-4 cursor-pointer active:scale-95 transition-transform max-w-md mx-auto pointer-events-auto"
+             style="top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));"
              dir="rtl">
             <div class="size-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <span class="material-symbols-outlined text-primary text-2xl">{{ icon }}</span>

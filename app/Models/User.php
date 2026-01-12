@@ -32,6 +32,9 @@ class User extends Authenticatable
         'total_earnings',
         'fcm_token',
         'market_id',
+        'webauthn_credential_id',
+        'webauthn_public_key',
+        'biometric_enabled',
     ];
 
     /**
@@ -42,6 +45,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'webauthn_credential_id',
+        'webauthn_public_key',
     ];
 
     /**
