@@ -162,27 +162,29 @@ export default {
             const currentScrollTop = contentArea ? contentArea.scrollTop : 0;
             
             // Only allow drag-to-close if:
-            // 1. We're at the top of the content (scrollTop <= 5)
+            // 1. We're at the top of the content (scrollTop <= 2)
             // 2. User is dragging DOWN (deltaY > 0)
-            if (currentScrollTop <= 5 && deltaY > 0) {
-                // Enable dragging after a small threshold
-                if (!this.canDrag && deltaY > 10) {
+            if (currentScrollTop <= 2 && deltaY > 0) {
+                // Enable dragging after a very small threshold
+                if (!this.canDrag && deltaY > 5) {
                     this.canDrag = true;
                 }
                 
                 if (this.canDrag) {
-                    if (!this.isDragging && deltaY > 15) {
+                    if (!this.isDragging && deltaY > 8) {
                         this.isDragging = true;
                     }
                     
                     if (this.isDragging) {
                         // Apply resistance for smoother feel
                         this.currentY = Math.pow(deltaY, 0.9);
+                        // Only prevent default when actually dragging to close
                         if (e.cancelable) e.preventDefault();
                     }
                 }
             } else {
                 // User is either scrolling up or not at top - allow normal scroll
+                // Reset drag state but DON'T prevent default to allow scrolling
                 this.canDrag = false;
                 this.isDragging = false;
             }
