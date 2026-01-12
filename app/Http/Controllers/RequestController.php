@@ -120,8 +120,8 @@ class RequestController extends Controller
         $serviceRequest->load([
             'category:id,name,icon',
             'resident:id,name,phone,block_no,floor,apt_no',
-            'proposals.provider:id,name,phone,photo,rating_average',
-            'acceptedProposal.provider:id,name,phone,photo,rating_average',
+            'proposals.provider:id,name,phone,photo,rating_average,rating_count',
+            'acceptedProposal.provider:id,name,phone,photo,rating_average,rating_count',
             'review',
         ]);
 
