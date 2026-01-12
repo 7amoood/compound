@@ -67,8 +67,14 @@ export default {
                 this.notification = null;
             }, 6000);
             
-            // Play a subtle sound if desired (optional)
-            // try { new Audio('/notif.mp3').play(); } catch(e) {}
+            // Play notification sound
+            try { 
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                audio.volume = 0.5;
+                audio.play(); 
+            } catch(e) {
+                console.warn('Sound play failed', e);
+            }
         },
         handleClick() {
             const requestId = this.notification?.data?.request_id;
@@ -93,5 +99,9 @@ export default {
 .notif-leave-to {
     transform: translateY(-100px);
     opacity: 0;
+}
+
+div {
+    font-family: 'Cairo', sans-serif !important;
 }
 </style>
