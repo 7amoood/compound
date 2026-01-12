@@ -28,7 +28,7 @@ export default {
     props: {
         threshold: {
             type: Number,
-            default: 80 // Increased from 80
+            default: 60 // Reduced from 80 for easier trigger
         },
         onRefresh: {
             type: Function,
@@ -115,8 +115,8 @@ export default {
 
             if (delta > 0) {
                 this.isDragging = true;
-                // Resistance effect - decreased power from 0.85 to 0.75 for firmer feel
-                this.pullDelta = Math.pow(delta, 0.75);
+                // Increased sensitivity (removed resistance slightly)
+                this.pullDelta = Math.pow(delta, 0.85);
                 
                 // Prevent native scrolling when pulling down
                 if (e.cancelable) {
@@ -136,7 +136,7 @@ export default {
 
             if (thresholdMet) {
                 this.isLoading = true;
-                this.pullDelta = 60; // Fixed loading position
+                this.pullDelta = 50; // Fixed loading position
                 
                 try {
                     await this.onRefresh();
