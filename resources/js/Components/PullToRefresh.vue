@@ -28,7 +28,7 @@ export default {
     props: {
         threshold: {
             type: Number,
-            default: 120 // Increased from 80
+            default: 80 // Increased from 80
         },
         onRefresh: {
             type: Function,
@@ -112,17 +112,19 @@ export default {
 
             const currentY = e.touches[0].clientY;
             const delta = currentY - this.startY;
+            const startThreshold = 45; // Dead zone before movement starts
 
-            if (delta > 0) {
+            if (delta > startThreshold) {
                 this.isDragging = true;
-                // Resistance effect - decreased power from 0.85 to 0.75 for firmer feel
-                this.pullDelta = Math.pow(delta, 0.75);
+                // Subtract threshold so movement starts from 0 after the dead zone
+                // Increased exponent slightly for a natural feel after the initial burst
+                this.pullDelta = Math.pow(delta - startThreshold, 0.85);
                 
-                // Prevent native scrolling when pulling down
+                // Prevent native scrolling once we've crossed the threshold
                 if (e.cancelable) {
                     e.preventDefault();
                 }
-            } else {
+            } else if (delta < 0) {
                 this.pullDelta = 0;
                 this.isDragging = false;
             }
