@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompoundController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\NotificationController;
@@ -30,15 +31,15 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/login', [App\Http\Controllers\AuthController::class, 'loginView'])->name('login');
+Route::get('/login', [AuthController::class, 'loginView'])->name('login');
 
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'webLogin']);
+Route::post('/login', [AuthController::class, 'webLogin']);
 
-Route::post('/register', [App\Http\Controllers\AuthController::class, 'webRegister']);
+Route::post('/register', [AuthController::class, 'webRegister']);
 
 Route::middleware('auth')->group(function () {
-    Route::get('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout.get');
-    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout.post');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout.post');
 
     Route::get('/dashboard', function () {
         $user = auth()->user();
@@ -96,12 +97,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/provider/stats', [ReviewController::class, 'providerStats']);
         Route::get('/provider/reviews', [ReviewController::class, 'providerReviews']);
 
-        // If Provider Dashboard calls /api/provider/available-requests and it wasn't in api.php list?
-        // Checking lines 28-90 of api.php... I passed `RequestController::index` on line 38.
-        // Maybe I need to map `/api/provider/available-requests` to `RequestController::index` with a query param?
-        // Or maybe I missed a line in `api.php`.
-        // Let's create a specific route for it if needed, or map it.
-        // I'll check RequestController later if it fails. For now I'll map it to index.
         Route::get('/provider/available-requests', [RequestController::class, 'index']);
 
         // Reviews
