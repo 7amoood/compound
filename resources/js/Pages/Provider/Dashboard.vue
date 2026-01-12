@@ -599,23 +599,23 @@ export default {
                 }
             };
         },
-        async handleNotificationClick(n) {
+        handleNotificationClick(n) {
              if (!n.is_read) {
-                 try { axios.post(`/api/notifications/${n.id}/read`); } catch(e) {}
+                 axios.post(`/api/notifications/${n.id}/read`).catch(() => {});
                  n.is_read = true;
                  this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
              }
              
              const requestId = n.data?.request_id;
              
-             // Close notifications modal first
+             // Close notifications modal
              this.showNotificationsModal = false;
              
-             // Wait for modal close animation, then focus on request
+             // Focus on request if there's a request_id
              if (requestId) {
-                 setTimeout(() => {
+                 this.$nextTick(() => {
                      this.focusRequest(requestId);
-                 }, 600); // Wait for modal to fully close
+                 });
              }
         },
         async loadNotifications() {
@@ -625,6 +625,10 @@ export default {
                 if (response.data.success) {
                     this.notifications = response.data.notifications.data;
                     this.nextNotificationsUrl = response.data.notifications.next_page_url || null;
+                    // Use unread_count from response
+                    if (response.data.unread_count !== undefined) {
+                        this.unreadNotificationsCount = response.data.unread_count;
+                    }
                 }
             } catch (e) {
                 console.error(e);

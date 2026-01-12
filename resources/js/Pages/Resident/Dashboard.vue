@@ -626,24 +626,25 @@ export default {
                 }
             };
         },
-        async handleNotificationClick(n) {
+        handleNotificationClick(n) {
              // Mark as read
              if (!n.is_read) {
-                 try { axios.post(`/api/notifications/${n.id}/read`); } catch(e) {}
+                 axios.post(`/api/notifications/${n.id}/read`).catch(() => {});
                  n.is_read = true;
                  this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
              }
              
              const requestId = n.data?.request_id;
              
-             // Close notifications modal first
+             // Close notifications modal
              this.showNotificationsModal = false;
              
-             // Wait for modal close animation, then open details
+             // Open request details if there's a request_id
              if (requestId) {
-                 setTimeout(() => {
+                 // Use nextTick to ensure the first modal is closed before opening the second
+                 this.$nextTick(() => {
                      this.openRequestDetails(requestId);
-                 }, 600); // Wait for modal to fully close
+                 });
              }
         },
         openRating(request) {
@@ -707,7 +708,10 @@ export default {
                 if (response.data.success) {
                     this.notifications = response.data.notifications.data || response.data.notifications;
                     this.nextNotificationsUrl = response.data.notifications.next_page_url || null;
-                    this.loadUnreadCount();
+                    // Use unread_count from response instead of separate API call
+                    if (response.data.unread_count !== undefined) {
+                        this.unreadNotificationsCount = response.data.unread_count;
+                    }
                 }
             } catch (e) { 
                 console.error(e); 
