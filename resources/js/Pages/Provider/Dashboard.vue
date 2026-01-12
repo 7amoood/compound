@@ -121,21 +121,21 @@
                                 <p class="text-slate-600 dark:text-slate-300 text-sm line-clamp-2">{{ job.notes || 'لا توجد تفاصيل إضافية' }}</p>
                             </div>
                             <div class="pt-1 flex gap-3">
-                                <button :disabled="viewingId === job.id" @click="viewRequest(job.id)" class="flex-1 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
-                                    <span v-if="viewingId === job.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                                <button :disabled="loadingKey === 'view-' + job.id" @click="viewRequest(job.id, 'view-' + job.id)" class="flex-1 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
+                                    <span v-if="loadingKey === 'view-' + job.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
                                     <span v-else class="material-symbols-outlined">visibility</span>
                                 </button>
 
                                 <template v-if="isMarketStaff">
-                                    <button v-if="job.status === 'pending'" :disabled="capturingId === job.id" @click="startMarketOrder(job)" class="flex-[3] h-10 rounded-lg bg-emerald-600 text-white font-medium text-sm shadow-md shadow-emerald-500/20 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
-                                        <span v-if="capturingId === job.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                                    <button v-if="job.status === 'pending'" :disabled="loadingKey === 'cap-' + job.id" @click="startMarketOrder(job, 'cap-' + job.id)" class="flex-[3] h-10 rounded-lg bg-emerald-600 text-white font-medium text-sm shadow-md shadow-emerald-500/20 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+                                        <span v-if="loadingKey === 'cap-' + job.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
                                         <template v-else>
                                             <span>التقاط الطلب</span>
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </template>
                                     </button>
-                                    <button v-else :disabled="viewingId === job.id" @click="viewRequest(job.id)" class="flex-[3] h-10 rounded-lg bg-blue-600 text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                                        <span v-if="viewingId === job.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                                    <button v-else :disabled="loadingKey === 'comp-' + job.id" @click="viewRequest(job.id, 'comp-' + job.id)" class="flex-[3] h-10 rounded-lg bg-blue-600 text-white font-medium text-sm shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                                        <span v-if="loadingKey === 'comp-' + job.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
                                         <template v-else>
                                             <span>إكمال الطلب</span>
                                             <span class="material-symbols-outlined text-[18px]">check_circle</span>
@@ -425,11 +425,14 @@
 
                  <!-- Actions -->
                  <div class="pt-4 border-t border-slate-100 dark:border-slate-700 flex gap-3">
-                     <button v-if="requestDetails.status === 'pending' && isMarketStaff" 
-                             @click="startMarketOrder(requestDetails)"
+                     <button :disabled="loadingKey === 'modal-start'" v-if="requestDetails.status === 'pending' && isMarketStaff" 
+                             @click="startMarketOrder(requestDetails, 'modal-start')"
                              class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
-                         <span>بدء التجهيز</span>
-                         <span class="material-symbols-outlined">play_arrow</span>
+                          <span v-if="loadingKey === 'modal-start'" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                          <template v-else>
+                              <span>بدء التجهيز</span>
+                              <span class="material-symbols-outlined">play_arrow</span>
+                          </template>
                      </button>
                      
                      <button v-if="requestDetails.status === 'in_progress'" 
@@ -492,9 +495,8 @@ export default {
             // Market/Details Modal
             showRequestDetailsModal: false,
             requestDetails: null,
-            // Local loading states
-            capturingId: null,
-            viewingId: null,
+            // Local loading state for buttons
+            loadingKey: null,
         };
     },
     computed: {
@@ -603,10 +605,10 @@ export default {
             }
             
             // 3. Fallback: Fetch details directly and open Details Modal
-            await this.viewRequest(id);
+            await this.viewRequest(id, 'focus-' + id);
         },
-        async viewRequest(id) {
-            this.viewingId = id;
+        async viewRequest(id, key = null) {
+            if (key) this.loadingKey = key;
             try {
                 const response = await axios.get(`/api/requests/${id}`);
                 if(response.data.success) {
@@ -617,7 +619,7 @@ export default {
                 console.error(e);
                 window.showToast('تعذر تحميل تفاصيل الطلب', 'error');
             } finally {
-                this.viewingId = null;
+                if (key) this.loadingKey = null;
             }
         },
         async toggleItem(item) {
@@ -632,9 +634,9 @@ export default {
                  window.showToast('فشل تحديث الحالة', 'error');
              }
         },
-        async startMarketOrder(inputReq) {
+        async startMarketOrder(inputReq, key = null) {
              const req = inputReq || this.requestDetails;
-             if (inputReq) this.capturingId = req.id;
+             if (key) this.loadingKey = key;
              try {
                   const response = await axios.post(`/api/requests/${req.id}/start-market-order`);
                   if (response.data.success) {
@@ -645,7 +647,7 @@ export default {
              } catch (e) {
                   window.showToast(e.response?.data?.message || 'حدث خطأ', 'error');
              } finally {
-                  this.capturingId = null;
+                  if (key) this.loadingKey = null;
              }
         },
         setMyJobsFilter(filter) {
