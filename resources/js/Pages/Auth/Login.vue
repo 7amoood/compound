@@ -1,12 +1,12 @@
 <template>
     <Head title="تسجيل الدخول - خدمات المجمع" />
     
-    <div class="relative flex min-h-[100dvh] w-full flex-col overflow-x-hidden overflow-y-auto max-w-md mx-auto bg-white dark:bg-background-dark shadow-sm font-display pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]" dir="rtl">
-        <!-- Header Section -->
+    <div class="relative flex min-h-[100dvh] w-full flex-col overflow-x-hidden overflow-y-auto max-w-md mx-auto bg-white dark:bg-background-dark shadow-sm font-display pb-[env(safe-area-inset-bottom)]" dir="rtl">
+        <!-- Header Section - Image goes to very top, content has safe area -->
         <div class="@container">
-            <div class="@[480px]:px-4 @[480px]:py-3 pt-0">
-                <div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-slate-50 @[480px]:rounded-lg min-h-[280px] relative" 
-                     style='background-image: url("/assets/garden_city.png");'>
+            <div class="@[480px]:px-4 @[480px]:py-3">
+                <div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-slate-50 @[480px]:rounded-lg relative" 
+                     style="background-image: url('/assets/garden_city.png'); min-height: calc(280px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top);">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     <div class="relative p-6">
                         <div class="flex items-center gap-2 mb-2">
