@@ -39,7 +39,10 @@
                         </button>
                     </div>
                     <!-- Scrollable Content -->
-                    <div class="flex-1 overflow-y-auto no-scrollbar p-6 pb-24">
+                    <div ref="contentArea" 
+                         class="flex-1 overflow-y-auto no-scrollbar p-6 pb-24"
+                         @touchstart="startDrag"
+                         @mousedown="startDrag">
                         <slot></slot>
                     </div>
                 </div>
@@ -62,6 +65,9 @@ export default {
             startY: 0,
             currentY: 0,
             isDragging: false,
+            startTime: 0,
+            canDrag: false,
+            initialScrollTop: 0,
         };
     },
     computed: {
@@ -115,8 +121,21 @@ export default {
             }
         },
         startDrag(e) {
-            this.isDragging = true;
+            // Check if content is scrollable and at top
+            const contentArea = this.$refs.contentArea;
+            if (contentArea) {
+                this.initialScrollTop = contentArea.scrollTop;
+                // Only allow drag if we're at the top of scrollable content
+                if (this.initialScrollTop > 5) {
+                    this.canDrag = false;
+                    return;
+                }
+            }
+            
+            this.canDrag = true;
+            this.isDragging = false; // Will be set to true on first move
             this.startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            this.startTime = Date.now();
             
             document.addEventListener('mousemove', this.onDrag);
             document.addEventListener('touchmove', this.onDrag, { passive: false });
@@ -124,32 +143,58 @@ export default {
             document.addEventListener('touchend', this.stopDrag);
         },
         onDrag(e) {
-            if (!this.isDragging) return;
+            if (!this.canDrag) return;
             
             const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
             const deltaY = clientY - this.startY;
             
+            // Only drag down
             if (deltaY > 0) {
-                this.currentY = deltaY;
-                if (e.cancelable) e.preventDefault();
+                // Start dragging after a small threshold to avoid conflicts
+                if (!this.isDragging && deltaY > 3) {
+                    this.isDragging = true;
+                }
+                
+                if (this.isDragging) {
+                    // Apply resistance for smoother feel
+                    this.currentY = Math.pow(deltaY, 0.9);
+                    if (e.cancelable) e.preventDefault();
+                }
             }
         },
         stopDrag() {
-            if (!this.isDragging) return;
-            this.isDragging = false;
+            if (!this.canDrag) {
+                this.cleanup();
+                return;
+            }
             
+            const wasDragging = this.isDragging;
+            this.isDragging = false;
+            this.canDrag = false;
+            
+            this.cleanup();
+            
+            if (!wasDragging) return;
+            
+            // Calculate velocity for natural swipe detection
+            const timeDiff = Date.now() - this.startTime;
+            const velocity = this.currentY / timeDiff;
+            
+            // Close if:
+            // 1. Dragged more than 80px (reduced from 120px)
+            // 2. Fast swipe down (velocity > 0.5)
+            if (this.currentY > 80 || velocity > 0.5) {
+                this.closeModal();
+            } else {
+                // Bounce back smoothly
+                this.currentY = 0;
+            }
+        },
+        cleanup() {
             document.removeEventListener('mousemove', this.onDrag);
             document.removeEventListener('touchmove', this.onDrag);
             document.removeEventListener('mouseup', this.stopDrag);
             document.removeEventListener('touchend', this.stopDrag);
-            
-            if (this.currentY > 120) {
-                this.closeModal();
-                // Optionally keep a small delay before clearing currentY to let the transition finish
-                // but Transition component will apply its own transform so it's usually fine.
-            } else {
-                this.currentY = 0;
-            }
         }
     },
 };
