@@ -2,7 +2,7 @@
     <Head title="الإعدادات - خدمات المجمع" />
     <Toast />
     
-    <div class="relative flex h-[100dvh] w-full flex-col mx-auto max-w-md bg-background-light dark:bg-background-dark font-display" dir="rtl">
+    <div class="relative flex h-[100vh] w-full flex-col mx-auto max-w-md bg-background-light dark:bg-background-dark font-display" dir="rtl">
         <!-- Top App Bar (iOS style) -->
         <header class="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
             <Link href="/dashboard" class="flex items-center text-primary text-base font-normal -mr-1">
