@@ -32,3 +32,38 @@ createInertiaApp({
 
 // Service worker registration is handled in firebase.js during notification permission request
 
+// Global Service Worker Message Listener for Notification Clicks
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'ON_NOTIFICATION_CLICK') {
+            const urlString = event.data.url;
+
+            // Parse URL
+            const urlObj = new URL(urlString, window.location.origin);
+            const requestId = urlObj.searchParams.get('request_id');
+
+            if (requestId) {
+                // Check if we are on a dashboard page
+                const currentPath = window.location.pathname;
+                const isDashboard = currentPath.includes('/resident') ||
+                    currentPath.includes('/provider') ||
+                    currentPath.includes('/dashboard');
+
+                if (isDashboard) {
+                    // Dispatch a custom event that dashboards are listening to
+                    window.dispatchEvent(new CustomEvent('open-request-details', {
+                        detail: { requestId: parseInt(requestId) }
+                    }));
+                } else {
+                    // Not on dashboard, navigate to it (Inertia handles this smoothly)
+                    router.visit(urlString);
+                }
+            } else {
+                // Fallback: navigate using Inertia to avoid reload
+                const path = urlObj.pathname + urlObj.search;
+                router.visit(path);
+            }
+        }
+    });
+}
+

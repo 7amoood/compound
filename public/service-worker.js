@@ -120,12 +120,16 @@ self.addEventListener('notificationclick', event => {
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
                 if ('focus' in client) {
-                    client.focus();
-                    // Send message to let the app handle navigation smoothly (SPA)
-                    client.postMessage({
-                        type: 'ON_NOTIFICATION_CLICK',
-                        url: urlToOpen
-                    });
+                    client.focus().then(() => {
+                        // Wait a bit for the page to wake up fully
+                        setTimeout(() => {
+                            client.postMessage({
+                                type: 'ON_NOTIFICATION_CLICK',
+                                url: urlToOpen
+                            });
+                        }, 200);
+                    }).catch(err => console.error('Focus failed:', err));
+
                     return;
                 }
             }

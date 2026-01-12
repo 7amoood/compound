@@ -1,25 +1,25 @@
 {
-  "_Modal-4zpZU99j.js": {
-    "file": "assets/Modal-4zpZU99j.js",
+  "_Modal-ACkwF3lE.css": {
+    "file": "assets/Modal-ACkwF3lE.css",
+    "src": "_Modal-ACkwF3lE.css"
+  },
+  "_Modal-DIVI1qt_.js": {
+    "file": "assets/Modal-DIVI1qt_.js",
     "name": "Modal",
     "imports": [
-      "_vendor-DhvMcwBQ.js",
+      "_vendor-CWDXIMv3.js",
       "resources/js/app.js"
     ],
     "css": [
       "assets/Modal-ACkwF3lE.css"
     ]
   },
-  "_Modal-ACkwF3lE.css": {
-    "file": "assets/Modal-ACkwF3lE.css",
-    "src": "_Modal-ACkwF3lE.css"
-  },
-  "_firebase-CR6JpfPq.js": {
-    "file": "assets/firebase-CR6JpfPq.js",
+  "_firebase-CuvXdY9m.js": {
+    "file": "assets/firebase-CuvXdY9m.js",
     "name": "firebase",
     "imports": [
       "resources/js/app.js",
-      "_vendor-DhvMcwBQ.js"
+      "_vendor-CWDXIMv3.js"
     ],
     "dynamicImports": [
       "node_modules/firebase/app/dist/esm/index.esm.js",
@@ -39,8 +39,8 @@
     "file": "assets/index.esm-BJAW3Jpj.js",
     "name": "index.esm"
   },
-  "_vendor-DhvMcwBQ.js": {
-    "file": "assets/vendor-DhvMcwBQ.js",
+  "_vendor-CWDXIMv3.js": {
+    "file": "assets/vendor-CWDXIMv3.js",
     "name": "vendor"
   },
   "node_modules/firebase/app/dist/esm/index.esm.js": {
@@ -71,13 +71,13 @@
     ]
   },
   "resources/js/Pages/Admin/Dashboard.vue": {
-    "file": "assets/Dashboard-Dz2XivDs.js",
+    "file": "assets/Dashboard-CtSYnZJt.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-DhvMcwBQ.js",
-      "_Modal-4zpZU99j.js",
+      "_vendor-CWDXIMv3.js",
+      "_Modal-DIVI1qt_.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -86,12 +86,12 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-xsDcHCsw.js",
+    "file": "assets/Login-BFHytnpb.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-DhvMcwBQ.js",
+      "_vendor-CWDXIMv3.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -99,14 +99,14 @@
     ]
   },
   "resources/js/Pages/Provider/Dashboard.vue": {
-    "file": "assets/Dashboard-CIeStxgs.js",
+    "file": "assets/Dashboard-WE_wjtsC.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Provider/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-DhvMcwBQ.js",
-      "_Modal-4zpZU99j.js",
-      "_firebase-CR6JpfPq.js",
+      "_vendor-CWDXIMv3.js",
+      "_Modal-DIVI1qt_.js",
+      "_firebase-CuvXdY9m.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -115,14 +115,14 @@
     ]
   },
   "resources/js/Pages/Resident/Dashboard.vue": {
-    "file": "assets/Dashboard-BuAVICBJ.js",
+    "file": "assets/Dashboard-Bb5-Qjx7.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Resident/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-DhvMcwBQ.js",
-      "_Modal-4zpZU99j.js",
-      "_firebase-CR6JpfPq.js",
+      "_vendor-CWDXIMv3.js",
+      "_Modal-DIVI1qt_.js",
+      "_firebase-CuvXdY9m.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -131,13 +131,13 @@
     ]
   },
   "resources/js/Pages/Settings.vue": {
-    "file": "assets/Settings-DC4VuHpw.js",
+    "file": "assets/Settings-DHobMP_v.js",
     "name": "Settings",
     "src": "resources/js/Pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-DhvMcwBQ.js",
-      "_Modal-4zpZU99j.js",
+      "_vendor-CWDXIMv3.js",
+      "_Modal-DIVI1qt_.js",
       "resources/js/app.js"
     ],
     "css": [
@@ -146,12 +146,12 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DZoyKW8J.js",
+    "file": "assets/app-C6zEG9LV.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_vendor-DhvMcwBQ.js"
+      "_vendor-CWDXIMv3.js"
     ],
     "dynamicImports": [
       "resources/js/Pages/Admin/Dashboard.vue",
