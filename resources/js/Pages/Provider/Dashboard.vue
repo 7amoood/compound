@@ -450,11 +450,13 @@ export default {
             if (availableJob) {
                 this.switchToTab('available');
                 this.openProposalModal(availableJob);
-                // Also update URL to show this tab
-                const url = new URL(window.location);
-                url.searchParams.set('tab', 'available');
-                url.searchParams.set('request_id', id);
-                window.history.replaceState(window.history.state, '', url);
+                // Also update URL to show this tab (AFTER modal opens)
+                this.$nextTick(() => {
+                    const url = new URL(window.location);
+                    url.searchParams.set('tab', 'available');
+                    url.searchParams.set('request_id', id);
+                    window.history.replaceState(window.history.state, '', url);
+                });
                 return;
             }
         },

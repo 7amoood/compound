@@ -569,12 +569,15 @@ export default {
             }
         },
         async openRequestDetails(id) {
-            // Add request_id to URL
-            const url = new URL(window.location);
-            url.searchParams.set('request_id', id);
-            window.history.replaceState(window.history.state, '', url);
-            
             this.showRequestDetailsModal = true;
+            
+            // Update URL AFTER modal opens and pushes its state
+            this.$nextTick(() => {
+                const url = new URL(window.location);
+                url.searchParams.set('request_id', id);
+                window.history.replaceState(window.history.state, '', url);
+            });
+
             this.loadingProposals = true;
             this.currentProposals = [];
             
