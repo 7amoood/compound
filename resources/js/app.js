@@ -6,6 +6,7 @@ import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 import PWAInstaller from './Components/PWAInstaller.vue';
+import InAppNotification from './Components/InAppNotification.vue';
 
 createInertiaApp({
     title: (title) => `${title} - خدمات المجمع`,
@@ -14,7 +15,8 @@ createInertiaApp({
         const app = createApp({
             render: () => h('div', [
                 h(App, props),
-                h(PWAInstaller)
+                h(PWAInstaller),
+                h(InAppNotification)
             ])
         });
         app.use(plugin);
@@ -67,4 +69,27 @@ if ('BroadcastChannel' in window) {
         }
     };
 }
+
+// Prevent iOS Rubber Banding / Elastic Scrolling on body
+document.addEventListener('touchmove', function (e) {
+    // Only prevent if the target is NOT inside a scrollable element
+    let isScrollable = false;
+    let el = e.target;
+
+    while (el && el !== document.body && el !== document.documentElement) {
+        if (el instanceof HTMLElement) {
+            const style = window.getComputedStyle(el);
+            const overflow = style.getPropertyValue('overflow-y');
+            if ((overflow === 'auto' || overflow === 'scroll') && el.scrollHeight > el.clientHeight) {
+                isScrollable = true;
+                break;
+            }
+        }
+        el = el.parentElement;
+    }
+
+    if (!isScrollable && e.cancelable) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
