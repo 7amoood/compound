@@ -81,8 +81,11 @@
                                 <p class="mt-2">لا توجد طلبات</p>
                             </div>
 
-                            <div v-for="(req, index) in requests" :key="req.id" @click="openRequestDetails(req.id)"
-                                 class="group flex flex-col bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer">
+                            <div v-for="(req, index) in requests" :key="req.id" @click="openRequestDetails(req.id, 'req-' + req.id)"
+                                 class="group flex flex-col bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 active:bg-slate-50 dark:active:bg-slate-800 transition-colors cursor-pointer relative overflow-hidden">
+                                <div v-if="loadingKey === 'req-' + req.id" class="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-[1px] flex items-center justify-center z-10 transition-all">
+                                    <span class="material-symbols-outlined animate-spin text-primary text-3xl">progress_activity</span>
+                                </div>
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="flex items-center gap-4">
                                         <div class="flex items-center justify-center size-12 rounded-xl shrink-0" :class="getServiceColor(index)">
@@ -383,7 +386,10 @@
             <Modal :show="showNotificationsModal" title="الإشعارات" @close="showNotificationsModal = false">
                 <div class="flex items-center justify-between mb-4 px-1" v-if="notifications.length > 0">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">سجل التنبيهات</h3>
-                    <button v-if="unreadNotificationsCount > 0" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline">تحديد الكل كمقروء</button>
+                    <button v-if="unreadNotificationsCount > 0" :disabled="loadingMarkAll" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                        <span v-if="loadingMarkAll" class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
+                        <span>تحديد الكل كمقروء</span>
+                    </button>
                 </div>
                 <div class="space-y-3">
                     <div v-if="loadingNotifications" class="text-center py-12 text-slate-400">
@@ -504,6 +510,9 @@ export default {
             confirmMessage: '',
             confirmAction: null,
             processingConfirm: false,
+            // Local loading state for buttons
+            loadingKey: null,
+            loadingMarkAll: false,
         };
     },
     computed: {
@@ -683,7 +692,8 @@ export default {
                 this.submittingRequest = false;
             }
         },
-        async openRequestDetails(id) {
+        async openRequestDetails(id, key = null) {
+            if (key) this.loadingKey = key;
             this.showRequestDetailsModal = true;
             
             // Update URL AFTER modal opens and pushes its state
@@ -713,6 +723,7 @@ export default {
                 window.showToast('تعذر تحميل التفاصيل', 'error');
             } finally {
                 this.loadingProposals = false;
+                if (key) this.loadingKey = null;
             }
         },
         acceptProposal(proposal) {
@@ -856,6 +867,7 @@ export default {
             }
         },
         async markAllNotificationsAsRead() {
+            this.loadingMarkAll = true;
             try {
                 const response = await axios.post('/api/notifications/read-all');
                 if (response.data.success) {
@@ -866,6 +878,8 @@ export default {
             } catch (e) {
                 console.error(e);
                 window.showToast('حدث خطأ', 'error');
+            } finally {
+                this.loadingMarkAll = false;
             }
         },
         async loadUnreadCount() {

@@ -48,10 +48,11 @@
             <div class="px-4 mb-2 grid grid-cols-2 gap-3">
                 <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
                     <div class="flex items-center gap-2 mb-1">
-                        <span class="material-symbols-outlined text-green-500 text-xl">payments</span>
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">الأرباح اليوم</span>
+                        <span class="material-symbols-outlined text-xl" :class="isMarketStaff ? 'text-primary' : 'text-green-500'">{{ isMarketStaff ? 'shopping_bag' : 'payments' }}</span>
+                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ isMarketStaff ? 'طلبات اليوم' : 'الأرباح اليوم' }}</span>
                     </div>
-                    <p class="text-xl font-bold text-slate-900 dark:text-white">{{ stats.today_earnings || 0 }} ج.م</p>
+                    <p v-if="isMarketStaff" class="text-xl font-bold text-slate-900 dark:text-white">{{ stats.today_completed_jobs || 0 }} <span class="text-xs font-normal text-slate-400">طلب</span></p>
+                    <p v-else class="text-xl font-bold text-slate-900 dark:text-white">{{ stats.today_earnings || 0 }} ج.م</p>
                 </div>
                 <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
                     <div class="flex items-center gap-2 mb-1">
@@ -225,9 +226,12 @@
                             </div>
                         </div>
                         <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex gap-2">
-                             <button @click="viewRequest(job.id)" class="flex-1 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2">
-                                 <span>عرض التفاصيل</span>
-                                 <span class="material-symbols-outlined text-[18px]">visibility</span>
+                             <button :disabled="loadingKey === 'view-' + job.id" @click="viewRequest(job.id, 'view-' + job.id)" class="flex-1 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2">
+                                 <span v-if="loadingKey === 'view-' + job.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                                 <template v-else>
+                                     <span>عرض التفاصيل</span>
+                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                 </template>
                              </button>
                         </div>
                     </div>
@@ -265,8 +269,9 @@
                              </div>
                         </div>
                         
-                        <button v-if="hasMoreReviews" @click="loadMoreReviews" class="w-full py-3 text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-colors">
-                            تحميل المزيد
+                        <button v-if="hasMoreReviews" :disabled="loadingMoreReviews" @click="loadMoreReviews" class="w-full py-3 text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-colors flex items-center justify-center gap-2">
+                            <span v-if="loadingMoreReviews" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                            <span>تحميل المزيد</span>
                         </button>
                     </div>
                 </template>
@@ -311,7 +316,10 @@
         <Modal :show="showNotificationsModal" title="الإشعارات" @close="showNotificationsModal = false">
             <div class="flex items-center justify-between mb-4 px-1" v-if="notifications.length > 0">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">سجل التنبيهات</h3>
-                <button v-if="unreadNotificationsCount > 0" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline">تحديد الكل كمقروء</button>
+                <button v-if="unreadNotificationsCount > 0" :disabled="loadingMarkAll" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                    <span v-if="loadingMarkAll" class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
+                    <span>تحديد الكل كمقروء</span>
+                </button>
             </div>
             <div class="space-y-3">
                 <div v-if="loadingNotifications" class="text-center py-12 text-slate-400">
@@ -341,24 +349,7 @@
             </div>
         </Modal>
 
-        <!-- Confirmation Modal -->
-        <Modal :show="showConfirmModal" title="تأكيد الإجراء" @close="showConfirmModal = false">
-            <div class="space-y-4">
-                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl flex gap-3 text-amber-800 dark:text-amber-200">
-                    <span class="material-symbols-outlined text-2xl flex-shrink-0">warning</span>
-                    <p class="text-sm font-medium leading-relaxed">{{ confirmMessage }}</p>
-                </div>
-                <div class="flex gap-3">
-                    <button @click="showConfirmModal = false" class="flex-1 py-3 text-slate-600 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
-                        إلغاء
-                    </button>
-                    <button @click="confirmAction" :disabled="processingConfirm" class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors">
-                        <span v-if="processingConfirm" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-                        <span>تأكيد</span>
-                    </button>
-                </div>
-            </div>
-        </Modal>
+
 
         <!-- Request Details Modal -->
         <Modal :show="showRequestDetailsModal" title="تفاصيل الطلب" @close="showRequestDetailsModal = false">
@@ -448,6 +439,25 @@
                  </div>
              </div>
         </Modal>
+
+        <!-- Confirmation Modal -->
+        <Modal :show="showConfirmModal" title="تأكيد الإجراء" @close="showConfirmModal = false">
+            <div class="space-y-4">
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl flex gap-3 text-amber-800 dark:text-amber-200">
+                    <span class="material-symbols-outlined text-2xl flex-shrink-0">warning</span>
+                    <p class="text-sm font-medium leading-relaxed">{{ confirmMessage }}</p>
+                </div>
+                <div class="flex gap-3">
+                    <button @click="showConfirmModal = false" class="flex-1 py-3 text-slate-600 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
+                        إلغاء
+                    </button>
+                    <button @click="confirmAction" :disabled="processingConfirm" class="flex-1 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors">
+                        <span v-if="processingConfirm" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                        <span>تأكيد</span>
+                    </button>
+                </div>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -497,6 +507,8 @@ export default {
             requestDetails: null,
             // Local loading state for buttons
             loadingKey: null,
+            loadingMarkAll: false,
+            loadingMoreReviews: false,
         };
     },
     computed: {
@@ -721,8 +733,11 @@ export default {
             if (reset) {
                 this.reviewsPage = 1;
                 this.reviews = [];
+                if (handleLoading) this.loading = true;
+            } else {
+                this.loadingMoreReviews = true;
             }
-            if (handleLoading) this.loading = true;
+
             try {
                 const response = await axios.get(`/api/provider/reviews?page=${this.reviewsPage}`);
                 if (response.data.success) {
@@ -736,7 +751,11 @@ export default {
             } catch (e) {
                 console.error(e);
             } finally {
-                if (handleLoading) this.loading = false;
+                if (reset) {
+                    if (handleLoading) this.loading = false;
+                } else {
+                    this.loadingMoreReviews = false;
+                }
             }
         },
         loadMoreReviews() {
@@ -886,6 +905,7 @@ export default {
             }
         },
         async markAllNotificationsAsRead() {
+            this.loadingMarkAll = true;
             try {
                 const response = await axios.post('/api/notifications/read-all');
                 if (response.data.success) {
@@ -896,6 +916,8 @@ export default {
             } catch (e) {
                 console.error(e);
                 window.showToast('حدث خطأ', 'error');
+            } finally {
+                this.loadingMarkAll = false;
             }
         },
         async loadUnreadCount() {

@@ -106,19 +106,22 @@ class ReviewController extends Controller
             ->sum('price');
 
         // Get total completed jobs
-        $completedJobs = $user->proposals()
+        $completedJobsQuery = $user->proposals()
             ->whereHas('request', function ($q) {
                 $q->where('status', 'completed');
-            })
-            ->count();
+            });
+
+        $completedJobs      = (clone $completedJobsQuery)->count();
+        $todayCompletedJobs = $completedJobsQuery->whereDate('updated_at', '>=', $today)->count();
         return response()->json([
             'success' => true,
             'stats'   => [
-                'average_rating' => $user->rating_average, // Denormalized field
-                'reviews_count'  => $user->rating_count,   // Denormalized field
-                'total_earnings' => $user->total_earnings, // Denormalized field
-                'today_earnings' => $todayEarnings,
-                'completed_jobs' => $completedJobs,
+                'average_rating'       => $user->rating_average, // Denormalized field
+                'reviews_count'        => $user->rating_count,   // Denormalized field
+                'total_earnings'       => $user->total_earnings, // Denormalized field
+                'today_earnings'       => $todayEarnings,
+                'completed_jobs'       => $completedJobs,
+                'today_completed_jobs' => $todayCompletedJobs,
             ],
         ]);
     }
