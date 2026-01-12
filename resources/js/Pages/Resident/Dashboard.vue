@@ -935,6 +935,5 @@ export default {
 <style scoped>
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 .fill-1 { font-variation-settings: 'FILL' 1; }
 </style>
