@@ -33,15 +33,15 @@
 
         <!-- Content -->
         <div class="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-24">
-            <PullToRefresh :onRefresh="loadData">
-                <div class="flex flex-col gap-3 p-4">
+            <PullToRefresh :onRefresh="loadData" class="min-h-full">
+                <div class="flex flex-col gap-3 p-4 min-h-[60vh]">
                     <!-- Loading -->
                     <div v-if="loading" class="text-center py-12 text-slate-400">
                         <span class="material-symbols-outlined text-4xl animate-spin">progress_activity</span>
                     </div>
 
                     <!-- Empty State -->
-                    <div v-else-if="requests.length === 0" class="text-center py-12 text-slate-400">
+                    <div v-else-if="requests.length === 0" class="flex-1 flex flex-col items-center justify-center text-center py-12 text-slate-400">
                         <span class="material-symbols-outlined text-5xl">{{ emptyIcon }}</span>
                         <p class="mt-2">{{ emptyMessage }}</p>
                     </div>
@@ -56,6 +56,11 @@
                                     :style="`background-image: url('${req.requester?.photo || 'https://ui-avatars.com/api/?name=' + (req.requester?.name || 'U')}');`"></div>
                                 <div>
                                     <p class="font-bold text-slate-900 dark:text-white text-sm">{{ req.requester?.name }}</p>
+                                    <p v-if="activeTab === 'available' && req.requester" class="text-xs text-slate-500">
+                                        <span v-if="req.requester.block_no">عمارة {{ req.requester.block_no }}</span>
+                                        <span v-if="req.requester.floor"> - الدور {{ req.requester.floor }}</span>
+                                        <span v-if="req.requester.apt_no"> - شقة {{ req.requester.apt_no }}</span>
+                                    </p>
                                     <p class="text-xs text-slate-400">{{ formatDate(req.created_at) }}</p>
                                 </div>
                             </div>
@@ -229,7 +234,6 @@ export default {
                 { id: 'available', label: 'طلبات متاحة' },
                 { id: 'my', label: 'طلباتي' },
                 { id: 'helped', label: 'ساعدت فيها' },
-                { id: 'cancelled', label: 'ملغية' },
             ],
             requests: [],
             loading: false,

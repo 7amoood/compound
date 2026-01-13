@@ -131,9 +131,9 @@ class NotificationController extends Controller
             'fcm_token' => $token,
         ]);
 
-        // 3. Subscribe residents to help topic
-        if ($activeUser->role === 'resident') {
-            $this->subscribeToTopic($token, 'residents_help');
+        // 3. Subscribe residents to their compound's help topic
+        if ($activeUser->role === 'resident' && $activeUser->compound_id) {
+            $this->subscribeToTopic($token, "compound_{$activeUser->compound_id}_help");
         }
 
         return response()->json([
@@ -151,6 +151,7 @@ class NotificationController extends Controller
         $authFile  = env('FIREBASE_CREDENTIALS', storage_path('app/firebase-auth.json'));
 
         if (! file_exists($authFile)) {
+            \Illuminate\Support\Facades\Log::warning("FCM Topic Subscribe: Missing auth file");
             return;
         }
 
@@ -160,10 +161,16 @@ class NotificationController extends Controller
             $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
             $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
 
-            \Illuminate\Support\Facades\Http::withHeaders([
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Authorization' => 'Bearer ' . $accessToken,
                 'Content-Type'  => 'application/json',
             ])->post("https://iid.googleapis.com/iid/v1/{$token}/rel/topics/{$topic}");
+
+            if ($response->successful()) {
+                \Illuminate\Support\Facades\Log::info("FCM Topic Subscribe: Successfully subscribed to {$topic}");
+            } else {
+                \Illuminate\Support\Facades\Log::error("FCM Topic Subscribe Failed: " . $response->body());
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('FCM Topic Subscribe Error: ' . $e->getMessage());
         }

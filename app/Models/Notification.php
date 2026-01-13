@@ -31,6 +31,8 @@ class Notification extends Model
     const TYPE_WORK_STARTED      = 'work_started';
     const TYPE_WORK_COMPLETED    = 'work_completed';
     const TYPE_NEW_REVIEW        = 'new_review';
+    const TYPE_HELP_PICKED       = 'help_picked';
+    const TYPE_HELP_COMMENT      = 'help_comment';
 
     /**
      * Get the user that owns the notification

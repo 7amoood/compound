@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\HelpComment;
 use App\Models\HelpRequest;
+use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -31,7 +32,7 @@ class HelpController extends Controller
             ->whereHas('requester', function ($q) use ($user) {
                 $q->where('compound_id', $user->compound_id);
             })
-            ->with(['requester:id,name,photo', 'comments' => function ($q) {
+            ->with(['requester:id,name,photo,block_no,floor,apt_no', 'comments' => function ($q) {
                 $q->latest()->limit(3);
             }, 'comments.user:id,name,photo'])
             ->latest()
@@ -105,8 +106,8 @@ class HelpController extends Controller
             'status'       => HelpRequest::STATUS_OPEN,
         ]);
 
-        // Send FCM topic notification to all residents
-        $this->sendTopicNotification($user->name, $request->description);
+        // Send FCM topic notification to residents in the same compound
+        $this->sendTopicNotification($user->compound_id, $user->name, $request->description);
 
         $helpRequest->load('requester:id,name,photo');
 
@@ -145,6 +146,15 @@ class HelpController extends Controller
             'helper_id' => $user->id,
             'picked_at' => now(),
         ]);
+
+        // Notify the requester that someone picked up their request
+        Notification::send(
+            $helpRequest->requester_id,
+            Notification::TYPE_HELP_PICKED,
+            '🙋 جارك قدّم لك المساعدة!',
+            "{$user->name} تطوّع لمساعدتك",
+            ['help_request_id' => $helpRequest->id, 'helper_name' => $user->name]
+        );
 
         $helpRequest->load(['requester:id,name,photo,phone', 'helper:id,name,photo,phone']);
 
@@ -256,6 +266,18 @@ class HelpController extends Controller
             'comment'         => $request->comment,
         ]);
 
+        // Notify the other party about the new comment
+        $recipientId = $isOwner ? $helpRequest->helper_id : $helpRequest->requester_id;
+        if ($recipientId) {
+            Notification::send(
+                $recipientId,
+                Notification::TYPE_HELP_COMMENT,
+                '💬 تعليق جديد',
+                "{$user->name}: " . mb_substr($request->comment, 0, 50),
+                ['help_request_id' => $helpRequest->id]
+            );
+        }
+
         $comment->load('user:id,name,photo');
 
         return response()->json([
@@ -286,10 +308,14 @@ class HelpController extends Controller
     }
 
     /**
-     * Send FCM topic notification
+     * Send FCM topic notification to compound residents
      */
-    protected function sendTopicNotification(string $requesterName, string $description): void
+    protected function sendTopicNotification(?int $compoundId, string $requesterName, string $description): void
     {
+        if (! $compoundId) {
+            return;
+        }
+
         $projectId = env('FIREBASE_PROJECT_ID', 'garden-city-compound');
         $authFile  = env('FIREBASE_CREDENTIALS', storage_path('app/firebase-auth.json'));
 
@@ -304,12 +330,15 @@ class HelpController extends Controller
             $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
             $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
 
+            // Topic specific to compound
+            $topic = "compound_{$compoundId}_help";
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $accessToken,
                 'Content-Type'  => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
                 'message' => [
-                    'topic'        => 'residents_help',
+                    'topic'        => $topic,
                     'notification' => [
                         'title' => '🆘 طلب مساعدة جديد',
                         'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),
