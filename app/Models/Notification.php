@@ -101,10 +101,10 @@ class Notification extends Model
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
                 'message' => [
                     'token'        => $user->fcm_token,
-                    'notification' => [
-                        'title' => $notification->title,
-                        'body'  => $notification->body,
-                    ],
+                    // 'notification' => [
+                    //     'title' => $notification->title,
+                    //     'body'  => $notification->body,
+                    // ],
                     'data'         => [
                         'title'           => $notification->title,
                         'body'            => $notification->body,

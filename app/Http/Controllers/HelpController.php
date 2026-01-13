@@ -372,10 +372,10 @@ class HelpController extends Controller
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
                 'message'         => [
                     'topic'        => $topic,
-                    'notification' => [
-                        'title' => '🆘 طلب مساعدة جديد',
-                        'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),
-                    ],
+                    // 'notification' => [
+                    //     'title' => '🆘 طلب مساعدة جديد',
+                    //     'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),
+                    // ],
                     'data'            => [
                         'title' => '🆘 طلب مساعدة جديد',
                         'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),

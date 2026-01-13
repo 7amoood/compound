@@ -83,7 +83,7 @@ messaging.onBackgroundMessage(async (payload) => {
     // the browser (Chrome/Safari) will display it automatically in the background.
     // We only show a manual one if it's a data-only message.
     // if (!payload.notification) {
-        const notificationTitle = 'momo';
+        const notificationTitle = payload.data.title || 'إشعار جديد';
         const notificationOptions = {
             body: payload.data.body || '',
             icon: '/icons/icon-192x192.png',
@@ -95,7 +95,43 @@ messaging.onBackgroundMessage(async (payload) => {
     // }
 });
 
-// 4. PWA Caching Logic
+// 4. Handle Notification Clicks
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+
+    // Get target URL from notification data (click_action)
+    const urlToOpen = event.notification.data?.click_action || event.notification.data || '/dashboard';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+            // 1. If a window is already open, focus it and send message
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if ('focus' in client) {
+                    client.focus().catch(err => console.error('Focus failed:', err));
+
+                    // Use BroadcastChannel for reliable communication
+                    const channel = new BroadcastChannel('notification_channel');
+                    channel.postMessage({
+                        type: 'ON_NOTIFICATION_CLICK',
+                        url: urlToOpen
+                    });
+
+                    // Close channel after a short delay to ensure message is sent
+                    setTimeout(() => channel.close(), 1000);
+
+                    return;
+                }
+            }
+            // 2. Otherwise open a new window
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
+    );
+});
+
+// 5. PWA Caching Logic
 const CACHE_NAME = 'compound-v3'; // Incremented version to clear old problematic cache
 const STATIC_ASSETS = [
     '/',
@@ -161,42 +197,6 @@ self.addEventListener('fetch', event => {
                 }
                 return response;
             });
-        })
-    );
-});
-
-// 5. Handle Notification Clicks
-self.addEventListener('notificationclick', event => {
-    event.notification.close();
-
-    // Get target URL from notification data (click_action)
-    const urlToOpen = event.notification.data?.click_action || event.notification.data || '/dashboard';
-
-    event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-            // 1. If a window is already open, focus it and send message
-            for (let i = 0; i < windowClients.length; i++) {
-                const client = windowClients[i];
-                if ('focus' in client) {
-                    client.focus().catch(err => console.error('Focus failed:', err));
-
-                    // Use BroadcastChannel for reliable communication
-                    const channel = new BroadcastChannel('notification_channel');
-                    channel.postMessage({
-                        type: 'ON_NOTIFICATION_CLICK',
-                        url: urlToOpen
-                    });
-
-                    // Close channel after a short delay to ensure message is sent
-                    setTimeout(() => channel.close(), 1000);
-
-                    return;
-                }
-            }
-            // 2. Otherwise open a new window
-            if (clients.openWindow) {
-                return clients.openWindow(urlToOpen);
-            }
         })
     );
 });
