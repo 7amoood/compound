@@ -823,7 +823,7 @@ export default {
              
              if (helpId) {
                  this.showNotificationsModal = false;
-                 router.visit(`/help?request_id=${helpId}`);
+                 this.$inertia.visit(`/help?request_id=${helpId}`);
                  return;
              }
              
