@@ -7,6 +7,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 import PWAInstaller from './Components/PWAInstaller.vue';
 import InAppNotification from './Components/InAppNotification.vue';
+import OpenInAppBanner from './Components/OpenInAppBanner.vue';
 
 createInertiaApp({
     title: (title) => `${title} - خدمات المجمع`,
@@ -14,6 +15,7 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         const app = createApp({
             render: () => h('div', [
+                h(OpenInAppBanner),
                 h(App, props),
                 h(PWAInstaller),
                 h(InAppNotification)
