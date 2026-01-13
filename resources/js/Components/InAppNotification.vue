@@ -31,15 +31,17 @@ export default {
     data() {
         return {
             notification: null,
-            timeout: null
+            timeout: null,
+            audio: null,
+            audioUnlocked: false
         };
     },
     computed: {
         title() {
-            return this.notification?.notification?.title || this.notification?.data?.title || 'إشعار جديد';
+            return this.notification?.data?.title || 'إشعار جديد';
         },
         body() {
-            return this.notification?.notification?.body || this.notification?.data?.body || '';
+            return this.notification?.data?.body || '';
         },
         icon() {
             // Map types to icons if available in data
@@ -59,11 +61,37 @@ export default {
     },
     mounted() {
         window.addEventListener('fcm-message', this.handleMessage);
+        
+        // iOS requires user interaction to unlock audio
+        const unlock = () => {
+            this.initAudio();
+            window.removeEventListener('click', unlock);
+            window.removeEventListener('touchstart', unlock);
+        };
+        window.addEventListener('click', unlock);
+        window.addEventListener('touchstart', unlock);
     },
     beforeUnmount() {
         window.removeEventListener('fcm-message', this.handleMessage);
     },
     methods: {
+        initAudio() {
+            if (this.audioUnlocked) return;
+            
+            this.audio = new Audio('/sounds/notification.wav');
+            this.audio.volume = 0;
+            
+            // Play and immediately pause to unlock
+            this.audio.play().then(() => {
+                this.audio.pause();
+                this.audio.currentTime = 0;
+                this.audio.volume = 0.5;
+                this.audioUnlocked = true;
+                console.log('Audio unlocked for iOS');
+            }).catch(e => {
+                console.warn('Audio unlock failed:', e);
+            });
+        },
         handleMessage(event) {
             const payload = event.detail;
 
@@ -81,13 +109,15 @@ export default {
                 this.notification = null;
             }, 6000);
             
-            // Play premium notification sound
-            try { 
+            // Play notification sound
+            if (this.audio && this.audioUnlocked) {
+                this.audio.currentTime = 0;
+                this.audio.play().catch(e => console.warn('Sound play failed:', e));
+            } else {
+                // Fallback for browsers that don't need unlocking
                 const audio = new Audio('/sounds/notification.wav');
                 audio.volume = 0.5;
-                audio.play(); 
-            } catch(e) {
-                console.warn('Sound play failed', e);
+                audio.play().catch(() => {});
             }
         },
         handleClick() {

@@ -338,12 +338,18 @@ export default {
                 }
             }
         },
-        logout() {
+        async logout() {
             this.loggingOut = true;
+            try {
+                // 1. Explicitly remove token from backend and unsubscribe from topics
+                await axios.post('/api/notifications/remove-token');
+                sessionStorage.removeItem('fcm_token');
+            } catch (e) {
+                console.error('Failed to remove FCM token on logout', e);
+            }
+
+            // 2. Perform actual logout
             router.post('/logout', {}, {
-                onSuccess: () => {
-                    sessionStorage.removeItem('fcm_token');
-                },
                 onFinish: () => {
                     this.loggingOut = false;
                 }

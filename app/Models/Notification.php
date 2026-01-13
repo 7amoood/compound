@@ -100,36 +100,27 @@ class Notification extends Model
                 'Content-Type'  => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
                 'message' => [
-                    'token'        => $user->fcm_token,
-                    'notification' => [
-                        'title' => $notification->title,
-                        'body'  => $notification->body,
+                    'token'   => $user->fcm_token,
+                    // 'notification' block removed to prevent auto-display (InAppNotification.vue & SW handle this)
+                    'data'    => [
+                        'title'        => $notification->title,
+                        'body'         => $notification->body,
+                        'type'         => $notification->type,
+                        'request_id'   => (string) $requestId,
+                        'click_action' => $link,
                     ],
-                    'android'      => [
-                        'notification' => [
-                            'sound' => 'default',
-                        ],
+                    'android' => [
+                        'priority' => 'high',
                     ],
-                    'apns'         => [
+                    'apns'    => [
                         'payload' => [
                             'aps' => [
                                 'sound' => 'default',
                             ],
                         ],
                     ],
-                    'data'         => [
-                        'type'         => $notification->type,
-                        'request_id'   => (string) $requestId,
-                        'click_action' => $link,
-                    ],
-                    'webpush'      => [
-                        'notification' => [
-                            'icon'        => '/icons/icon-192x192.png',
-                            'badge'       => '/icons/badge-72x72.png',
-                            'dir'         => 'rtl',
-                            'allow_sound' => true,
-                        ],
-                        'fcm_options'  => [
+                    'webpush' => [
+                        'fcm_options' => [
                             'link' => $link,
                         ],
                     ],

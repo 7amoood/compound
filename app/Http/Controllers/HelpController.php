@@ -228,8 +228,7 @@ class HelpController extends Controller
         $comments = $helpRequest->comments()
             ->select('id', 'help_request_id', 'user_id', 'comment', 'created_at')
             ->latest()
-            ->cursorPaginate(5)
-            ->withPath(url("/api/help/{$helpRequest->id}/comments"));
+            ->cursorPaginate(5);
 
         return response()->json([
             'success'  => true,
@@ -393,12 +392,7 @@ class HelpController extends Controller
                         ],
                     ],
                     'webpush' => [
-                        'notification' => [
-                            'icon'  => '/icons/icon-192x192.png',
-                            'badge' => '/icons/badge-72x72.png',
-                            'dir'   => 'rtl',
-                        ],
-                        'fcm_options'  => [
+                        'fcm_options' => [
                             'link' => $requestId ? "/help?request_id={$requestId}" : '/help',
                         ],
                     ],

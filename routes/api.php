@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
     Route::post('/notifications/save-token', [NotificationController::class, 'saveToken']);
+    Route::post('/notifications/remove-token', [NotificationController::class, 'removeToken']);
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
 
     // Settings (API endpoints called by Vue)

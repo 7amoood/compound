@@ -143,15 +143,53 @@ class NotificationController extends Controller
     }
 
     /**
+     * مسح توكن الإشعارات (عند تسجيل الخروج)
+     * Remove FCM token
+     */
+    public function removeToken(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if ($user && $user->fcm_token) {
+            // Unsubscribe from compound topic if applicable
+            if ($user->role === 'resident' && $user->compound_id) {
+                $this->unsubscribeFromTopic($user->fcm_token, "compound_{$user->compound_id}_help");
+            }
+
+            $user->update(['fcm_token' => null]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم مسح توكن الإشعارات',
+        ]);
+    }
+
+    /**
      * Subscribe token to FCM topic using FCM v1 API
      */
     protected function subscribeToTopic(string $token, string $topic): void
+    {
+        $this->topicMgt($token, $topic, true);
+    }
+
+    /**
+     * Unsubscribe token from FCM topic
+     */
+    protected function unsubscribeFromTopic(string $token, string $topic): void
+    {
+        $this->topicMgt($token, $topic, false);
+    }
+
+    /**
+     * Internal helper for topic management
+     */
+    protected function topicMgt(string $token, string $topic, bool $subscribe): void
     {
         $projectId = env('FIREBASE_PROJECT_ID', 'garden-city-compound');
         $authFile  = env('FIREBASE_CREDENTIALS', storage_path('app/firebase-auth.json'));
 
         if (! file_exists($authFile)) {
-            \Illuminate\Support\Facades\Log::warning("FCM Topic Subscribe: Missing auth file");
+            \Illuminate\Support\Facades\Log::warning("FCM Topic: Missing auth file");
             return;
         }
 
@@ -161,33 +199,23 @@ class NotificationController extends Controller
             $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
             $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
 
-            // Use the FCM v1 API for topic subscription
+            $action = $subscribe ? 'batchAdd' : 'batchRemove';
+
             $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Authorization'     => 'Bearer ' . $accessToken,
-                'Content-Type'      => 'application/json',
-                'access_token_auth' => 'true',
-            ])->post("https://iid.googleapis.com/iid/v1/{$token}/rel/topics/{$topic}");
+                'Authorization' => 'Bearer ' . $accessToken,
+                'Content-Type'  => 'application/json',
+            ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/notifications:{$action}", [
+                'topic' => "/topics/{$topic}",
+                'tokens' => [$token],
+            ]);
 
             if ($response->successful()) {
-                \Illuminate\Support\Facades\Log::info("FCM Topic Subscribe: Successfully subscribed to {$topic}");
+                \Illuminate\Support\Facades\Log::info("FCM Topic " . ($subscribe ? 'Sub' : 'Unsub') . ": Success for {$topic}");
             } else {
-                // Try alternative endpoint
-                $altResponse = \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $accessToken,
-                    'Content-Type'  => 'application/json',
-                ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/subscriptions:batchCreate", [
-                    'topic' => "/topics/{$topic}",
-                    'tokens' => [$token],
-                ]);
-
-                if ($altResponse->successful()) {
-                    \Illuminate\Support\Facades\Log::info("FCM Topic Subscribe (v1): Successfully subscribed to {$topic}");
-                } else {
-                    \Illuminate\Support\Facades\Log::error("FCM Topic Subscribe Failed: " . $altResponse->body());
-                }
+                \Illuminate\Support\Facades\Log::error("FCM Topic " . ($subscribe ? 'Sub' : 'Unsub') . " Failed: " . $response->body());
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('FCM Topic Subscribe Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('FCM Topic Exception: ' . $e->getMessage());
         }
     }
 }
