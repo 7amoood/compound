@@ -13,14 +13,6 @@ use Inertia\Inertia;
 class HelpController extends Controller
 {
     /**
-     * Show help page
-     */
-    public function index()
-    {
-        return Inertia::render('Resident/Help');
-    }
-
-    /**
      * Get open help requests (excluding user's own, same compound only)
      */
     public function available(Request $request): JsonResponse
@@ -222,12 +214,41 @@ class HelpController extends Controller
         $helpRequest->load([
             'requester:id,name,photo,phone,block_no,floor,apt_no',
             'helper:id,name,photo,phone,block_no,floor,apt_no',
-            'comments.user:id,name,photo',
         ]);
 
+        // Get paginated comments (Simplified user data)
+        $comments = $helpRequest->comments()
+            ->select('id', 'help_request_id', 'user_id', 'comment', 'created_at')
+            ->latest()
+            ->cursorPaginate(5);
+
         return response()->json([
-            'success' => true,
-            'request' => $helpRequest,
+            'success'  => true,
+            'request'  => $helpRequest,
+            'comments' => $comments,
+        ]);
+    }
+
+    /**
+     * Get paginated comments for a request
+     */
+    public function comments(HelpRequest $helpRequest): JsonResponse
+    {
+        $user      = request()->user();
+        $isRelated = $helpRequest->requester_id === $user->id || $helpRequest->helper_id === $user->id || $user->role === 'admin';
+
+        if (! $isRelated && $helpRequest->status !== HelpRequest::STATUS_OPEN) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $comments = $helpRequest->comments()
+            ->select('id', 'help_request_id', 'user_id', 'comment', 'created_at')
+            ->latest()
+            ->cursorPaginate(5);
+
+        return response()->json([
+            'success'  => true,
+            'comments' => $comments,
         ]);
     }
 
@@ -279,7 +300,7 @@ class HelpController extends Controller
             );
         }
 
-        $comment->load('user:id,name,photo');
+        // $comment->load('user:id,name,photo'); // No longer needed for performance
 
         return response()->json([
             'success' => true,

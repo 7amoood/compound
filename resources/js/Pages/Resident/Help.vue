@@ -208,18 +208,24 @@
                     </div>
 
                     <template v-else>
-                        <p class="text-sm font-bold text-slate-900 dark:text-white">التعليقات ({{ selectedRequest.comments?.length || 0 }}/50)</p>
-                        
-                        <div class="max-h-48 overflow-y-auto space-y-2">
+                        <!-- Load More -->
+                        <div v-if="nextCommentsUrl" class="flex justify-center my-2">
+                            <button @click="loadMoreComments" :disabled="loadingMoreComments" class="text-[11px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1 rounded-full transition-colors flex items-center gap-1">
+                                <span v-if="loadingMoreComments" class="material-symbols-outlined animate-spin text-[12px]">progress_activity</span>
+                                <span>عرض المحادثات الأقدم</span>
+                            </button>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div class="max-h-60 overflow-y-auto space-y-3 px-1 py-2 flex flex-col">
                             <div v-for="comment in selectedRequest.comments" :key="comment.id" 
-                                class="flex gap-2 p-2 rounded-lg"
-                                :class="comment.user_id === currentUserId ? 'bg-primary/10' : 'bg-slate-50 dark:bg-slate-800'">
-                                <div class="size-8 rounded-full bg-cover bg-center shrink-0" 
-                                    :style="`background-image: url('${comment.user?.photo || 'https://ui-avatars.com/api/?name=' + (comment.user?.name || 'U')}');`"></div>
-                                <div>
-                                    <p class="text-xs font-bold text-slate-900 dark:text-white">{{ comment.user?.name }}</p>
-                                    <p class="text-sm text-slate-600 dark:text-slate-300">{{ comment.comment }}</p>
-                                </div>
+                                class="p-3 rounded-2xl max-w-[85%]"
+                                :class="comment.user_id === currentUserId ? 'bg-primary text-white mr-auto rounded-tl-none' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 ml-auto rounded-tr-none'">
+                                
+                                <p class="text-[10px] font-bold opacity-80 mb-1" :class="comment.user_id === currentUserId ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'">
+                                    {{ getCommentAuthorName(comment) }}
+                                </p>
+                                <p class="text-sm leading-relaxed">{{ comment.comment }}</p>
                             </div>
                         </div>
 
@@ -318,6 +324,8 @@ export default {
             submitting: false,
             newComment: '',
             addingComment: false,
+            nextCommentsUrl: null,
+            loadingMoreComments: false,
             // Notifications
             showNotificationsModal: false,
             notifications: [],
@@ -557,12 +565,19 @@ export default {
             this.selectedRequest = req;
             this.showDetailsModal = true;
             this.loadingDetails = true;
+            this.nextCommentsUrl = null;
 
             try {
                 const response = await axios.get(`/api/help/${req.id}`);
                 if (response.data.success) {
                     if (this.selectedRequest && this.selectedRequest.id === req.id) {
                         this.selectedRequest = response.data.request;
+                        
+                        // Handle paginated comments
+                        if (response.data.comments) {
+                            this.selectedRequest.comments = response.data.comments.data.slice().reverse(); 
+                            this.nextCommentsUrl = response.data.comments.next_page_url;
+                        }
                     }
                 }
             } catch (e) {
@@ -576,6 +591,31 @@ export default {
                 }
             }
         },
+        async loadMoreComments() {
+            if (!this.nextCommentsUrl || this.loadingMoreComments) return;
+            this.loadingMoreComments = true;
+            
+            try {
+                const response = await axios.get(this.nextCommentsUrl);
+                if (response.data.success) {
+                    const newComments = response.data.comments.data.slice().reverse();
+                    this.selectedRequest.comments = [...newComments, ...this.selectedRequest.comments];
+                    this.nextCommentsUrl = response.data.comments.next_page_url;
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.loadingMoreComments = false;
+            }
+        },
+        getCommentAuthorName(comment) {
+            if (comment.user_id === this.currentUserId) return 'أنت';
+            if (this.selectedRequest) {
+                if (comment.user_id === this.selectedRequest.requester_id) return 'طالب المساعدة';
+                if (comment.user_id === this.selectedRequest.helper_id) return 'المساعد';
+            }
+            return 'مستخدم';
+        },
         async addComment() {
             if (!this.newComment.trim() || this.addingComment) return;
             this.addingComment = true;
@@ -584,6 +624,7 @@ export default {
                     comment: this.newComment,
                 });
                 if (response.data.success) {
+                    if (!this.selectedRequest.comments) this.selectedRequest.comments = [];
                     this.selectedRequest.comments.push(response.data.comment);
                     this.newComment = '';
                 }
