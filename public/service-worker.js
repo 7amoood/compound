@@ -169,34 +169,26 @@ self.addEventListener('fetch', event => {
 self.addEventListener('notificationclick', event => {
     event.notification.close();
 
-    // Get target URL from notification data (click_action)
-    const urlToOpen = event.notification.data?.click_action || event.notification.data || '/dashboard';
+    const data = event.notification.data || {};
+    const urlToOpen = data.click_action || data.url || '/dashboard';
 
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-            // 1. If a window is already open, focus it and send message
-            for (let i = 0; i < windowClients.length; i++) {
-                const client = windowClients[i];
-                if ('focus' in client) {
-                    client.focus().catch(err => console.error('Focus failed:', err));
-
-                    // Use BroadcastChannel for reliable communication
-                    const channel = new BroadcastChannel('notification_channel');
-                    channel.postMessage({
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientsArr => {
+            for (const client of clientsArr) {
+                if (client.url.startsWith(self.location.origin)) {
+                    await client.focus();
+                    client.postMessage({
                         type: 'ON_NOTIFICATION_CLICK',
                         url: urlToOpen
                     });
-
-                    // Close channel after a short delay to ensure message is sent
-                    setTimeout(() => channel.close(), 1000);
-
                     return;
                 }
             }
-            // 2. Otherwise open a new window
+
             if (clients.openWindow) {
-                return clients.openWindow(urlToOpen);
+                return clients.openWindow(`${urlToOpen}?from_notification=1`);
             }
         })
     );
 });
+

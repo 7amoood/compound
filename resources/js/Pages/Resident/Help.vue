@@ -571,7 +571,9 @@ export default {
                         
                         // Scroll to bottom if new comments arrived
                         if (this.selectedRequest.comments.length > oldCommentsCount) {
-                            this.scrollToBottom();
+                            this.$nextTick(() => {
+                                this.scrollToBottom();
+                            });
                         }
                     }
                 }

@@ -37,49 +37,32 @@ createInertiaApp({
 // Service worker registration is handled in firebase.js during notification permission request
 
 // Global Service Worker Message Listener for Notification Clicks
-if ('BroadcastChannel' in window) {
-    const channel = new BroadcastChannel('notification_channel');
-    channel.onmessage = (event) => {
-        if (event.data && event.data.type === 'ON_NOTIFICATION_CLICK') {
-            const urlString = event.data.url;
+navigator.serviceWorker?.addEventListener('message', (event) => {
+    if (!event.data || event.data.type !== 'ON_NOTIFICATION_CLICK') return;
 
-            // Parse URL
-            const urlObj = new URL(urlString, window.location.origin);
-            const requestId = urlObj.searchParams.get('request_id');
-            console.log('firing click ' + requestId);
-            if (requestId) {
-                // If it's a help request, always go to help page
-                if (urlObj.pathname.includes('/help')) {
-                    this.$nextTick(() => {
-                        router.visit(urlString);
-                    });
-                    return;
-                }
+    const urlString = event.data.url;
+    const urlObj = new URL(urlString, window.location.origin);
+    const requestId = urlObj.searchParams.get('request_id');
 
-                // Check if we are on a dashboard page
-                const currentPath = window.location.pathname;
-                const isDashboard = currentPath.includes('/resident') ||
-                    currentPath.includes('/provider') ||
-                    currentPath.includes('/dashboard');
+    console.log('notification click', requestId);
 
-                if (isDashboard) {
-                    // Dispatch a custom event that dashboards are listening to
-                    window.dispatchEvent(new CustomEvent('open-request-details', {
-                        detail: { requestId: parseInt(requestId) }
-                    }));
-                } else {
-                    // Not on dashboard, navigate to it (Inertia handles this smoothly)
-                    this.$nextTick(() => {
-                        router.visit(urlString);
-                    });
-                }
-            } else {
-                // Fallback: navigate using Inertia to avoid reload
-                const path = urlObj.pathname + urlObj.search;
-                this.$nextTick(() => {
-                    router.visit(path);
-                });
-            }
-        }
-    };
-}
+    if (requestId && urlObj.pathname.includes('/help')) {
+        // Inertia navigation مباشرة
+        this.$inertia.visit(urlString);
+        return;
+    }
+
+    const currentPath = window.location.pathname;
+    const isDashboard =
+        currentPath.includes('/resident') ||
+        currentPath.includes('/provider') ||
+        currentPath.includes('/dashboard');
+
+    if (requestId && isDashboard) {
+        window.dispatchEvent(new CustomEvent('open-request-details', {
+            detail: { requestId: Number(requestId) }
+        }));
+    } else {
+        this.$inertia.visit(urlObj.pathname + urlObj.search);
+    }
+});
