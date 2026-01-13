@@ -153,7 +153,7 @@ export default {
             while (parent) {
                 const style = window.getComputedStyle(parent);
                 const overflowY = style.getPropertyValue('overflow-y');
-                if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+                if (overflowY === 'auto' || overflowY === 'scroll') {
                     return parent;
                 }
                 parent = parent.parentElement;

@@ -42,7 +42,7 @@
 
         <!-- Content -->
         <div class="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-24">
-            <PullToRefresh :onRefresh="loadData" class="min-h-full">
+            <PullToRefresh :onRefresh="() => loadData(true)" class="min-h-full">
                 <div class="flex flex-col gap-3 p-4 min-h-[60vh]">
                     <!-- Loading -->
                     <div v-if="loading" class="text-center py-12 text-slate-400">
@@ -526,9 +526,11 @@ export default {
             }
         },
 
-        async loadData() {
-            this.loading = true;
-            this.requests = [];
+        async loadData(isRefresh = false) {
+            if (!isRefresh) {
+                this.loading = true;
+                this.requests = [];
+            }
             this.nextPageUrl = null;
 
             try {
@@ -606,7 +608,7 @@ export default {
                     this.showPickModal = false;
                     this.pickComment = '';
                     this.showDetailsModal = false;
-                    this.loadData();
+                    this.activeTab = 'helping';
                 } else {
                     window.showToast(response.data.message, 'error');
                 }
@@ -636,7 +638,7 @@ export default {
         async openDetails(req) {
             // Optimistic UI: Show modal immediately with available data
             this.selectedRequest = req;
-            this.selectedRequest.comments = this.selectedRequest.comments.reverse();
+            this.selectedRequest.comments = this.selectedRequest.comments?.reverse();
             this.showDetailsModal = true;
             this.loadingDetails = true;
             this.nextCommentsUrl = null;
