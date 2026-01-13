@@ -36,10 +36,10 @@ export default {
     },
     computed: {
         title() {
-            return this.notification?.notification?.title || 'إشعار جديد';
+            return this.notification?.notification?.title || this.notification?.data?.title || 'إشعار جديد';
         },
         body() {
-            return this.notification?.notification?.body || '';
+            return this.notification?.notification?.body || this.notification?.data?.body || '';
         },
         icon() {
             // Map types to icons if available in data

@@ -553,7 +553,7 @@ export default {
                         
                         // Scroll to bottom if new comments arrived
                         if (this.selectedRequest.comments.length > oldCommentsCount) {
-                            this.$nextTick(() => this.scrollToBottom());
+                            this.scrollToBottom();
                         }
                     }
                 }
@@ -689,7 +689,7 @@ export default {
                         if (response.data.comments) {
                             this.selectedRequest.comments = response.data.comments.data.slice().reverse(); 
                             this.nextCommentsUrl = response.data.comments.next_page_url;
-                            this.$nextTick(() => this.scrollToBottom());
+                            this.scrollToBottom();
                         }
                     }
                 }
@@ -733,12 +733,16 @@ export default {
             }
         },
         scrollToBottom() {
-            this.$nextTick(() => {
+            // Use setTimeout to ensure the DOM has fully rendered and scrollHeight is calculated
+            setTimeout(() => {
                 const container = this.$refs.commentsContainer;
                 if (container) {
-                    container.scrollTop = container.scrollHeight;
+                    container.scrollTo({
+                        top: container.scrollHeight,
+                        behavior: 'smooth'
+                    });
                 }
-            });
+            }, 50);
         },
         getCommentAuthorName(comment) {
             if (comment.user_id === this.currentUserId) return 'أنت';
@@ -759,7 +763,7 @@ export default {
                     if (!this.selectedRequest.comments) this.selectedRequest.comments = [];
                     this.selectedRequest.comments.push(response.data.comment);
                     this.newComment = '';
-                    this.$nextTick(() => this.scrollToBottom());
+                    this.scrollToBottom();
                 }
             } catch (e) {
                 window.showToast(e.response?.data?.message || 'حدث خطأ', 'error');
