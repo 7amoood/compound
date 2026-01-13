@@ -521,8 +521,44 @@ export default {
                 this.loadNotifications();
             }
             
+            // Check if a comment arrived for the currently open request
+            const requestId = payload.data?.help_request_id || payload.data?.request_id;
+            const type = payload.data?.type;
+
+            if (type === 'help_comment' && 
+                this.showDetailsModal && 
+                this.selectedRequest && 
+                this.selectedRequest.id == requestId) {
+                // Silently refresh details to get new comment
+                this.refreshCurrentDetails();
+            }
+            
             if (this.activeTab === 'available') {
                 this.loadData();
+            }
+        },
+        async refreshCurrentDetails() {
+            if (!this.selectedRequest) return;
+            try {
+                const response = await axios.get(`/api/help/${this.selectedRequest.id}`);
+                if (response.data.success && this.selectedRequest && this.selectedRequest.id == response.data.request.id) {
+                    // Update only comments to avoid UI flicker if possible, 
+                    // but here we update the whole object for simplicity and consistency
+                    const oldCommentsCount = this.selectedRequest.comments?.length || 0;
+                    this.selectedRequest = response.data.request;
+                    
+                    if (response.data.comments) {
+                        this.selectedRequest.comments = response.data.comments.data.slice().reverse();
+                        this.nextCommentsUrl = response.data.comments.next_page_url;
+                        
+                        // Scroll to bottom if new comments arrived
+                        if (this.selectedRequest.comments.length > oldCommentsCount) {
+                            this.$nextTick(() => this.scrollToBottom());
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to refresh details:', e);
             }
         },
 
@@ -608,7 +644,7 @@ export default {
                     this.showPickModal = false;
                     this.pickComment = '';
                     this.showDetailsModal = false;
-                    this.activeTab = 'helping';
+                    this.activeTab = 'helped';
                 } else {
                     window.showToast(response.data.message, 'error');
                 }
