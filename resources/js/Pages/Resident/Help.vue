@@ -505,7 +505,7 @@ export default {
                 try { data = JSON.parse(data); } catch(e) {}
             }
             
-            const rid = data.help_request_id || data.request_id;
+            const rid = data.help_request_id;
             if (rid) {
                 this.showNotificationsModal = false;
                 this.openDetails({ id: rid });

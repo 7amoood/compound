@@ -818,7 +818,7 @@ export default {
                  try { data = JSON.parse(data); } catch(e) {}
              }
              
-             const helpId = data.help_request_id || (n.type === 'help_picked' || n.type === 'help_comment' ? data.request_id : null);
+             const helpId = data.help_request_id;
              const requestId = data.request_id;
              
              if (helpId) {

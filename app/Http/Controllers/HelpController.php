@@ -371,15 +371,15 @@ class HelpController extends Controller
                 'Content-Type'  => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
                 'message' => [
-                    'topic'        => $topic,
+                    'topic'           => $topic,
                     // 'notification' block removed to prevent auto-display
-                    'data'         => [
+                    'data'            => [
                         'title' => '🆘 طلب مساعدة جديد',
                         'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),
-                        'sender_id'    => (string) $senderId,
-                        'request_id'   => (string) $requestId,
-                        'type'         => 'new_help_request',
-                        'click_action' => $requestId ? "/help?request_id={$requestId}" : '/help',
+                        'sender_id'       => (string) $senderId,
+                        'help_request_id' => (string) $requestId,
+                        'type'            => 'new_help_request',
+                        'click_action'    => $requestId ? "/help?request_id={$requestId}" : '/help',
                     ],
                     'android' => [
                         'priority' => 'high',
