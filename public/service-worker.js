@@ -97,39 +97,63 @@ messaging.onBackgroundMessage(async (payload) => {
 
 // 4. Handle Notification Clicks
 self.addEventListener('notificationclick', event => {
+    console.log('[SW] Notification click received.');
+    
+    // تأكد أن البيانات موجودة
+    const notificationData = event.notification?.data || {};
+    console.log('[SW] Notification data:', notificationData);
+
+    // أغلق النوتيفيكيشن فوراً
     event.notification.close();
+    console.log('[SW] Notification closed.');
 
-    // Get target URL from notification data (click_action)
-    const urlToOpen = event.notification.data?.click_action || event.notification.data || '/dashboard';
+    // تحديد URL الهدف
+    const urlToOpen = notificationData.click_action || notificationData.url || '/dashboard';
+    console.log('[SW] URL to open:', urlToOpen);
 
+    // الانتظار حتى يتم التعامل مع النوافذ أو فتح نافذة جديدة
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-            // 1. If a window is already open, focus it and send message
-            for (let i = 0; i < windowClients.length; i++) {
-                const client = windowClients[i];
-                if ('focus' in client) {
-                    client.focus().catch(err => console.error('Focus failed:', err));
+            if (windowClients.length > 0) {
+                console.log('[SW] Found open windows:', windowClients.length);
 
-                    // Use BroadcastChannel for reliable communication
+                // ركّز على أول نافذة
+                const client = windowClients[0];
+                return client.focus().then(() => {
+                    console.log('[SW] Window focused.');
+
+                    // أرسل رسالة للنافذة
                     const channel = new BroadcastChannel('notification_channel');
                     channel.postMessage({
                         type: 'ON_NOTIFICATION_CLICK',
                         url: urlToOpen
                     });
+                    console.log('[SW] Message sent via BroadcastChannel.');
 
-                    // Close channel after a short delay to ensure message is sent
-                    setTimeout(() => channel.close(), 1000);
+                    // أغلق القناة بعد تأخير بسيط
+                    setTimeout(() => {
+                        channel.close();
+                        console.log('[SW] BroadcastChannel closed.');
+                    }, 1000);
 
-                    return;
-                }
+                }).catch(err => {
+                    console.error('[SW] Failed to focus window:', err);
+                });
             }
-            // 2. Otherwise open a new window
+
+            // إذا ما فيش نوافذ مفتوحة، افتح نافذة جديدة
             if (clients.openWindow) {
+                console.log('[SW] No open windows, opening new window.');
                 return clients.openWindow(urlToOpen);
             }
+
+            console.warn('[SW] No clients and cannot open window.');
+        }).catch(err => {
+            console.error('[SW] Error handling notification click:', err);
         })
     );
 });
+
 
 // 5. PWA Caching Logic
 const CACHE_NAME = 'compound-v3'; // Incremented version to clear old problematic cache
