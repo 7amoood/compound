@@ -21,11 +21,11 @@
         </header>
 
         <!-- Tabs -->
-        <div class="overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800/10 bg-white dark:bg-surface-dark">
-            <div class="flex min-w-max px-4 py-2 gap-2">
+        <div class="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 pt-3">
+            <div class="flex gap-2 min-w-max pr-4 px-4">
                 <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-                    class="h-9 px-4 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
-                    :class="activeTab === tab.id ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'">
+                    class="h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors border"
+                    :class="activeTab === tab.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white' : 'bg-white dark:bg-surface-dark border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'">
                     {{ tab.label }}
                 </button>
             </div>
@@ -56,7 +56,7 @@
                                     :style="`background-image: url('${req.requester?.photo || 'https://ui-avatars.com/api/?name=' + (req.requester?.name || 'U')}');`"></div>
                                 <div>
                                     <p class="font-bold text-slate-900 dark:text-white text-sm">{{ req.requester?.name }}</p>
-                                    <p v-if="activeTab === 'available' && req.requester" class="text-xs text-slate-500">
+                                    <p v-if="req.requester" class="text-xs text-slate-500">
                                         <span v-if="req.requester.block_no">عمارة {{ req.requester.block_no }}</span>
                                         <span v-if="req.requester.floor"> - الدور {{ req.requester.floor }}</span>
                                         <span v-if="req.requester.apt_no"> - شقة {{ req.requester.apt_no }}</span>
@@ -81,9 +81,16 @@
                         <div v-if="req.helper && (activeTab === 'my' || activeTab === 'helped')" class="mt-3 flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
                             <div class="size-6 rounded-full bg-cover bg-center" 
                                 :style="`background-image: url('${req.helper?.photo || 'https://ui-avatars.com/api/?name=' + (req.helper?.name || 'H')}');`"></div>
-                            <span class="text-xs font-medium text-blue-700 dark:text-blue-300">
-                                {{ activeTab === 'my' ? 'يساعدك: ' : 'تساعد: ' }}{{ activeTab === 'my' ? req.helper?.name : req.requester?.name }}
-                            </span>
+                            <div class="flex-1">
+                                <span class="text-xs font-medium text-blue-700 dark:text-blue-300">
+                                    {{ activeTab === 'my' ? 'يساعدك: ' : 'تساعد: ' }}{{ activeTab === 'my' ? req.helper?.name : req.requester?.name }}
+                                </span>
+                                <p v-if="activeTab === 'my' && req.helper" class="text-[10px] text-blue-600/70 dark:text-blue-400/70">
+                                    <span v-if="req.helper.block_no">عمارة {{ req.helper.block_no }}</span>
+                                    <span v-if="req.helper.floor"> - الدور {{ req.helper.floor }}</span>
+                                    <span v-if="req.helper.apt_no"> - شقة {{ req.helper.apt_no }}</span>
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Quick Actions -->

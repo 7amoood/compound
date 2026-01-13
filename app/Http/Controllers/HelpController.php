@@ -33,7 +33,7 @@ class HelpController extends Controller
                 $q->where('compound_id', $user->compound_id);
             })
             ->with(['requester:id,name,photo,block_no,floor,apt_no', 'comments' => function ($q) {
-                $q->latest()->limit(3);
+                $q->latest()->limit(1);
             }, 'comments.user:id,name,photo'])
             ->latest()
             ->paginate(10);
@@ -53,8 +53,8 @@ class HelpController extends Controller
         $status = $request->get('status', 'all');
 
         $query = HelpRequest::where('requester_id', $user->id)
-            ->with(['helper:id,name,photo,phone', 'comments' => function ($q) {
-                $q->latest()->limit(3);
+            ->with(['helper:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
+                $q->latest()->limit(1);
             }, 'comments.user:id,name,photo']);
 
         if ($status !== 'all') {
@@ -77,8 +77,8 @@ class HelpController extends Controller
         $user = $request->user();
 
         $requests = HelpRequest::where('helper_id', $user->id)
-            ->with(['requester:id,name,photo,phone', 'comments' => function ($q) {
-                $q->latest()->limit(3);
+            ->with(['requester:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
+                $q->latest()->limit(1);
             }, 'comments.user:id,name,photo'])
             ->latest()
             ->paginate(10);
@@ -299,7 +299,7 @@ class HelpController extends Controller
             $query->where('status', $status);
         }
 
-        $requests = $query->latest()->paginate(20);
+        $requests = $query->latest()->paginate(10);
 
         return response()->json([
             'success'  => true,
