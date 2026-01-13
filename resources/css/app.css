@@ -63,3 +63,13 @@
 .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
 }
+
+/* Inertia Progress Bar - Make it thicker and visible above notch */
+#nprogress .bar {
+    height: 4px !important;
+    top: env(safe-area-inset-top, 0) !important;
+}
+
+#nprogress .peg {
+    box-shadow: 0 0 10px #10b981, 0 0 5px #10b981 !important;
+}

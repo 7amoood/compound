@@ -4,7 +4,7 @@
     <div class="relative flex h-[100vh] w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark font-display" dir="rtl">
         <!-- Header -->
         <header class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/10 transition-all duration-200" style="padding-top: env(safe-area-inset-top);">
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center justify-center px-4 py-3">
                 <div class="flex items-center gap-3">
                     <div class="size-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
                         <span class="material-symbols-outlined">volunteer_activism</span>
@@ -13,15 +13,19 @@
                         <span class="text-lg font-bold text-slate-900 dark:text-white">مساعدة الجيران</span>
                     </div>
                 </div>
-                <button @click="showNewRequestModal = true" class="flex items-center gap-1 px-3 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined text-[18px]">add</span>
-                    <span>طلب مساعدة</span>
-                </button>
             </div>
         </header>
 
+        <!-- New Request Button -->
+        <div class="px-4 pt-4 pb-2">
+            <button @click="showNewRequestModal = true" class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all duration-200">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>طلب مساعدة جديد</span>
+            </button>
+        </div>
+
         <!-- Tabs -->
-        <div class="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 pt-3">
+        <div class="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 pt-2">
             <div class="flex gap-2 min-w-max pr-4 px-4">
                 <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
                     class="h-8 px-4 rounded-full text-sm font-semibold shadow-sm transition-colors border"
