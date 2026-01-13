@@ -217,7 +217,7 @@
                         </div>
 
                         <!-- Chat Messages -->
-                        <div class="max-h-60 overflow-y-auto overscroll-contain space-y-3 px-1 py-2 flex flex-col" @touchstart.stop>
+                        <div ref="commentsContainer" class="max-h-60 overflow-y-auto overscroll-contain space-y-3 px-1 py-2 flex flex-col" @touchstart.stop>
                             <div v-for="comment in selectedRequest.comments" :key="comment.id" 
                                 class="p-3 rounded-2xl max-w-[85%]"
                                 :class="comment.user_id === currentUserId ? 'bg-primary text-white ml-auto rounded-br-none' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 mr-auto rounded-bl-none'">
@@ -582,6 +582,7 @@ export default {
                         if (response.data.comments) {
                             this.selectedRequest.comments = response.data.comments.data.slice().reverse(); 
                             this.nextCommentsUrl = response.data.comments.next_page_url;
+                            this.$nextTick(() => this.scrollToBottom());
                         }
                     }
                 }
@@ -600,18 +601,37 @@ export default {
             if (!this.nextCommentsUrl || this.loadingMoreComments) return;
             this.loadingMoreComments = true;
             
+            const container = this.$refs.commentsContainer;
+            const previousHeight = container ? container.scrollHeight : 0;
+
             try {
+                // Ensure the URL uses the comments endpoint specifically
                 const response = await axios.get(this.nextCommentsUrl);
                 if (response.data.success) {
                     const newComments = response.data.comments.data.slice().reverse();
                     this.selectedRequest.comments = [...newComments, ...this.selectedRequest.comments];
                     this.nextCommentsUrl = response.data.comments.next_page_url;
+
+                    // Preserve scroll position after prepending items
+                    this.$nextTick(() => {
+                        if (container) {
+                            container.scrollTop = container.scrollHeight - previousHeight;
+                        }
+                    });
                 }
             } catch (e) {
                 console.error(e);
             } finally {
                 this.loadingMoreComments = false;
             }
+        },
+        scrollToBottom() {
+            this.$nextTick(() => {
+                const container = this.$refs.commentsContainer;
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
         },
         getCommentAuthorName(comment) {
             if (comment.user_id === this.currentUserId) return 'أنت';
@@ -632,6 +652,7 @@ export default {
                     if (!this.selectedRequest.comments) this.selectedRequest.comments = [];
                     this.selectedRequest.comments.push(response.data.comment);
                     this.newComment = '';
+                    this.$nextTick(() => this.scrollToBottom());
                 }
             } catch (e) {
                 window.showToast(e.response?.data?.message || 'حدث خطأ', 'error');

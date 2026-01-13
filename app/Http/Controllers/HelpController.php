@@ -8,7 +8,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
 
 class HelpController extends Controller
 {
@@ -220,7 +219,8 @@ class HelpController extends Controller
         $comments = $helpRequest->comments()
             ->select('id', 'help_request_id', 'user_id', 'comment', 'created_at')
             ->latest()
-            ->cursorPaginate(5);
+            ->cursorPaginate(5)
+            ->withPath(url("/api/help/{$helpRequest->id}/comments"));
 
         return response()->json([
             'success'  => true,
