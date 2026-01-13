@@ -104,8 +104,9 @@
 
                         <!-- Quick Actions -->
                         <div v-if="activeTab === 'available'" class="mt-3">
-                            <button @click.stop="pickRequest(req)" class="w-full py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-sm">
-                                سأساعد 🙋
+                            <button @click.stop="startPick(req)" :disabled="pickingRequest && selectedRequest?.id === req.id" class="w-full py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-sm flex items-center justify-center gap-2">
+                                <span v-if="pickingRequest && selectedRequest?.id === req.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                                <span>سأساعد 🙋</span>
                             </button>
                         </div>
                         <div v-if="activeTab === 'my' && req.status === 'open'" class="mt-3">
@@ -577,7 +578,10 @@ export default {
                 this.submitting = false;
             }
         },
-        async startPick() {
+        async startPick(req = null) {
+            if (req && req.id) {
+                this.selectedRequest = req;
+            }
             this.pickingRequest = true;
             setTimeout(() => {
                 this.showPickModal = true;
