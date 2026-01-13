@@ -51,7 +51,8 @@ export default {
                 'WORK_COMPLETED': 'verified',
                 'NEW_REVIEW': 'star',
                 'new_help_request': 'volunteer_activism',
-                'help_picked': 'emoji_people'
+                'help_picked': 'emoji_people',
+                'help_comment': 'chat'
             };
             return iconMap[type] || 'notifications';
         }
@@ -91,13 +92,24 @@ export default {
         },
         handleClick() {
             const data = this.notification?.data;
-            if (data?.request_id) {
-                if (data.type === 'new_help_request' || data.type === 'help_picked') {
-                    router.visit(`/help?request_id=${data.request_id}`);
+            const rid = data?.help_request_id || data?.request_id;
+
+            if (rid) {
+                const isHelpType = data.type === 'new_help_request' || data.type === 'help_picked' || data.type === 'help_comment';
+                
+                if (isHelpType) {
+                    // If we are already on the help page, just trigger the modal
+                    if (window.location.pathname === '/help') {
+                        window.dispatchEvent(new CustomEvent('open-help-details', {
+                            detail: { requestId: rid }
+                        }));
+                    } else {
+                        router.visit(`/help?request_id=${rid}`);
+                    }
                 } else {
-                    // Dispatch the event that dashboards listen to
+                    // Default behavior for other requests (e.g. maintenance)
                     window.dispatchEvent(new CustomEvent('open-request-details', {
-                        detail: { requestId: parseInt(data.request_id) }
+                        detail: { requestId: parseInt(rid) }
                     }));
                 }
             }

@@ -427,6 +427,7 @@ export default {
         this.loadData();
         this.loadUnreadCount();
         window.addEventListener('fcm-message', this.handleFcmMessage);
+        window.addEventListener('open-help-details', this.handleOpenHelpDetails);
         
         // Handle direct open (e.g. from notification click opening the app)
         const params = new URLSearchParams(window.location.search);
@@ -436,8 +437,14 @@ export default {
     },
     beforeUnmount() {
          window.removeEventListener('fcm-message', this.handleFcmMessage);
+         window.removeEventListener('open-help-details', this.handleOpenHelpDetails);
     },
     methods: {
+        handleOpenHelpDetails(e) {
+            if (e.detail?.requestId) {
+                this.openDetails({ id: e.detail.requestId });
+            }
+        },
         async loadUnreadCount() {
             try {
                 const response = await axios.get('/api/notifications/unread-count');
@@ -525,16 +532,24 @@ export default {
             const requestId = payload.data?.help_request_id || payload.data?.request_id;
             const type = payload.data?.type;
 
-            if (type === 'help_comment' && 
+            if ((type === 'help_comment' || type === 'help_picked') && 
                 this.showDetailsModal && 
                 this.selectedRequest && 
                 this.selectedRequest.id == requestId) {
-                // Silently refresh details to get new comment
+                // Silently refresh details to get new comment or status change
                 this.refreshCurrentDetails();
             }
             
-            if (this.activeTab === 'available') {
-                this.loadData();
+            // Refresh data list for relevant help notifications
+            const shouldRefreshList = 
+                type === 'help_picked' || 
+                type === 'new_help_request' || 
+                (type === 'help_comment' && !this.showDetailsModal);
+
+            if (shouldRefreshList) {
+                this.loadData(true);
+            } else if (this.activeTab === 'available') {
+                this.loadData(true);
             }
         },
         async refreshCurrentDetails() {
