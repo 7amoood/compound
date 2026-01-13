@@ -82,17 +82,15 @@ messaging.onBackgroundMessage(async (payload) => {
     // IF the payload already has a system-level notification block, 
     // the browser (Chrome/Safari) will display it automatically in the background.
     // We only show a manual one if it's a data-only message.
-    if (!payload.notification) {
-        const notificationTitle = payload.data.title || 'إشعار جديد';
-        const notificationOptions = {
-            body: payload.data.body || '',
-            icon: '/icons/icon-192x192.png',
-            badge: '/icons/badge-72x72.png',
-            data: payload.data,
-            dir: 'rtl'
-        };
-        return self.registration.showNotification(notificationTitle, notificationOptions);
-    }
+    const notificationTitle = payload.data.title || 'إشعار جديد';
+    const notificationOptions = {
+        body: payload.data.body || '',
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/badge-72x72.png',
+        data: payload.data,
+        dir: 'rtl'
+    };
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // 4. PWA Caching Logic
