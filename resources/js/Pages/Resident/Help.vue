@@ -626,6 +626,7 @@ export default {
         async openDetails(req) {
             // Optimistic UI: Show modal immediately with available data
             this.selectedRequest = req;
+            this.selectedRequest.comments = this.selectedRequest.comments.reverse();
             this.showDetailsModal = true;
             this.loadingDetails = true;
             this.nextCommentsUrl = null;
