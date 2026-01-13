@@ -217,14 +217,19 @@
                         </div>
 
                         <!-- Chat Messages -->
-                        <div class="max-h-60 overflow-y-auto space-y-3 px-1 py-2 flex flex-col">
+                        <div class="max-h-60 overflow-y-auto overscroll-contain space-y-3 px-1 py-2 flex flex-col" @touchstart.stop>
                             <div v-for="comment in selectedRequest.comments" :key="comment.id" 
                                 class="p-3 rounded-2xl max-w-[85%]"
-                                :class="comment.user_id === currentUserId ? 'bg-primary text-white mr-auto rounded-tl-none' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 ml-auto rounded-tr-none'">
+                                :class="comment.user_id === currentUserId ? 'bg-primary text-white ml-auto rounded-br-none' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 mr-auto rounded-bl-none'">
                                 
-                                <p class="text-[10px] font-bold opacity-80 mb-1" :class="comment.user_id === currentUserId ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'">
-                                    {{ getCommentAuthorName(comment) }}
-                                </p>
+                                <div class="flex justify-between items-start gap-4 mb-1">
+                                    <p class="text-[10px] font-bold opacity-80" :class="comment.user_id === currentUserId ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'">
+                                        {{ getCommentAuthorName(comment) }}
+                                    </p>
+                                    <p class="text-[9px] opacity-60 font-medium">
+                                        {{ formatTime(comment.created_at) }}
+                                    </p>
+                                </div>
                                 <p class="text-sm leading-relaxed">{{ comment.comment }}</p>
                             </div>
                         </div>
@@ -634,15 +639,23 @@ export default {
                 this.addingComment = false;
             }
         },
+        formatTime(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+        },
         formatDate(dateStr) {
+            if (!dateStr) return '';
             const date = new Date(dateStr);
             const now = new Date();
             const diff = Math.floor((now - date) / 1000);
+            
             if (diff < 60) return 'الآن';
-            if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
-            if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
-            if (diff < 604800) return `منذ ${Math.floor(diff / 86400)} يوم`;
-            return date.toLocaleDateString('ar-EG');
+            if (date.toDateString() === now.toDateString()) {
+                return this.formatTime(dateStr);
+            }
+            
+            return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }) + ' ' + this.formatTime(dateStr);
         },
     },
 };
