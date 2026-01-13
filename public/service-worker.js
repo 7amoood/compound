@@ -82,15 +82,17 @@ messaging.onBackgroundMessage(async (payload) => {
     // IF the payload already has a system-level notification block, 
     // the browser (Chrome/Safari) will display it automatically in the background.
     // We only show a manual one if it's a data-only message.
-    const notificationTitle = payload.data.title || 'إشعار جديد';
-    const notificationOptions = {
-        body: payload.data.body || '',
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/badge-72x72.png',
-        data: payload.data,
-        dir: 'rtl'
-    };
-    return self.registration.showNotification(notificationTitle, notificationOptions);
+    // if (!payload.notification) {
+        const notificationTitle = payload.data.title || 'إشعار جديد';
+        const notificationOptions = {
+            body: payload.data.body || '',
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/badge-72x72.png',
+            data: payload.data,
+            dir: 'rtl'
+        };
+        return self.registration.showNotification(notificationTitle, notificationOptions);
+    // }
 });
 
 // 4. PWA Caching Logic
@@ -164,41 +166,37 @@ self.addEventListener('fetch', event => {
 });
 
 // 5. Handle Notification Clicks
-self.addEventListener('notificationclick', event => {
-    console.log('[SW] Notification Clicked:', event.notification);
+self.addEventListeneself.addEventListener('notificationclick', event => {
     event.notification.close();
 
-    const data = event.notification.data || {};
-    // Fallback search for click_action in case it's nested (Firebase sometimes does this)
-    const urlToOpen = data.click_action || data.url || (data.FCM_MSG ? data.FCM_MSG.data.click_action : null) || '/dashboard';
-
-    console.log('[SW] Target URL:', urlToOpen);
+    // Get target URL from notification data (click_action)
+    const urlToOpen = event.notification.data?.click_action || event.notification.data || '/dashboard';
 
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientsArr => {
-            console.log('[SW] Active clients:', clientsArr.length);
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+            // 1. If a window is already open, focus it and send message
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if ('focus' in client) {
+                    client.focus().catch(err => console.error('Focus failed:', err));
 
-            // Try to find an existing tab and focus it
-            for (const client of clientsArr) {
-                if (client.url.startsWith(self.location.origin)) {
-                    console.log('[SW] Focusing existing client:', client.url);
-                    await client.focus();
-                    client.postMessage({
+                    // Use BroadcastChannel for reliable communication
+                    const channel = new BroadcastChannel('notification_channel');
+                    channel.postMessage({
                         type: 'ON_NOTIFICATION_CLICK',
                         url: urlToOpen
                     });
+
+                    // Close channel after a short delay to ensure message is sent
+                    setTimeout(() => channel.close(), 1000);
+
                     return;
                 }
             }
-
-            // If no window is open, open a new one
+            // 2. Otherwise open a new window
             if (clients.openWindow) {
-                const separator = urlToOpen.includes('?') ? '&' : '?';
-                const finalUrl = `${urlToOpen}${separator}from_notification=1`;
-                console.log('[SW] Opening new window:', finalUrl);
-                return clients.openWindow(finalUrl);
+                return clients.openWindow(urlToOpen);
             }
         })
     );
 });
-
