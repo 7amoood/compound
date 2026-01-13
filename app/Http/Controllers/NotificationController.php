@@ -210,7 +210,7 @@ class NotificationController extends Controller
             ]);
 
             if ($response->successful()) {
-                \Illuminate\Support\Facades\Log::info("FCM Topic " . ($subscribe ? 'Sub' : 'Unsub') . ": Success for {$topic}");
+                // \Illuminate\Support\Facades\Log::info("FCM Topic " . ($subscribe ? 'Sub' : 'Unsub') . ": Success for {$topic}");
             } else {
                 \Illuminate\Support\Facades\Log::error("FCM Topic " . ($subscribe ? 'Sub' : 'Unsub') . " Failed: " . $response->body());
             }
