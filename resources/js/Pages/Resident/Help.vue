@@ -175,7 +175,6 @@
                             <span v-if="selectedRequest.requester.floor"> - الدور {{ selectedRequest.requester.floor }}</span>
                             <span v-if="selectedRequest.requester.apt_no"> - شقة {{ selectedRequest.requester.apt_no }}</span>
                         </p>
-                        <p v-if="canSeePhone" class="text-sm text-primary">{{ selectedRequest.requester?.phone }}</p>
                     </div>
                 </div>
 
@@ -197,45 +196,52 @@
                                 <span v-if="selectedRequest.helper.floor"> - الدور {{ selectedRequest.helper.floor }}</span>
                                 <span v-if="selectedRequest.helper.apt_no"> - شقة {{ selectedRequest.helper.apt_no }}</span>
                             </p>
-                            <p v-if="canSeeHelperPhone" class="text-xs text-primary">{{ selectedRequest.helper?.phone }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Comments Section -->
                 <div v-if="selectedRequest.status === 'picked' && canComment" class="space-y-3">
-                    <p class="text-sm font-bold text-slate-900 dark:text-white">التعليقات ({{ selectedRequest.comments?.length || 0 }}/50)</p>
-                    
-                    <div class="max-h-48 overflow-y-auto space-y-2">
-                        <div v-for="comment in selectedRequest.comments" :key="comment.id" 
-                            class="flex gap-2 p-2 rounded-lg"
-                            :class="comment.user_id === currentUserId ? 'bg-primary/10' : 'bg-slate-50 dark:bg-slate-800'">
-                            <div class="size-8 rounded-full bg-cover bg-center shrink-0" 
-                                :style="`background-image: url('${comment.user?.photo || 'https://ui-avatars.com/api/?name=' + (comment.user?.name || 'U')}');`"></div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-900 dark:text-white">{{ comment.user?.name }}</p>
-                                <p class="text-sm text-slate-600 dark:text-slate-300">{{ comment.comment }}</p>
-                            </div>
-                        </div>
+                    <div v-if="loadingDetails && (!selectedRequest.comments || selectedRequest.comments.length === 0)" class="text-center py-4 text-slate-400">
+                        <span class="material-symbols-outlined animate-spin text-2xl">progress_activity</span>
+                        <p class="text-xs mt-1">جاري تحميل التعليقات...</p>
                     </div>
 
-                    <!-- Add Comment -->
-                    <div v-if="(selectedRequest.comments?.length || 0) < 50" class="flex gap-2">
-                        <input v-model="newComment" type="text" 
-                            class="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                            placeholder="اكتب تعليقاً...">
-                        <button @click="addComment" :disabled="!newComment.trim() || addingComment"
-                            class="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold disabled:opacity-50">
-                            <span v-if="addingComment" class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-                            <span v-else>إرسال</span>
-                        </button>
-                    </div>
+                    <template v-else>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white">التعليقات ({{ selectedRequest.comments?.length || 0 }}/50)</p>
+                        
+                        <div class="max-h-48 overflow-y-auto space-y-2">
+                            <div v-for="comment in selectedRequest.comments" :key="comment.id" 
+                                class="flex gap-2 p-2 rounded-lg"
+                                :class="comment.user_id === currentUserId ? 'bg-primary/10' : 'bg-slate-50 dark:bg-slate-800'">
+                                <div class="size-8 rounded-full bg-cover bg-center shrink-0" 
+                                    :style="`background-image: url('${comment.user?.photo || 'https://ui-avatars.com/api/?name=' + (comment.user?.name || 'U')}');`"></div>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-900 dark:text-white">{{ comment.user?.name }}</p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-300">{{ comment.comment }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Comment -->
+                        <div v-if="(selectedRequest.comments?.length || 0) < 50" class="flex gap-2">
+                            <input v-model="newComment" type="text" 
+                                class="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                placeholder="اكتب تعليقاً...">
+                            <button @click="addComment" :disabled="!newComment.trim() || addingComment"
+                                class="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold disabled:opacity-50">
+                                <span v-if="addingComment" class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                                <span v-else>إرسال</span>
+                            </button>
+                        </div>
+                    </template>
                 </div>
 
                 <!-- Actions -->
                 <div v-if="selectedRequest.status === 'open' && selectedRequest.requester_id !== currentUserId" class="pt-2">
-                    <button @click="pickRequest(selectedRequest)" class="w-full py-3 bg-primary text-white font-bold rounded-xl">
-                        سأساعد 🙋
+                    <button @click="pickRequest(selectedRequest)" :disabled="pickingRequest" class="w-full py-3 bg-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-blue-600 transition-colors">
+                        <span v-if="pickingRequest" class="material-symbols-outlined animate-spin">progress_activity</span>
+                        <span v-else>سأساعد 🙋</span>
                     </button>
                 </div>
             </div>
@@ -306,6 +312,8 @@ export default {
             showNewRequestModal: false,
             showDetailsModal: false,
             selectedRequest: null,
+            loadingDetails: false,
+            pickingRequest: false,
             newRequestDescription: '',
             submitting: false,
             newComment: '',
@@ -339,17 +347,6 @@ export default {
                 'helped': 'لم تساعد أحداً بعد',
                 'cancelled': 'لا توجد طلبات ملغية',
             }[this.activeTab] || 'لا توجد بيانات';
-        },
-        canSeePhone() {
-            if (!this.selectedRequest) return false;
-            const isOwner = this.selectedRequest.requester_id === this.currentUserId;
-            const isHelper = this.selectedRequest.helper_id === this.currentUserId;
-            return isOwner || isHelper;
-        },
-        canSeeHelperPhone() {
-            if (!this.selectedRequest) return false;
-            const isOwner = this.selectedRequest.requester_id === this.currentUserId;
-            return isOwner;
         },
         canComment() {
             if (!this.selectedRequest) return false;
@@ -413,7 +410,7 @@ export default {
         async markAllNotificationsAsRead() {
             this.loadingMarkAll = true;
             try {
-                await axios.post('/api/notifications/mark-all-read');
+                await axios.post('/api/notifications/read-all');
                 this.notifications.forEach(n => n.is_read = true);
                 this.unreadNotificationsCount = 0;
             } catch (e) {
@@ -526,6 +523,7 @@ export default {
             }
         },
         async pickRequest(req) {
+            this.pickingRequest = true;
             try {
                 const response = await axios.post(`/api/help/${req.id}/pick`);
                 if (response.data.success) {
@@ -537,6 +535,8 @@ export default {
                 }
             } catch (e) {
                 window.showToast(e.response?.data?.message || 'حدث خطأ', 'error');
+            } finally {
+                this.pickingRequest = false;
             }
         },
         async cancelRequest(req) {
@@ -553,14 +553,27 @@ export default {
             }
         },
         async openDetails(req) {
+            // Optimistic UI: Show modal immediately with available data
+            this.selectedRequest = req;
+            this.showDetailsModal = true;
+            this.loadingDetails = true;
+
             try {
                 const response = await axios.get(`/api/help/${req.id}`);
                 if (response.data.success) {
-                    this.selectedRequest = response.data.request;
-                    this.showDetailsModal = true;
+                    if (this.selectedRequest && this.selectedRequest.id === req.id) {
+                        this.selectedRequest = response.data.request;
+                    }
                 }
             } catch (e) {
-                window.showToast('تعذر تحميل التفاصيل', 'error');
+                // Keep showing basic data if fetch fails, or show error
+                if (this.selectedRequest && this.selectedRequest.id === req.id) {
+                    window.showToast('تعذر تحميل أحدث التفاصيل', 'error');
+                }
+            } finally {
+                if (this.selectedRequest && this.selectedRequest.id === req.id) {
+                    this.loadingDetails = false;
+                }
             }
         },
         async addComment() {
