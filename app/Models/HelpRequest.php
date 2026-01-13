@@ -47,7 +47,7 @@ class HelpRequest extends Model
      */
     public function comments(): HasMany
     {
-        return $this->hasMany(HelpComment::class)->orderBy('created_at', 'asc');
+        return $this->hasMany(HelpComment::class);
     }
 
     /**
