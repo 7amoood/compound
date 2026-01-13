@@ -486,7 +486,7 @@
 </template>
 
 <script>
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import Modal from '@/Components/Modal.vue';
 import Toast from '@/Components/Toast.vue';
@@ -813,7 +813,19 @@ export default {
                  this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
              }
              
-             const requestId = n.data?.request_id;
+             let data = n.data || {};
+             if (typeof data === 'string') {
+                 try { data = JSON.parse(data); } catch(e) {}
+             }
+             
+             const helpId = data.help_request_id || (n.type === 'help_picked' || n.type === 'help_comment' ? data.request_id : null);
+             const requestId = data.request_id;
+             
+             if (helpId) {
+                 this.showNotificationsModal = false;
+                 router.visit(`/help?request_id=${helpId}`);
+                 return;
+             }
              
              if (requestId) {
                  // 1. Preserving history state and remove modal flag BEFORE closing the prop

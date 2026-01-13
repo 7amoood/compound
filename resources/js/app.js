@@ -48,6 +48,12 @@ if ('BroadcastChannel' in window) {
             const requestId = urlObj.searchParams.get('request_id');
 
             if (requestId) {
+                // If it's a help request, always go to help page
+                if (urlObj.pathname.includes('/help')) {
+                    router.visit(urlString);
+                    return;
+                }
+
                 // Check if we are on a dashboard page
                 const currentPath = window.location.pathname;
                 const isDashboard = currentPath.includes('/resident') ||

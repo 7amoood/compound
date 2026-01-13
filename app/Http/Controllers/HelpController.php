@@ -44,8 +44,8 @@ class HelpController extends Controller
         $status = $request->get('status', 'all');
 
         $query = HelpRequest::where('requester_id', $user->id)
-            ->with(['helper:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
-                $q->latest()->limit(1);
+            ->with(['requester:id,name,photo,block_no,floor,apt_no', 'helper:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
+                $q->latest()->limit(3);
             }, 'comments.user:id,name,photo']);
 
         if ($status !== 'all') {
@@ -68,8 +68,8 @@ class HelpController extends Controller
         $user = $request->user();
 
         $requests = HelpRequest::where('helper_id', $user->id)
-            ->with(['requester:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
-                $q->latest()->limit(1);
+            ->with(['requester:id,name,photo,phone,block_no,floor,apt_no', 'helper:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
+                $q->latest()->limit(3);
             }, 'comments.user:id,name,photo'])
             ->latest()
             ->paginate(10);
@@ -113,9 +113,9 @@ class HelpController extends Controller
     /**
      * Pick up a help request (offer to help)
      */
-    public function pick(HelpRequest $helpRequest): JsonResponse
+    public function pick(Request $request, HelpRequest $helpRequest): JsonResponse
     {
-        $user = request()->user();
+        $user = $request->user();
 
         // Can't pick your own request
         if ($helpRequest->requester_id === $user->id) {
@@ -138,6 +138,15 @@ class HelpController extends Controller
             'helper_id' => $user->id,
             'picked_at' => now(),
         ]);
+
+        // Optional: Create initial comment if provided
+        if ($request->has('comment') && ! empty($request->comment)) {
+            HelpComment::create([
+                'help_request_id' => $helpRequest->id,
+                'user_id'         => $user->id,
+                'comment'         => $request->comment,
+            ]);
+        }
 
         // Notify the requester that someone picked up their request
         Notification::send(
@@ -390,7 +399,7 @@ class HelpController extends Controller
                             'dir'   => 'rtl',
                         ],
                         'fcm_options'  => [
-                            'link' => '/help',
+                            'link' => $requestId ? "/help?request_id={$requestId}" : '/help',
                         ],
                     ],
                 ],

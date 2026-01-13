@@ -109,8 +109,9 @@
                             </button>
                         </div>
                         <div v-if="activeTab === 'my' && req.status === 'open'" class="mt-3">
-                            <button @click.stop="cancelRequest(req)" class="w-full py-2 bg-red-500 text-white rounded-lg text-sm font-bold">
-                                إلغاء الطلب
+                            <button @click.stop="cancelRequest(req)" :disabled="cancellingRequestId === req.id" class="w-full py-2 bg-red-500 text-white rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+                                <span v-if="cancellingRequestId === req.id" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                                <span>إلغاء الطلب</span>
                             </button>
                         </div>
                     </div>
@@ -250,7 +251,7 @@
 
                 <!-- Actions -->
                 <div v-if="selectedRequest.status === 'open' && selectedRequest.requester_id !== currentUserId" class="pt-2">
-                    <button @click="pickRequest(selectedRequest)" :disabled="pickingRequest" class="w-full py-3 bg-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-blue-600 transition-colors">
+                    <button @click="startPick" :disabled="pickingRequest" class="w-full py-3 bg-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-blue-600 transition-colors">
                         <span v-if="pickingRequest" class="material-symbols-outlined animate-spin">progress_activity</span>
                         <span v-else>سأساعد 🙋</span>
                     </button>
@@ -293,6 +294,36 @@
                     <span v-if="loadingMoreNotifications" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
                     <span>{{ loadingMoreNotifications ? 'جاري التحميل...' : 'تحميل المزيد' }}</span>
                 </button>
+            </div>
+        </Modal>
+        <!-- Pick Help Confirmation Modal -->
+        <Modal :show="showPickModal" title="تقديم المساعدة" @close="showPickModal = false">
+            <div class="space-y-4">
+                <div class="p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        أرسل رسالة سريعة لجيرانك لتخبرهم كيف يمكنك مساعدتهم. سيبدأ هذا المحادثة بينكما.
+                    </p>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">رسالتك الأولى</label>
+                    <textarea v-model="pickComment" 
+                        rows="3"
+                        class="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-slate-400"
+                        placeholder="مثلاً: أنا في طريقي الآن، هل تحتاج شيئاً آخر؟"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button @click="showPickModal = false" class="flex-1 py-3 text-sm font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        إلغاء
+                    </button>
+                    <button @click="confirmPick" 
+                        :disabled="!pickComment.trim() || confirmingPick"
+                        class="flex-[2] py-3 text-sm font-bold text-white bg-primary rounded-xl shadow-lg shadow-primary/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+                        <span v-if="confirmingPick" class="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+                        <span v-else>إرسال ومساعدة 🙋</span>
+                    </button>
+                </div>
             </div>
         </Modal>
     </div>
@@ -339,6 +370,10 @@ export default {
             loadingMarkAll: false,
             loadingMoreNotifications: false,
             nextNotificationsUrl: null,
+            showPickModal: false,
+            pickComment: '',
+            confirmingPick: false,
+            cancellingRequestId: null,
         };
     },
     computed: {
@@ -371,6 +406,14 @@ export default {
     watch: {
         activeTab() {
             this.loadData();
+        },
+        '$page.url': {
+            handler() {
+                const params = new URLSearchParams(window.location.search);
+                if (params.has('request_id')) {
+                    this.openDetails({ id: params.get('request_id') });
+                }
+            }
         }
     },
     mounted() {
@@ -448,9 +491,10 @@ export default {
                 try { data = JSON.parse(data); } catch(e) {}
             }
             
-            if (data.request_id) {
+            const rid = data.help_request_id || data.request_id;
+            if (rid) {
                 this.showNotificationsModal = false;
-                this.openDetails({ id: data.request_id });
+                this.openDetails({ id: rid });
             } else if (data.click_action && data.click_action !== window.location.pathname) {
                  window.location.href = data.click_action;
             }
@@ -486,8 +530,6 @@ export default {
                     endpoint = '/api/help/my-requests';
                 } else if (this.activeTab === 'helped') {
                     endpoint = '/api/help/my-helps';
-                } else if (this.activeTab === 'cancelled') {
-                    endpoint = '/api/help/my-requests?status=cancelled';
                 }
 
                 const response = await axios.get(endpoint);
@@ -535,12 +577,24 @@ export default {
                 this.submitting = false;
             }
         },
-        async pickRequest(req) {
+        async startPick() {
             this.pickingRequest = true;
+            setTimeout(() => {
+                this.showPickModal = true;
+                this.pickingRequest = false;
+            }, 300);
+        },
+        async confirmPick() {
+            if (!this.pickComment.trim() || this.confirmingPick) return;
+            this.confirmingPick = true;
             try {
-                const response = await axios.post(`/api/help/${req.id}/pick`);
+                const response = await axios.post(`/api/help/${this.selectedRequest.id}/pick`, {
+                    comment: this.pickComment
+                });
                 if (response.data.success) {
                     window.showToast('شكراً لمساعدتك! 🙏', 'success');
+                    this.showPickModal = false;
+                    this.pickComment = '';
                     this.showDetailsModal = false;
                     this.loadData();
                 } else {
@@ -549,10 +603,12 @@ export default {
             } catch (e) {
                 window.showToast(e.response?.data?.message || 'حدث خطأ', 'error');
             } finally {
-                this.pickingRequest = false;
+                this.confirmingPick = false;
             }
         },
         async cancelRequest(req) {
+            if (this.cancellingRequestId) return;
+            this.cancellingRequestId = req.id;
             try {
                 const response = await axios.post(`/api/help/${req.id}/cancel`);
                 if (response.data.success) {
@@ -563,6 +619,8 @@ export default {
                 }
             } catch (e) {
                 window.showToast(e.response?.data?.message || 'حدث خطأ', 'error');
+            } finally {
+                this.cancellingRequestId = null;
             }
         },
         async openDetails(req) {

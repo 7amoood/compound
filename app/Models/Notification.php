@@ -88,6 +88,12 @@ class Notification extends Model
             $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
             $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
 
+            // Determine the correct deep link URL based on notification type
+            $requestId = $notification->data['help_request_id'] ?? $notification->data['request_id'] ?? null;
+            $isHelp    = in_array($notification->type, [self::TYPE_HELP_PICKED, self::TYPE_HELP_COMMENT, 'new_help_request']);
+            $baseUrl   = $isHelp ? '/help' : '/dashboard';
+            $link      = $requestId ? "{$baseUrl}?request_id={$requestId}" : $baseUrl;
+
             // Log::info("FCM v1: Sending to user {$user->id} (token: " . substr($user->fcm_token, 0, 10) . "...)");
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $accessToken,
@@ -113,8 +119,8 @@ class Notification extends Model
                     ],
                     'data'         => [
                         'type'         => $notification->type,
-                        'request_id'   => (string) ($notification->data['request_id'] ?? ''),
-                        'click_action' => isset($notification->data['request_id']) ? "/dashboard?request_id=" . $notification->data['request_id'] : '/dashboard',
+                        'request_id'   => (string) $requestId,
+                        'click_action' => $link,
                     ],
                     'webpush'      => [
                         'notification' => [
@@ -124,7 +130,7 @@ class Notification extends Model
                             'allow_sound' => true,
                         ],
                         'fcm_options'  => [
-                            'link' => isset($notification->data['request_id']) ? "/dashboard?request_id=" . $notification->data['request_id'] : '/dashboard',
+                            'link' => $link,
                         ],
                     ],
                 ],

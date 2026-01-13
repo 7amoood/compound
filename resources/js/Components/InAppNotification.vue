@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import { router, usePage } from '@inertiajs/vue3';
+
 export default {
     name: 'InAppNotification',
     data() {
@@ -47,7 +49,9 @@ export default {
                 'NEW_PROPOSAL': 'local_offer',
                 'PROPOSAL_ACCEPTED': 'check_circle',
                 'WORK_COMPLETED': 'verified',
-                'NEW_REVIEW': 'star'
+                'NEW_REVIEW': 'star',
+                'new_help_request': 'volunteer_activism',
+                'help_picked': 'emoji_people'
             };
             return iconMap[type] || 'notifications';
         }
@@ -60,7 +64,15 @@ export default {
     },
     methods: {
         handleMessage(event) {
-            this.notification = event.detail;
+            const payload = event.detail;
+
+            // Skip if sender is self
+            const currentUserId = usePage().props.auth?.user?.id;
+            if (payload?.data?.sender_id && currentUserId && payload.data.sender_id == currentUserId) {
+                return;
+            }
+
+            this.notification = payload;
             
             // Auto hide after 6 seconds
             if (this.timeout) clearTimeout(this.timeout);
@@ -78,12 +90,16 @@ export default {
             }
         },
         handleClick() {
-            const requestId = this.notification?.data?.request_id;
-            if (requestId) {
-                // Dispatch the event that dashboards listen to
-                window.dispatchEvent(new CustomEvent('open-request-details', {
-                    detail: { requestId: parseInt(requestId) }
-                }));
+            const data = this.notification?.data;
+            if (data?.request_id) {
+                if (data.type === 'new_help_request' || data.type === 'help_picked') {
+                    router.visit(`/help?request_id=${data.request_id}`);
+                } else {
+                    // Dispatch the event that dashboards listen to
+                    window.dispatchEvent(new CustomEvent('open-request-details', {
+                        detail: { requestId: parseInt(data.request_id) }
+                    }));
+                }
             }
             this.notification = null;
         }
