@@ -83,7 +83,7 @@ messaging.onBackgroundMessage(async (payload) => {
     // the browser (Chrome/Safari) will display it automatically in the background.
     // We only show a manual one if it's a data-only message.
     // if (!payload.notification) {
-        const notificationTitle = payload.data.title || 'إشعار جديد';
+        const notificationTitle = 'momo';
         const notificationOptions = {
             body: payload.data.body || '',
             icon: '/icons/icon-192x192.png',
