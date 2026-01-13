@@ -24,8 +24,8 @@ class HelpController extends Controller
                 $q->where('compound_id', $user->compound_id);
             })
             ->with(['requester:id,name,photo,block_no,floor,apt_no', 'comments' => function ($q) {
-                $q->latest()->limit(1);
-            }, 'comments.user:id,name,photo'])
+                $q->limit(1);
+            }])
             ->latest()
             ->paginate(10);
 
@@ -45,8 +45,8 @@ class HelpController extends Controller
 
         $query = HelpRequest::where('requester_id', $user->id)
             ->with(['requester:id,name,photo,block_no,floor,apt_no', 'helper:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
-                $q->latest()->limit(3);
-            }, 'comments.user:id,name,photo']);
+                $q->limit(3);
+            }]);
 
         if ($status !== 'all') {
             $query->where('status', $status);
@@ -69,8 +69,8 @@ class HelpController extends Controller
 
         $requests = HelpRequest::where('helper_id', $user->id)
             ->with(['requester:id,name,photo,phone,block_no,floor,apt_no', 'helper:id,name,photo,phone,block_no,floor,apt_no', 'comments' => function ($q) {
-                $q->latest()->limit(3);
-            }, 'comments.user:id,name,photo'])
+                $q->limit(3);
+            }])
             ->latest()
             ->paginate(10);
 
