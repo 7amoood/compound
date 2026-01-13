@@ -532,7 +532,7 @@ export default {
             }
             
             // Check if a comment arrived for the currently open request
-            const requestId = payload.data?.help_request_id;
+            const requestId = payload.data?.help_request_id||payload.data?.request_id;
             const type = payload.data?.type;
 
             if ((type === 'help_comment' || type === 'help_picked') && 

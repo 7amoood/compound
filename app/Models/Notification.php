@@ -100,26 +100,37 @@ class Notification extends Model
                 'Content-Type'  => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
                 'message' => [
-                    'token'   => $user->fcm_token,
-                    // 'notification' block removed to prevent auto-display (InAppNotification.vue & SW handle this)
-                    'data'    => [
-                        'title'        => $notification->title,
-                        'body'         => $notification->body,
-                        'type'         => $notification->type,
-                        'request_id'   => (string) $requestId,
-                        'click_action' => $link,
+                    'token'        => $user->fcm_token,
+                    'notification' => [
+                        'title' => $notification->title,
+                        'body'  => $notification->body,
                     ],
-                    'android' => [
+                    'data'         => [
+                        'title'           => $notification->title,
+                        'body'            => $notification->body,
+                        'type'            => $notification->type,
+                        'request_id'      => (string) $requestId,
+                        'click_action'    => $link,
+                    ],
+                    'android'      => [
                         'priority' => 'high',
                     ],
-                    'apns'    => [
+                    'apns'         => [
+                        'headers' => [
+                            'apns-priority' => '10',
+                        ],
                         'payload' => [
                             'aps' => [
-                                'sound' => 'default',
+                                'sound'             => 'default',
+                                'content-available' => 1,
+                                'mutable-content'   => 1,
                             ],
                         ],
                     ],
-                    'webpush' => [
+                    'webpush'      => [
+                        'headers'     => [
+                            'Urgency' => 'high',
+                        ],
                         'fcm_options' => [
                             'link' => $link,
                         ],

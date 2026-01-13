@@ -370,9 +370,12 @@ class HelpController extends Controller
                 'Authorization' => 'Bearer ' . $accessToken,
                 'Content-Type'  => 'application/json',
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
-                'message' => [
-                    'topic'           => $topic,
-                    // 'notification' block removed to prevent auto-display
+                'message'         => [
+                    'topic'        => $topic,
+                    'notification' => [
+                        'title' => '🆘 طلب مساعدة جديد',
+                        'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),
+                    ],
                     'data'            => [
                         'title' => '🆘 طلب مساعدة جديد',
                         'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),
@@ -384,14 +387,22 @@ class HelpController extends Controller
                     'android' => [
                         'priority' => 'high',
                     ],
-                    'apns'    => [
+                    'apns' => [
+                        'headers' => [
+                            'apns-priority' => '10',
+                        ],
                         'payload' => [
                             'aps' => [
-                                'sound' => 'default',
+                                'sound'             => 'default',
+                                'content-available' => 1,
+                                'mutable-content'   => 1,
                             ],
                         ],
                     ],
                     'webpush' => [
+                        'headers'     => [
+                            'Urgency' => 'high',
+                        ],
                         'fcm_options' => [
                             'link' => $requestId ? "/help?request_id={$requestId}" : '/help',
                         ],
