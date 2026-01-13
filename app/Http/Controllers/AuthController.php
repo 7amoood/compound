@@ -100,6 +100,10 @@ class AuthController extends Controller
 
     public function logout()
     {
+        auth()->user()->update([
+            'fcm_token'      => null,
+            'remember_token' => null,
+        ]);
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
