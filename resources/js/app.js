@@ -48,7 +48,7 @@ navigator.serviceWorker?.addEventListener('message', (event) => {
 
     if (requestId && urlObj.pathname.includes('/help')) {
         // Inertia navigation مباشرة
-        this.$inertia.visit(urlString);
+        router.visit(urlString);
         return;
     }
 
@@ -63,6 +63,6 @@ navigator.serviceWorker?.addEventListener('message', (event) => {
             detail: { requestId: Number(requestId) }
         }));
     } else {
-        this.$inertia.visit(urlObj.pathname + urlObj.search);
+        router.visit(urlObj.pathname + urlObj.search);
     }
 });

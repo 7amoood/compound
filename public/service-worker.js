@@ -88,7 +88,7 @@ messaging.onBackgroundMessage(async (payload) => {
             body: payload.data.body || '',
             icon: '/icons/icon-192x192.png',
             badge: '/icons/badge-72x72.png',
-            data: payload.data.click_action || '/',
+            data: payload.data,
             dir: 'rtl'
         };
         return self.registration.showNotification(notificationTitle, notificationOptions);
@@ -167,16 +167,23 @@ self.addEventListener('fetch', event => {
 
 // 5. Handle Notification Clicks
 self.addEventListener('notificationclick', event => {
-    console.log('notification click-service-worker:', event);
+    console.log('[SW] Notification Clicked:', event.notification);
     event.notification.close();
 
     const data = event.notification.data || {};
-    const urlToOpen = data.click_action || data.url || '/dashboard';
+    // Fallback search for click_action in case it's nested (Firebase sometimes does this)
+    const urlToOpen = data.click_action || data.url || (data.FCM_MSG ? data.FCM_MSG.data.click_action : null) || '/dashboard';
+
+    console.log('[SW] Target URL:', urlToOpen);
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async clientsArr => {
+            console.log('[SW] Active clients:', clientsArr.length);
+
+            // Try to find an existing tab and focus it
             for (const client of clientsArr) {
                 if (client.url.startsWith(self.location.origin)) {
+                    console.log('[SW] Focusing existing client:', client.url);
                     await client.focus();
                     client.postMessage({
                         type: 'ON_NOTIFICATION_CLICK',
@@ -186,8 +193,12 @@ self.addEventListener('notificationclick', event => {
                 }
             }
 
+            // If no window is open, open a new one
             if (clients.openWindow) {
-                return clients.openWindow(`${urlToOpen}?from_notification=1`);
+                const separator = urlToOpen.includes('?') ? '&' : '?';
+                const finalUrl = `${urlToOpen}${separator}from_notification=1`;
+                console.log('[SW] Opening new window:', finalUrl);
+                return clients.openWindow(finalUrl);
             }
         })
     );
