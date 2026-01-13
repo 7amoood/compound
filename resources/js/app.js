@@ -39,41 +39,58 @@ createInertiaApp({
 // Global Service Worker Message Listener for Notification Clicks
 if ('BroadcastChannel' in window) {
     const channel = new BroadcastChannel('notification_channel');
+
     channel.onmessage = (event) => {
-        if (event.data && event.data.type === 'ON_NOTIFICATION_CLICK') {
-            const urlString = event.data.url;
+        const data = event.data;
+        if (!data || data.type !== 'ON_NOTIFICATION_CLICK') return;
 
-            // Parse URL
-            const urlObj = new URL(urlString, window.location.origin);
-            const requestId = urlObj.searchParams.get('request_id');
+        // console.log('[BroadcastChannel] Notification click received:', data);
 
-            if (requestId) {
-                // If it's a help request, always go to help page
-                if (urlObj.pathname.includes('/help')) {
-                    router.visit(urlString);
-                    return;
-                }
+        const urlString = data.url || '/dashboard';
+        const urlObj = new URL(urlString, window.location.origin);
+        const requestId = urlObj.searchParams.get('request_id');
 
-                // Check if we are on a dashboard page
-                const currentPath = window.location.pathname;
-                const isDashboard = currentPath.includes('/resident') ||
-                    currentPath.includes('/provider') ||
-                    currentPath.includes('/dashboard');
+        // console.log('[BroadcastChannel] Parsed URL:', urlObj.href, 'Request ID:', requestId);
 
-                if (isDashboard) {
-                    // Dispatch a custom event that dashboards are listening to
-                    window.dispatchEvent(new CustomEvent('open-request-details', {
-                        detail: { requestId: parseInt(requestId) }
-                    }));
-                } else {
-                    // Not on dashboard, navigate to it (Inertia handles this smoothly)
-                    router.visit(urlString);
-                }
-            } else {
-                // Fallback: navigate using Inertia to avoid reload
-                const path = urlObj.pathname + urlObj.search;
-                router.visit(path);
+        const navigateTo = (path) => {
+            // console.log('[BroadcastChannel] Navigating via router.visit to:', path);
+            router.visit(path);
+        };
+
+        const dispatchRequestEvent = (id) => {
+            // console.log('[BroadcastChannel] Dispatching open-request-details event for ID:', id);
+            window.dispatchEvent(new CustomEvent('open-request-details', {
+                detail: { requestId: id }
+            }));
+        };
+
+        if (requestId) {
+            // Case 1: Help request
+            if (urlObj.pathname.includes('/help')) {
+                navigateTo(urlString);
+                return;
             }
+
+            // Case 2: Dashboard page
+            const currentPath = window.location.pathname;
+            const isDashboard = ['/resident', '/provider', '/dashboard'].some(prefix => currentPath.includes(prefix));
+
+            if (isDashboard) {
+                dispatchRequestEvent(Number(requestId));
+            } else {
+                // Case 3: Not on dashboard, navigate
+                navigateTo(urlString);
+            }
+        } else {
+            // Case 4: Fallback, navigate to URL
+            const path = urlObj.pathname + urlObj.search;
+            navigateTo(path);
         }
     };
+
+    // Optional: close channel on unload to prevent leaks
+    window.addEventListener('beforeunload', () => {
+        channel.close();
+        // console.log('[BroadcastChannel] Channel closed on unload');
+    });
 }

@@ -115,12 +115,12 @@ self.addEventListener('notificationclick', event => {
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
             if (windowClients.length > 0) {
-                console.log('[SW] Found open windows:', windowClients.length);
+                // console.log('[SW] Found open windows:', windowClients.length);
 
                 // ركّز على أول نافذة
                 const client = windowClients[0];
                 return client.focus().then(() => {
-                    console.log('[SW] Window focused.');
+                    // console.log('[SW] Window focused.');
 
                     // أرسل رسالة للنافذة
                     const channel = new BroadcastChannel('notification_channel');
@@ -128,12 +128,12 @@ self.addEventListener('notificationclick', event => {
                         type: 'ON_NOTIFICATION_CLICK',
                         url: urlToOpen
                     });
-                    console.log('[SW] Message sent via BroadcastChannel.');
+                    // console.log('[SW] Message sent via BroadcastChannel.');
 
                     // أغلق القناة بعد تأخير بسيط
                     setTimeout(() => {
                         channel.close();
-                        console.log('[SW] BroadcastChannel closed.');
+                        // console.log('[SW] BroadcastChannel closed.');
                     }, 1000);
 
                 }).catch(err => {
@@ -143,11 +143,11 @@ self.addEventListener('notificationclick', event => {
 
             // إذا ما فيش نوافذ مفتوحة، افتح نافذة جديدة
             if (clients.openWindow) {
-                console.log('[SW] No open windows, opening new window.');
+                // console.log('[SW] No open windows, opening new window.');
                 return clients.openWindow(urlToOpen);
             }
 
-            console.warn('[SW] No clients and cannot open window.');
+            // console.warn('[SW] No clients and cannot open window.');
         }).catch(err => {
             console.error('[SW] Error handling notification click:', err);
         })
