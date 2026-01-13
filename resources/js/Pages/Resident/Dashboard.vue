@@ -605,8 +605,14 @@ export default {
         this.loadCategories();
         this.loadRequests();
         this.loadUnreadCount();
-        // Lazy load notification permission request
-        setTimeout(() => requestNotificationPermission(), 1000);
+        
+        // Always request notification permission if not granted
+        if ('Notification' in window && Notification.permission !== 'granted') {
+            setTimeout(() => requestNotificationPermission(), 1000);
+        } else if ('Notification' in window && Notification.permission === 'granted') {
+            // If already granted, just ensure token is synced
+            requestNotificationPermission();
+        }
         
         // Listen for incoming push notifications while app is open
         window.addEventListener('fcm-message', this.handleFcmMessage);

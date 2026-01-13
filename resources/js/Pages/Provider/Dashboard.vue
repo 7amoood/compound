@@ -538,8 +538,15 @@ export default {
         this.loadStats();
         this.loadUnreadCount();
         this.switchToTab(this.activeTab);
-        // Lazy load notification permission request
-        setTimeout(() => requestNotificationPermission(), 1000);
+
+        // Always request notification permission if not granted
+        if ('Notification' in window && Notification.permission !== 'granted') {
+            setTimeout(() => requestNotificationPermission(), 1000);
+        } else if ('Notification' in window && Notification.permission === 'granted') {
+            // If already granted, just ensure token is synced
+            requestNotificationPermission();
+        }
+
 
         // Handle direct request focus (e.g. from push notifications)
         const params = new URLSearchParams(window.location.search);

@@ -1,6 +1,6 @@
 {
-  "_Modal-CVf2rjTm.js": {
-    "file": "assets/Modal-CVf2rjTm.js",
+  "_Modal-BXcwa-Al.js": {
+    "file": "assets/Modal-BXcwa-Al.js",
     "name": "Modal",
     "imports": [
       "_vendor-tvXOKrQx.js",
@@ -14,12 +14,8 @@
     "file": "assets/Modal-DA7eKiM2.css",
     "src": "_Modal-DA7eKiM2.css"
   },
-  "_PullToRefresh-Dm6APd8e.css": {
-    "file": "assets/PullToRefresh-Dm6APd8e.css",
-    "src": "_PullToRefresh-Dm6APd8e.css"
-  },
-  "_PullToRefresh-DoYOnOWr.js": {
-    "file": "assets/PullToRefresh-DoYOnOWr.js",
+  "_PullToRefresh-CHQ31WB8.js": {
+    "file": "assets/PullToRefresh-CHQ31WB8.js",
     "name": "PullToRefresh",
     "imports": [
       "resources/js/app.js",
@@ -29,19 +25,9 @@
       "assets/PullToRefresh-Dm6APd8e.css"
     ]
   },
-  "_firebase-TbBgJMCo.js": {
-    "file": "assets/firebase-TbBgJMCo.js",
-    "name": "firebase",
-    "imports": [
-      "resources/js/app.js",
-      "_vendor-tvXOKrQx.js"
-    ],
-    "dynamicImports": [
-      "node_modules/firebase/app/dist/esm/index.esm.js",
-      "node_modules/firebase/messaging/dist/esm/index.esm.js",
-      "node_modules/firebase/messaging/dist/esm/index.esm.js",
-      "node_modules/firebase/messaging/dist/esm/index.esm.js"
-    ]
+  "_PullToRefresh-Dm6APd8e.css": {
+    "file": "assets/PullToRefresh-Dm6APd8e.css",
+    "src": "_PullToRefresh-Dm6APd8e.css"
   },
   "_index.esm-BJAW3Jpj.js": {
     "file": "assets/index.esm-BJAW3Jpj.js",
@@ -70,7 +56,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-DtU4r3ZO.css",
+    "file": "assets/app-CtjebJnV.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -79,22 +65,22 @@
     ]
   },
   "resources/js/Pages/Admin/Dashboard.vue": {
-    "file": "assets/Dashboard-Bs8IfpvJ.js",
+    "file": "assets/Dashboard-wb42__Vc.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-tvXOKrQx.js",
-      "_Modal-CVf2rjTm.js",
+      "_Modal-BXcwa-Al.js",
       "resources/js/app.js"
     ],
     "css": [
       "assets/Dashboard-CdXyEzhZ.css",
-      "assets/app-DtU4r3ZO.css"
+      "assets/app-CtjebJnV.css"
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-CBYk6O19.js",
+    "file": "assets/Login-DDfdqf3D.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -104,75 +90,78 @@
     ],
     "css": [
       "assets/Login-DVkUkv3A.css",
-      "assets/app-DtU4r3ZO.css"
+      "assets/app-CtjebJnV.css"
     ]
   },
   "resources/js/Pages/Provider/Dashboard.vue": {
-    "file": "assets/Dashboard-CQnoKpGG.js",
+    "file": "assets/Dashboard-izHtaEXw.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Provider/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-tvXOKrQx.js",
-      "_Modal-CVf2rjTm.js",
-      "_PullToRefresh-DoYOnOWr.js",
-      "_firebase-TbBgJMCo.js",
+      "_Modal-BXcwa-Al.js",
+      "_PullToRefresh-CHQ31WB8.js",
+      "resources/js/firebase.js",
       "resources/js/app.js"
     ],
     "css": [
-      "assets/Dashboard-DQvYZe-Z.css",
-      "assets/app-DtU4r3ZO.css"
+      "assets/Dashboard-C5KXwx9T.css",
+      "assets/app-CtjebJnV.css"
     ]
   },
   "resources/js/Pages/Resident/Dashboard.vue": {
-    "file": "assets/Dashboard-EQz9Tmm-.js",
+    "file": "assets/Dashboard-DF-PX3qZ.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Resident/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-tvXOKrQx.js",
-      "_Modal-CVf2rjTm.js",
-      "_PullToRefresh-DoYOnOWr.js",
-      "_firebase-TbBgJMCo.js",
+      "_Modal-BXcwa-Al.js",
+      "_PullToRefresh-CHQ31WB8.js",
+      "resources/js/firebase.js",
       "resources/js/app.js"
     ],
     "css": [
-      "assets/Dashboard-BKlXcb4h.css",
-      "assets/app-DtU4r3ZO.css"
+      "assets/Dashboard-DyMzX12i.css",
+      "assets/app-CtjebJnV.css"
     ]
   },
   "resources/js/Pages/Resident/Help.vue": {
-    "file": "assets/Help-CoAndFfi.js",
+    "file": "assets/Help-NocbGflA.js",
     "name": "Help",
     "src": "resources/js/Pages/Resident/Help.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-tvXOKrQx.js",
-      "_Modal-CVf2rjTm.js",
-      "_PullToRefresh-DoYOnOWr.js",
+      "_Modal-BXcwa-Al.js",
+      "_PullToRefresh-CHQ31WB8.js",
       "resources/js/app.js"
     ],
     "css": [
-      "assets/app-DtU4r3ZO.css"
+      "assets/app-CtjebJnV.css"
     ]
   },
   "resources/js/Pages/Settings.vue": {
-    "file": "assets/Settings-BXN2Isoi.js",
+    "file": "assets/Settings-S6Thc743.js",
     "name": "Settings",
     "src": "resources/js/Pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
+      "resources/js/app.js",
       "_vendor-tvXOKrQx.js",
-      "_Modal-CVf2rjTm.js",
-      "resources/js/app.js"
+      "_Modal-BXcwa-Al.js"
+    ],
+    "dynamicImports": [
+      "resources/js/firebase.js"
     ],
     "css": [
       "assets/Settings-tn0RQdqM.css",
-      "assets/app-DtU4r3ZO.css"
+      "assets/app-CtjebJnV.css"
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DnqEoAW8.js",
+    "file": "assets/app-DflFgpLp.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -189,7 +178,26 @@
     ],
     "css": [
       "assets/app-DQK5lG8w.css",
-      "assets/app-DtU4r3ZO.css"
+      "assets/app-CtjebJnV.css"
+    ]
+  },
+  "resources/js/firebase.js": {
+    "file": "assets/firebase-C3CWsg66.js",
+    "name": "firebase",
+    "src": "resources/js/firebase.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_vendor-tvXOKrQx.js"
+    ],
+    "dynamicImports": [
+      "node_modules/firebase/app/dist/esm/index.esm.js",
+      "node_modules/firebase/messaging/dist/esm/index.esm.js",
+      "node_modules/firebase/messaging/dist/esm/index.esm.js",
+      "node_modules/firebase/messaging/dist/esm/index.esm.js"
+    ],
+    "css": [
+      "assets/app-CtjebJnV.css"
     ]
   }
 }

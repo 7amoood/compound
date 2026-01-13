@@ -74,6 +74,24 @@
             <div class="px-4 mb-6">
                 <h3 class="pr-4 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">الإشعارات</h3>
                 <div class="bg-surface-light dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100 dark:divide-gray-800">
+                    <!-- Push Notifications Toggle -->
+                    <div class="flex items-center justify-between px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-xl" :class="notificationStatus === 'granted' ? 'text-green-500' : 'text-gray-400'">notifications</span>
+                            <div>
+                                <span class="text-[16px] text-gray-900 dark:text-white font-normal">الإشعارات الفورية</span>
+                                <p class="text-xs text-gray-500">{{ notificationStatusText }}</p>
+                            </div>
+                        </div>
+                        <button 
+                            @click="requestNotificationPermission" 
+                            :disabled="notificationStatus === 'granted' || requestingNotification"
+                            class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                            :class="notificationStatus === 'granted' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-primary text-white'">
+                            <span v-if="requestingNotification" class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                            <span v-else>{{ notificationStatus === 'granted' ? 'مفعّل ✓' : 'تفعيل' }}</span>
+                        </button>
+                    </div>
                     <!-- Dark Mode Selector -->
                     <div class="flex flex-col px-4 py-3 gap-3">
                         <span class="text-[16px] text-gray-900 dark:text-white font-normal">المظهر</span>
@@ -176,6 +194,8 @@ export default {
             showAvatarGallery: false,
             nextAvatar: null,
             loggingOut: false,
+            notificationStatus: 'default',
+            requestingNotification: false,
         };
     },
     computed: {
@@ -185,6 +205,13 @@ export default {
         },
         csrfToken() {
             return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        },
+        notificationStatusText() {
+            switch (this.notificationStatus) {
+                case 'granted': return 'الإشعارات مفعّلة';
+                case 'denied': return 'الإشعارات محظورة من المتصفح';
+                default: return 'اضغط لتفعيل الإشعارات';
+            }
         }
     },
     watch: {
@@ -200,6 +227,7 @@ export default {
         }
     },
     mounted() {
+        // Theme
         if (localStorage.theme === 'dark') {
             this.theme = 'dark';
         } else if (localStorage.theme === 'light') {
@@ -207,8 +235,34 @@ export default {
         } else {
             this.theme = 'auto';
         }
+        // Notification status
+        if ('Notification' in window) {
+            this.notificationStatus = Notification.permission;
+        }
     },
     methods: {
+        async requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                window.showToast('المتصفح لا يدعم الإشعارات', 'error');
+                return;
+            }
+            this.requestingNotification = true;
+            try {
+                const { requestNotificationPermission } = await import('@/firebase.js');
+                await requestNotificationPermission();
+                this.notificationStatus = Notification.permission;
+                if (this.notificationStatus === 'granted') {
+                    window.showToast('تم تفعيل الإشعارات بنجاح', 'success');
+                } else if (this.notificationStatus === 'denied') {
+                    window.showToast('تم رفض الإشعارات. يمكنك تفعيلها من إعدادات المتصفح', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                window.showToast('حدث خطأ', 'error');
+            } finally {
+                this.requestingNotification = false;
+            }
+        },
         async saveProfile() {
             this.saving = true;
             try {
