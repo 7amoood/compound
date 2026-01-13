@@ -823,7 +823,11 @@ export default {
              
              if (helpId) {
                  this.showNotificationsModal = false;
-                 this.$inertia.visit(`/help?request_id=${helpId}`);
+
+                 this.$nextTick(() => {
+                     this.$inertia.visit(`/help?request_id=${helpId}`);
+                 });
+
                  return;
              }
              
