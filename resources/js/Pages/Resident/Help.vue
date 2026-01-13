@@ -300,6 +300,12 @@
         <!-- Pick Help Confirmation Modal -->
         <Modal :show="showPickModal" title="تقديم المساعدة" @close="showPickModal = false">
             <div class="space-y-4">
+                <!-- Request Description Preview -->
+                <div v-if="selectedRequest" class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">تفاصيل طلب المساعدة:</p>
+                    <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{{ selectedRequest.description }}"</p>
+                </div>
+
                 <div class="p-4 bg-primary/5 rounded-2xl border border-primary/10">
                     <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                         أرسل رسالة سريعة لجيرانك لتخبرهم كيف يمكنك مساعدتهم. سيبدأ هذا المحادثة بينكما.
