@@ -170,7 +170,7 @@ class WebAuthnController extends Controller
         session()->forget(['webauthn_auth_challenge', 'webauthn_auth_user_id']);
 
         // Login the user
-        Auth::login($user);
+        Auth::login($user, true);
         $request->session()->regenerate();
 
         return response()->json([

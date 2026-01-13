@@ -44,7 +44,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, true)) {
             $request->session()->regenerate();
             return redirect()->intended('/dashboard');
         }
