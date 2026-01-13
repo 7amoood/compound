@@ -167,6 +167,7 @@ self.addEventListener('fetch', event => {
 
 // 5. Handle Notification Clicks
 self.addEventListener('notificationclick', event => {
+    console.log('notification click-service-worker:', event);
     event.notification.close();
 
     const data = event.notification.data || {};
