@@ -166,7 +166,7 @@ self.addEventListener('fetch', event => {
 });
 
 // 5. Handle Notification Clicks
-self.addEventListeneself.addEventListener('notificationclick', event => {
+self.addEventListener('notificationclick', event => {
     event.notification.close();
 
     // Get target URL from notification data (click_action)
