@@ -46,11 +46,13 @@ if ('BroadcastChannel' in window) {
             // Parse URL
             const urlObj = new URL(urlString, window.location.origin);
             const requestId = urlObj.searchParams.get('request_id');
-
+            console.log('firing click ' + requestId);
             if (requestId) {
                 // If it's a help request, always go to help page
                 if (urlObj.pathname.includes('/help')) {
-                    router.visit(urlString);
+                    this.$nextTick(() => {
+                        router.visit(urlString);
+                    });
                     return;
                 }
 
@@ -67,12 +69,16 @@ if ('BroadcastChannel' in window) {
                     }));
                 } else {
                     // Not on dashboard, navigate to it (Inertia handles this smoothly)
-                    router.visit(urlString);
+                    this.$nextTick(() => {
+                        router.visit(urlString);
+                    });
                 }
             } else {
                 // Fallback: navigate using Inertia to avoid reload
                 const path = urlObj.pathname + urlObj.search;
-                router.visit(path);
+                this.$nextTick(() => {
+                    router.visit(path);
+                });
             }
         }
     };
