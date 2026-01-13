@@ -509,8 +509,11 @@ export default {
             if (rid) {
                 this.showNotificationsModal = false;
                 this.openDetails({ id: rid });
-            } else if (data.click_action && data.click_action !== window.location.pathname) {
-                 window.location.href = data.click_action;
+            } else if (data.click_action) {
+                this.showNotificationsModal = false;
+                this.$nextTick(() => {
+                    this.$inertia.visit(data.click_action);
+                });
             }
         },
         handleFcmMessage(event) {
@@ -529,7 +532,7 @@ export default {
             }
             
             // Check if a comment arrived for the currently open request
-            const requestId = payload.data?.help_request_id || payload.data?.request_id;
+            const requestId = payload.data?.help_request_id;
             const type = payload.data?.type;
 
             if ((type === 'help_comment' || type === 'help_picked') && 
