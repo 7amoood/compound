@@ -209,16 +209,16 @@
                     </div>
 
                     <template v-else>
-                        <!-- Load More -->
-                        <div v-if="nextCommentsUrl" class="flex justify-center my-2">
-                            <button @click="loadMoreComments" :disabled="loadingMoreComments" class="text-[11px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1 rounded-full transition-colors flex items-center gap-1">
-                                <span v-if="loadingMoreComments" class="material-symbols-outlined animate-spin text-[12px]">progress_activity</span>
-                                <span>عرض المحادثات الأقدم</span>
-                            </button>
-                        </div>
-
                         <!-- Chat Messages -->
                         <div ref="commentsContainer" class="max-h-60 overflow-y-auto overscroll-contain space-y-3 px-1 py-2 flex flex-col" @touchstart.stop>
+                            <!-- Load More (Inside at Top) -->
+                            <div v-if="nextCommentsUrl" class="flex justify-center mb-2">
+                                <button @click="loadMoreComments" :disabled="loadingMoreComments" class="text-[11px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1 rounded-full transition-colors flex items-center gap-1">
+                                    <span v-if="loadingMoreComments" class="material-symbols-outlined animate-spin text-[12px]">progress_activity</span>
+                                    <span>عرض المحادثات الأقدم</span>
+                                </button>
+                            </div>
+
                             <div v-for="comment in selectedRequest.comments" :key="comment.id" 
                                 class="p-3 rounded-2xl max-w-[85%]"
                                 :class="comment.user_id === currentUserId ? 'bg-primary text-white ml-auto rounded-br-none' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 mr-auto rounded-bl-none'">
