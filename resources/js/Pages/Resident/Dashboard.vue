@@ -606,6 +606,18 @@ export default {
         this.loadRequests();
         this.loadUnreadCount();
         
+        // Send user ID to Service Worker for notification filtering
+        if ('serviceWorker' in navigator && this.$page.props.auth.user) {
+             navigator.serviceWorker.ready.then(registration => {
+                 if (registration.active) {
+                     registration.active.postMessage({
+                         type: 'SET_USER_ID',
+                         userId: this.$page.props.auth.user.id
+                     });
+                 }
+             });
+        }
+
         // Always request notification permission if not granted
         if ('Notification' in window && Notification.permission !== 'granted') {
             setTimeout(() => requestNotificationPermission(), 1000);
@@ -631,6 +643,15 @@ export default {
             }
         },
         handleFcmMessage(event) {
+            const payload = event.detail;
+
+            // Ignore if sender is self (avoid double processing/notification)
+            if (payload?.data?.sender_id && 
+                this.$page.props.auth.user && 
+                payload.data.sender_id == this.$page.props.auth.user.id) {
+                return;
+            }
+
             // Update unread count
             this.unreadNotificationsCount++;
             
@@ -640,7 +661,6 @@ export default {
             }
             
             // Optionally reload requests if it's a request-related notification
-            const payload = event.detail;
             if (payload?.data?.request_id) {
                 this.loadRequests();
             }

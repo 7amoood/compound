@@ -4,7 +4,7 @@
     <div class="relative flex h-[100vh] w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark font-display" dir="rtl">
         <!-- Header -->
         <header class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/10 transition-all duration-200" style="padding-top: env(safe-area-inset-top);">
-            <div class="flex items-center justify-center px-4 py-3">
+            <div class="flex items-center justify-between px-4 py-3">
                 <div class="flex items-center gap-3">
                     <div class="size-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
                         <span class="material-symbols-outlined">volunteer_activism</span>
@@ -13,6 +13,11 @@
                         <span class="text-lg font-bold text-slate-900 dark:text-white">مساعدة الجيران</span>
                     </div>
                 </div>
+                <!-- Notifications Button -->
+                <button @click="showNotificationsModal = true; loadNotifications()" class="relative p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+                    <span v-if="unreadNotificationsCount > 0" class="absolute top-1 right-1 size-2.5 bg-red-500 rounded-full border-2 border-white dark:border-background-dark"></span>
+                </button>
             </div>
         </header>
 
@@ -165,7 +170,12 @@
                         :style="`background-image: url('${selectedRequest.requester?.photo || 'https://ui-avatars.com/api/?name=' + (selectedRequest.requester?.name || 'U')}');`"></div>
                     <div>
                         <p class="font-bold text-slate-900 dark:text-white">{{ selectedRequest.requester?.name }}</p>
-                        <p v-if="canSeePhone" class="text-sm text-slate-500">{{ selectedRequest.requester?.phone }}</p>
+                        <p v-if="selectedRequest.requester" class="text-xs text-slate-500">
+                            <span v-if="selectedRequest.requester.block_no">عمارة {{ selectedRequest.requester.block_no }}</span>
+                            <span v-if="selectedRequest.requester.floor"> - الدور {{ selectedRequest.requester.floor }}</span>
+                            <span v-if="selectedRequest.requester.apt_no"> - شقة {{ selectedRequest.requester.apt_no }}</span>
+                        </p>
+                        <p v-if="canSeePhone" class="text-sm text-primary">{{ selectedRequest.requester?.phone }}</p>
                     </div>
                 </div>
 
@@ -182,7 +192,12 @@
                             :style="`background-image: url('${selectedRequest.helper?.photo || 'https://ui-avatars.com/api/?name=' + (selectedRequest.helper?.name || 'H')}');`"></div>
                         <div>
                             <p class="font-bold text-slate-900 dark:text-white text-sm">{{ selectedRequest.helper?.name }}</p>
-                            <p v-if="canSeeHelperPhone" class="text-xs text-slate-500">{{ selectedRequest.helper?.phone }}</p>
+                            <p v-if="selectedRequest.helper" class="text-[11px] text-blue-600/70 dark:text-blue-400/70">
+                                <span v-if="selectedRequest.helper.block_no">عمارة {{ selectedRequest.helper.block_no }}</span>
+                                <span v-if="selectedRequest.helper.floor"> - الدور {{ selectedRequest.helper.floor }}</span>
+                                <span v-if="selectedRequest.helper.apt_no"> - شقة {{ selectedRequest.helper.apt_no }}</span>
+                            </p>
+                            <p v-if="canSeeHelperPhone" class="text-xs text-primary">{{ selectedRequest.helper?.phone }}</p>
                         </div>
                     </div>
                 </div>
@@ -225,6 +240,44 @@
                 </div>
             </div>
         </Modal>
+
+        <!-- Notifications Modal -->
+        <Modal :show="showNotificationsModal" title="الإشعارات" @close="showNotificationsModal = false">
+            <div class="flex items-center justify-between mb-4 px-1" v-if="notifications.length > 0">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">سجل التنبيهات</h3>
+                <button v-if="unreadNotificationsCount > 0" :disabled="loadingMarkAll" @click="markAllNotificationsAsRead" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                    <span v-if="loadingMarkAll" class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
+                    <span>تحديد الكل كمقروء</span>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div v-if="loadingNotifications" class="text-center py-12 text-slate-400">
+                    <span class="material-symbols-outlined text-5xl animate-spin">progress_activity</span>
+                    <p class="mt-3 text-sm font-medium">جاري تحميل الإشعارات...</p>
+                </div>
+                <div v-else-if="notifications.length === 0" class="text-center py-8 text-slate-400">
+                    <span class="material-symbols-outlined text-4xl">notifications_off</span>
+                    <p class="mt-2">لا توجد إشعارات</p>
+                </div>
+                <div v-for="n in notifications" :key="n.id" @click="handleNotificationClick(n)"
+                        class="flex gap-3 p-3 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        :class="n.is_read ? 'bg-slate-50 dark:bg-slate-800/50' : 'bg-primary/5 border border-primary/20'">
+                    <div class="size-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm bg-slate-100 text-slate-600">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ n.title }}</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ n.body }}</p>
+                        <p class="text-[10px] text-slate-400 mt-1">{{ formatDate(n.created_at) }}</p>
+                    </div>
+                    <span v-if="!n.is_read" class="size-2 bg-primary rounded-full flex-shrink-0 mt-2"></span>
+                </div>
+                <button v-if="nextNotificationsUrl" @click="loadMoreNotifications" :disabled="loadingMoreNotifications" class="w-full mt-2 py-3 text-sm font-bold text-primary bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    <span v-if="loadingMoreNotifications" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                    <span>{{ loadingMoreNotifications ? 'جاري التحميل...' : 'تحميل المزيد' }}</span>
+                </button>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -257,6 +310,14 @@ export default {
             submitting: false,
             newComment: '',
             addingComment: false,
+            // Notifications
+            showNotificationsModal: false,
+            notifications: [],
+            unreadNotificationsCount: 0,
+            loadingNotifications: false,
+            loadingMarkAll: false,
+            loadingMoreNotifications: false,
+            nextNotificationsUrl: null,
         };
     },
     computed: {
@@ -304,8 +365,106 @@ export default {
     },
     mounted() {
         this.loadData();
+        this.loadUnreadCount();
+        window.addEventListener('fcm-message', this.handleFcmMessage);
+        
+        // Handle direct open (e.g. from notification click opening the app)
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('request_id')) {
+            this.openDetails({id: params.get('request_id')});
+        }
+    },
+    beforeUnmount() {
+         window.removeEventListener('fcm-message', this.handleFcmMessage);
     },
     methods: {
+        async loadUnreadCount() {
+            try {
+                const response = await axios.get('/api/notifications/unread-count');
+                this.unreadNotificationsCount = response.data.count;
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        async loadNotifications(url = '/api/notifications') {
+            this.loadingNotifications = true;
+            try {
+                const response = await axios.get(url);
+                if (response.data.success) {
+                    if (url === '/api/notifications') {
+                        this.notifications = response.data.notifications.data;
+                    } else {
+                        this.notifications = [...this.notifications, ...response.data.notifications.data];
+                    }
+                    this.nextNotificationsUrl = response.data.notifications.next_page_url;
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.loadingNotifications = false;
+                this.loadingMoreNotifications = false;
+            }
+        },
+        async loadMoreNotifications() {
+            if (!this.nextNotificationsUrl) return;
+            this.loadingMoreNotifications = true;
+            this.loadNotifications(this.nextNotificationsUrl);
+        },
+        async markAllNotificationsAsRead() {
+            this.loadingMarkAll = true;
+            try {
+                await axios.post('/api/notifications/mark-all-read');
+                this.notifications.forEach(n => n.is_read = true);
+                this.unreadNotificationsCount = 0;
+            } catch (e) {
+                window.showToast('حدث خطأ', 'error');
+            } finally {
+                this.loadingMarkAll = false;
+            }
+        },
+        async handleNotificationClick(notification) {
+            if (!notification.is_read) {
+                try {
+                    await axios.post(`/api/notifications/${notification.id}/read`);
+                    notification.is_read = true;
+                    this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+            
+            let data = notification.data || {};
+            if (typeof data === 'string') {
+                try { data = JSON.parse(data); } catch(e) {}
+            }
+            
+            if (data.request_id) {
+                this.showNotificationsModal = false;
+                this.openDetails({ id: data.request_id });
+            } else if (data.click_action && data.click_action !== window.location.pathname) {
+                 window.location.href = data.click_action;
+            }
+        },
+        handleFcmMessage(event) {
+            const payload = event.detail;
+
+            // Ignore if sender is self
+            if (payload?.data?.sender_id && 
+                this.currentUserId && 
+                payload.data.sender_id == this.currentUserId) {
+                return;
+            }
+
+            this.unreadNotificationsCount++;
+            if (this.showNotificationsModal) {
+                this.loadNotifications();
+            }
+            
+            if (this.activeTab === 'available') {
+                this.loadData();
+            }
+        },
+
         async loadData() {
             this.loading = true;
             this.requests = [];

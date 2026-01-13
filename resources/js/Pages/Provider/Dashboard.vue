@@ -539,6 +539,18 @@ export default {
         this.loadUnreadCount();
         this.switchToTab(this.activeTab);
 
+        // Send user ID to Service Worker for notification filtering
+        if ('serviceWorker' in navigator && this.$page.props.auth.user) {
+             navigator.serviceWorker.ready.then(registration => {
+                 if (registration.active) {
+                     registration.active.postMessage({
+                         type: 'SET_USER_ID',
+                         userId: this.$page.props.auth.user.id
+                     });
+                 }
+             });
+        }
+
         // Always request notification permission if not granted
         if ('Notification' in window && Notification.permission !== 'granted') {
             setTimeout(() => requestNotificationPermission(), 1000);
@@ -571,6 +583,15 @@ export default {
             }
         },
         handleFcmMessage(event) {
+            const payload = event.detail;
+
+            // Ignore if sender is self
+            if (payload?.data?.sender_id && 
+                this.$page.props.auth.user && 
+                payload.data.sender_id == this.$page.props.auth.user.id) {
+                return;
+            }
+
             // Update unread count
             this.unreadNotificationsCount++;
             
@@ -580,7 +601,6 @@ export default {
             }
             
             // Reload available jobs if it's a new request notification
-            const payload = event.detail;
             if (payload?.data?.request_id) {
                 this.loadAvailableJobs();
                 this.loadMyJobs();

@@ -107,7 +107,8 @@ class HelpController extends Controller
         ]);
 
         // Send FCM topic notification to residents in the same compound
-        $this->sendTopicNotification($user->compound_id, $user->name, $request->description);
+        // Send FCM topic notification to residents in the same compound
+        $this->sendTopicNotification($user->compound_id, $user->id, $user->name, $request->description, $helpRequest->id);
 
         $helpRequest->load('requester:id,name,photo');
 
@@ -219,8 +220,8 @@ class HelpController extends Controller
         }
 
         $helpRequest->load([
-            'requester:id,name,photo,phone',
-            'helper:id,name,photo,phone',
+            'requester:id,name,photo,phone,block_no,floor,apt_no',
+            'helper:id,name,photo,phone,block_no,floor,apt_no',
             'comments.user:id,name,photo',
         ]);
 
@@ -310,7 +311,10 @@ class HelpController extends Controller
     /**
      * Send FCM topic notification to compound residents
      */
-    protected function sendTopicNotification(?int $compoundId, string $requesterName, string $description): void
+    /**
+     * Send FCM topic notification to compound residents
+     */
+    protected function sendTopicNotification(?int $compoundId, int $senderId, string $requesterName, string $description, int $requestId = null): void
     {
         if (! $compoundId) {
             return;
@@ -339,14 +343,17 @@ class HelpController extends Controller
             ])->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
                 'message' => [
                     'topic'        => $topic,
-                    'notification' => [
+                    // 'notification' block removed to prevent auto-display
+                    'data'         => [
                         'title' => '🆘 طلب مساعدة جديد',
                         'body'  => "{$requesterName}: " . mb_substr($description, 0, 100),
+                        'sender_id'    => (string) $senderId,
+                        'request_id'   => (string) $requestId,
+                        'type'         => 'new_help_request',
+                        'click_action' => $requestId ? "/help?request_id={$requestId}" : '/help',
                     ],
                     'android' => [
-                        'notification' => [
-                            'sound' => 'default',
-                        ],
+                        'priority' => 'high',
                     ],
                     'apns'    => [
                         'payload' => [

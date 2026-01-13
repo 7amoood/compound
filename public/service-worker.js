@@ -18,23 +18,78 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 3. Handle Background Messages
-messaging.onBackgroundMessage((payload) => {
-    console.log('[SW] Background message received:', payload);
-    // Note: If the payload contains a 'notification' property (as our PHP side does),
-    // the Firebase Messaging SW automatically shows a notification.
-    // Manually calling showNotification here would cause duplicates.
+// IndexedDB Helper to store User ID
+const DB_NAME = 'compound-db';
+const STORE_NAME = 'settings';
 
-    /*
-    const notificationTitle = payload.notification.title;
+function getUserId() {
+    return new Promise((resolve) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+        request.onsuccess = (e) => {
+            const db = e.target.result;
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                resolve(null);
+                return;
+            }
+            const store = tx.objectStore(STORE_NAME);
+            const getReq = store.get('user_id');
+            getReq.onsuccess = () => resolve(getReq.result);
+            getReq.onerror = () => resolve(null);
+        };
+        request.onerror = () => resolve(null);
+    });
+}
+
+// Handle messages from Client (start storing user ID)
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SET_USER_ID') {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+        request.onsuccess = (e) => {
+            const db = e.target.result;
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            store.put(event.data.userId, 'user_id');
+        };
+    }
+});
+
+// 3. Handle Background Messages
+messaging.onBackgroundMessage(async (payload) => {
+    console.log('[SW] Background message received:', payload);
+
+    // Check if message is from self
+    if (payload.data && payload.data.sender_id) {
+        const currentUserId = await getUserId();
+        if (currentUserId && payload.data.sender_id == currentUserId) {
+            console.log('[SW] Ignoring notification from self');
+            return;
+        }
+    }
+
+    // Manually show notification because we stripped the 'notification' key from payload
+    const notificationTitle = payload.data.title || (payload.notification && payload.notification.title) || 'إشعار جديد';
     const notificationOptions = {
-        body: payload.notification.body,
+        body: payload.data.body || (payload.notification && payload.notification.body) || '',
         icon: '/icons/icon-192x192.png',
         badge: '/icons/badge-72x72.png',
-        data: payload.data?.click_action || '/'
+        data: payload.data.click_action || '/',
+        dir: 'rtl'
     };
-    self.registration.showNotification(notificationTitle, notificationOptions);
-    */
+
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // 4. PWA Caching Logic
