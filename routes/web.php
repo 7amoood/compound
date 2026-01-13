@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompoundController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProposalController;
@@ -80,6 +81,9 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Settings');
     })->name('settings');
 
+    // Help Page (Resident)
+    Route::get('/help', [HelpController::class, 'index'])->name('help');
+
     // --- Internal API Routes (Session Based) ---
     Route::prefix('api')->group(function () {
         // Shared & Resident
@@ -133,6 +137,16 @@ Route::middleware('auth')->group(function () {
 
         // Request Items
         Route::put('/request-items/{item}/toggle', [RequestItemController::class, 'toggle']);
+
+        // Help (مساعدة) - Resident feature
+        Route::get('/help/available', [HelpController::class, 'available']);
+        Route::get('/help/my-requests', [HelpController::class, 'myRequests']);
+        Route::get('/help/my-helps', [HelpController::class, 'myHelps']);
+        Route::post('/help', [HelpController::class, 'store']);
+        Route::get('/help/{helpRequest}', [HelpController::class, 'show']);
+        Route::post('/help/{helpRequest}/pick', [HelpController::class, 'pick']);
+        Route::post('/help/{helpRequest}/cancel', [HelpController::class, 'cancel']);
+        Route::post('/help/{helpRequest}/comment', [HelpController::class, 'addComment']);
 
         // Admin Routes
         Route::middleware('role:admin')->group(function () {

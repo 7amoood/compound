@@ -131,9 +131,41 @@ class NotificationController extends Controller
             'fcm_token' => $token,
         ]);
 
+        // 3. Subscribe residents to help topic
+        if ($activeUser->role === 'resident') {
+            $this->subscribeToTopic($token, 'residents_help');
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'تم حفظ توكن الإشعارات بنجاح',
         ]);
+    }
+
+    /**
+     * Subscribe token to FCM topic
+     */
+    protected function subscribeToTopic(string $token, string $topic): void
+    {
+        $projectId = env('FIREBASE_PROJECT_ID', 'garden-city-compound');
+        $authFile  = env('FIREBASE_CREDENTIALS', storage_path('app/firebase-auth.json'));
+
+        if (! file_exists($authFile)) {
+            return;
+        }
+
+        try {
+            $client = new \Google_Client();
+            $client->setAuthConfig($authFile);
+            $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+            $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
+
+            \Illuminate\Support\Facades\Http::withHeaders([
+                'Authorization' => 'Bearer ' . $accessToken,
+                'Content-Type'  => 'application/json',
+            ])->post("https://iid.googleapis.com/iid/v1/{$token}/rel/topics/{$topic}");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('FCM Topic Subscribe Error: ' . $e->getMessage());
+        }
     }
 }

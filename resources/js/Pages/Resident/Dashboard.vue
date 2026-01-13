@@ -144,6 +144,10 @@
                     <span class="material-symbols-outlined fill-1">home</span>
                     <span class="text-[10px] font-bold">الرئيسية</span>
                 </Link>
+                <Link href="/help" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                    <span class="material-symbols-outlined">volunteer_activism</span>
+                    <span class="text-[10px] font-medium">مساعدة</span>
+                </Link>
                 <Link href="/settings" class="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
                     <span class="material-symbols-outlined">person</span>
                     <span class="text-[10px] font-medium">الحساب</span>
