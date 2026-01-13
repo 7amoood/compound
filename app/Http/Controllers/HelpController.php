@@ -218,8 +218,6 @@ class HelpController extends Controller
         // Get paginated comments (Simplified user data)
         $comments = $helpRequest->comments()
             ->select('id', 'help_request_id', 'user_id', 'comment', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('id', 'desc')
             ->cursorPaginate(5)
             ->withPath(url("/api/help/{$helpRequest->id}/comments"));
 
