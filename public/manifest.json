@@ -4,8 +4,14 @@
     "description": "تطبيق إدارة خدمات المجمع السكني",
     "lang": "ar",
     "dir": "rtl",
+    "id": "/",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "handle_links": "preferred",
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
     "background_color": "#f6f7f8",
     "theme_color": "#137fec",
     "orientation": "portrait",
