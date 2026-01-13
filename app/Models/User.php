@@ -31,6 +31,7 @@ class User extends Authenticatable
         'rating_count',
         'total_earnings',
         'fcm_token',
+        'remember_token',
         'market_id',
         'webauthn_credential_id',
         'webauthn_public_key',
